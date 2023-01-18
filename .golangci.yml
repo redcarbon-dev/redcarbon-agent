@@ -1,0 +1,25 @@
+linters-settings:
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(pkg.redcarbon.ai)
+
+run:
+  skip-files:
+    - ".*\\.sql\\.go$"
+    - ".*\\.pb\\.go$"
+
+linters:
+  enable:
+    - gci
+    - gofumpt
+    - gofmt
+    - gomnd
+    - goconst
+    - wsl
+  disable-all: true
+
+issues:
+  # Default: false.
+  new: true

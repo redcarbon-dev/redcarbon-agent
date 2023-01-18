@@ -1,0 +1,11 @@
+version: v1
+plugins:
+  - name: go
+    out: .
+    opt:
+      - module=pkg.redcarbon.ai
+  - name: go-grpc
+    out: .
+    opt:
+      - require_unimplemented_servers=false
+      - module=pkg.redcarbon.ai

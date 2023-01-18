@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package redcarbon.external_api.agents.api.v1;
+
+option go_package = "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1;agentsExternalApiV1";
+
+import "google/protobuf/timestamp.proto";
+
+service AgentsExternalV1Srv {
+  rpc HZ(HZReq)
+      returns (HZRes) {}
+
+  rpc PullConfigurations(PullConfigurationsReq)
+      returns (PullConfigurationsRes) {}
+
+  rpc SendData(SendDataReq)
+      returns (SendDataRes) {}
+}
+
+message HZReq {
+  string agent_id = 1;
+  string customer_id = 2;
+  string ip = 3;
+  string hostname = 4;
+}
+
+message HZRes {
+  google.protobuf.Timestamp received_at = 1;
+}
+
+message PullConfigurationsReq {
+  string agent_id = 1;
+  string customer_id = 2;
+}
+
+message PullConfigurationsRes {
+}
+
+message SendDataReq {
+  string agent_id = 1;
+  string customer_id = 2;
+  string data = 3;
+}
+
+message SendDataRes {
+  google.protobuf.Timestamp received_at = 1;
+}
