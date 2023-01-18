@@ -1,0 +1,35 @@
+project_name: redcarbon
+
+release:
+  prerelease: auto
+  name_template: "RedCarbon Agent {{.Version}}"
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: linux
+    main: ./cmd
+    binary: bin/redcarbon
+    goos: [linux]
+    goarch: [amd64]
+    ldflags:
+      - -s -w -X pkg.redcarbon.ai/internal/build.Version={{.Version}}
+
+archives:
+  - id: nix
+    builds: [linux]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    wrap_in_directory: true
+    format: tar.gz
+
+nfpms:
+  - license: MIT
+    maintainer: RedCarbon
+    homepage: https://redcarbon.ai
+    bindir: /usr
+    description: RedCarbon's Agent
+    formats:
+      - deb
+      - rpm
