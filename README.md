@@ -1,5 +1,3 @@
-# RedCarbon Agent
-
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
