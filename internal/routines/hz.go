@@ -2,7 +2,11 @@ package routines
 
 import (
 	"context"
+	"fmt"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+	"google.golang.org/grpc/metadata"
+	"net"
 	"os"
 
 	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
@@ -14,11 +18,18 @@ func (r routineConfig) HZRoutine() {
 		logrus.Fatalf("Error while retrieving the Hostname %v", err)
 	}
 
-	res, err := r.agentsCli.HZ(context.Background(), &agentsExternalApiV1.HZReq{
-		AgentId:    "agent:cld1k8f5g0000v6nm8xkc83b3",
-		CustomerId: "c1",
-		Ip:         "192.168.1.1",
-		Hostname:   hostname,
+	localAddr, err := getOutboundIP()
+	if err != nil {
+		return
+	}
+
+	ctx := context.Background()
+
+	updCtx := metadata.AppendToOutgoingContext(ctx, "authorization", fmt.Sprintf("Bearer %s", viper.Get("auth.access_token")))
+
+	res, err := r.agentsCli.HZ(updCtx, &agentsExternalApiV1.HZReq{
+		Ip:       localAddr,
+		Hostname: hostname,
 	})
 	if err != nil {
 		// TODO Decide how to handle it
@@ -27,4 +38,16 @@ func (r routineConfig) HZRoutine() {
 	}
 
 	logrus.Printf("HZ executed %s", res.ReceivedAt.String())
+}
+
+func getOutboundIP() (string, error) {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		logrus.Errorf("Error while retrieving the IP address %v", err)
+		return "", err
+	}
+
+	defer conn.Close()
+
+	return conn.LocalAddr().String(), nil
 }

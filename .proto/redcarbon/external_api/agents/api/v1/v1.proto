@@ -15,11 +15,12 @@ service AgentsExternalV1Srv {
 
   rpc SendData(SendDataReq)
       returns (SendDataRes) {}
+
+  rpc RefreshToken(RefreshTokenReq)
+      returns (RefreshTokenRes) {}
 }
 
 message HZReq {
-  string agent_id = 1;
-  string customer_id = 2;
   string ip = 3;
   string hostname = 4;
 }
@@ -29,19 +30,23 @@ message HZRes {
 }
 
 message PullConfigurationsReq {
-  string agent_id = 1;
-  string customer_id = 2;
 }
 
 message PullConfigurationsRes {
 }
 
 message SendDataReq {
-  string agent_id = 1;
-  string customer_id = 2;
-  string data = 3;
+  string data = 1;
 }
 
 message SendDataRes {
   google.protobuf.Timestamp received_at = 1;
+}
+
+message RefreshTokenReq {
+}
+
+message RefreshTokenRes {
+  string token = 1;
+  string refresh_token = 2;
 }

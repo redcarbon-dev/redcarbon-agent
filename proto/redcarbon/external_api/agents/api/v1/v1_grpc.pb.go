@@ -25,6 +25,7 @@ type AgentsExternalV1SrvClient interface {
 	HZ(ctx context.Context, in *HZReq, opts ...grpc.CallOption) (*HZRes, error)
 	PullConfigurations(ctx context.Context, in *PullConfigurationsReq, opts ...grpc.CallOption) (*PullConfigurationsRes, error)
 	SendData(ctx context.Context, in *SendDataReq, opts ...grpc.CallOption) (*SendDataRes, error)
+	RefreshToken(ctx context.Context, in *RefreshTokenReq, opts ...grpc.CallOption) (*RefreshTokenRes, error)
 }
 
 type agentsExternalV1SrvClient struct {
@@ -62,6 +63,15 @@ func (c *agentsExternalV1SrvClient) SendData(ctx context.Context, in *SendDataRe
 	return out, nil
 }
 
+func (c *agentsExternalV1SrvClient) RefreshToken(ctx context.Context, in *RefreshTokenReq, opts ...grpc.CallOption) (*RefreshTokenRes, error) {
+	out := new(RefreshTokenRes)
+	err := c.cc.Invoke(ctx, "/redcarbon.external_api.agents.api.v1.AgentsExternalV1Srv/RefreshToken", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AgentsExternalV1SrvServer is the server API for AgentsExternalV1Srv service.
 // All implementations should embed UnimplementedAgentsExternalV1SrvServer
 // for forward compatibility
@@ -69,6 +79,7 @@ type AgentsExternalV1SrvServer interface {
 	HZ(context.Context, *HZReq) (*HZRes, error)
 	PullConfigurations(context.Context, *PullConfigurationsReq) (*PullConfigurationsRes, error)
 	SendData(context.Context, *SendDataReq) (*SendDataRes, error)
+	RefreshToken(context.Context, *RefreshTokenReq) (*RefreshTokenRes, error)
 }
 
 // UnimplementedAgentsExternalV1SrvServer should be embedded to have forward compatible implementations.
@@ -83,6 +94,9 @@ func (UnimplementedAgentsExternalV1SrvServer) PullConfigurations(context.Context
 }
 func (UnimplementedAgentsExternalV1SrvServer) SendData(context.Context, *SendDataReq) (*SendDataRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendData not implemented")
+}
+func (UnimplementedAgentsExternalV1SrvServer) RefreshToken(context.Context, *RefreshTokenReq) (*RefreshTokenRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RefreshToken not implemented")
 }
 
 // UnsafeAgentsExternalV1SrvServer may be embedded to opt out of forward compatibility for this service.
@@ -150,6 +164,24 @@ func _AgentsExternalV1Srv_SendData_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AgentsExternalV1Srv_RefreshToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RefreshTokenReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AgentsExternalV1SrvServer).RefreshToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/redcarbon.external_api.agents.api.v1.AgentsExternalV1Srv/RefreshToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AgentsExternalV1SrvServer).RefreshToken(ctx, req.(*RefreshTokenReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AgentsExternalV1Srv_ServiceDesc is the grpc.ServiceDesc for AgentsExternalV1Srv service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -168,6 +200,10 @@ var AgentsExternalV1Srv_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SendData",
 			Handler:    _AgentsExternalV1Srv_SendData_Handler,
+		},
+		{
+			MethodName: "RefreshToken",
+			Handler:    _AgentsExternalV1Srv_RefreshToken_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

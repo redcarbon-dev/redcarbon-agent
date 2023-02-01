@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"pkg.redcarbon.ai/internal/build"
 
 	"github.com/spf13/cobra"
 
@@ -17,6 +18,8 @@ func main() {
 
 	rootCmd.AddCommand(config.NewConfigCmd())
 	rootCmd.AddCommand(start.NewStartCmd())
+
+	rootCmd.Version = build.Version
 
 	err := rootCmd.Execute()
 	if err != nil {
