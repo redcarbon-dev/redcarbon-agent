@@ -5,6 +5,7 @@ package redcarbon.external_api.agents.api.v1;
 option go_package = "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1;agentsExternalApiV1";
 
 import "google/protobuf/timestamp.proto";
+import "redcarbon/external_api/agents/api/v1/types.proto";
 
 service AgentsExternalV1Srv {
   rpc HZ(HZReq)
@@ -33,6 +34,7 @@ message PullConfigurationsReq {
 }
 
 message PullConfigurationsRes {
+  repeated AgentConfiguration agent_configurations = 1;
 }
 
 message SendDataReq {
