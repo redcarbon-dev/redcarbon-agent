@@ -1,24 +1,30 @@
 package config
 
 import (
+	"crypto/tls"
+	"os"
+	"path"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
-	"os"
-	"path"
 
 	"pkg.redcarbon.ai/internal/auth"
+	"pkg.redcarbon.ai/internal/build"
 	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
 )
 
-type LoginOptions struct {
+type ConfigOptions struct {
 	RefreshToken string
+	Host         string
+	Insercure    bool
 }
 
 func NewConfigCmd() *cobra.Command {
-	opts := &LoginOptions{}
+	opts := &ConfigOptions{}
 
 	cmd := &cobra.Command{
 		Use:   "config",
@@ -29,15 +35,17 @@ func NewConfigCmd() *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&opts.RefreshToken, "token", "t", "", "The token used to execute the login")
+	cmd.Flags().StringVarP(&opts.Host, "server", "s", build.DefaultHost, "The Server used to execute the login")
+	cmd.Flags().BoolVarP(&opts.Insercure, "insecure", "i", false, "connection insecure")
 
 	return cmd
 }
 
-func run(cmd *cobra.Command, args []string, opts *LoginOptions) {
-	agentsCli, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		logrus.Fatalf("Cannot create source connection: %v", err)
-	}
+func run(cmd *cobra.Command, args []string, opts *ConfigOptions) {
+	viper.Set("server.host", opts.Host)
+	viper.Set("server.insecure", opts.Insercure)
+
+	agentsCli := mustCreateAgentCli()
 	defer agentsCli.Close()
 
 	confDir, err := os.UserConfigDir()
@@ -65,4 +73,23 @@ func run(cmd *cobra.Command, args []string, opts *LoginOptions) {
 	}
 
 	logrus.Println("Agent successfully configured!")
+}
+
+func mustCreateAgentCli() *grpc.ClientConn {
+	host := viper.GetString("server.host")
+	var creds credentials.TransportCredentials
+
+	logrus.Printf("Connecting to the server... %s\n", host)
+
+	if viper.GetBool("server.insecure") {
+		creds = insecure.NewCredentials()
+	} else {
+		creds = credentials.NewTLS(&tls.Config{})
+	}
+
+	agentsCli, err := grpc.Dial(host, grpc.WithTransportCredentials(creds))
+	if err != nil {
+		logrus.Fatalf("Cannot create source connection: %v", err)
+	}
+	return agentsCli
 }

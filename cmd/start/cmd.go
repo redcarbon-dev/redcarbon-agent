@@ -1,14 +1,17 @@
 package start
 
 import (
+	"crypto/tls"
+	"os"
+	"path"
+
 	"github.com/jasonlvhit/gocron"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
-	"os"
-	"path"
 	"pkg.redcarbon.ai/internal/auth"
 
 	"pkg.redcarbon.ai/internal/routines"
@@ -24,10 +27,7 @@ func NewStartCmd() *cobra.Command {
 }
 
 func run(cmd *cobra.Command, args []string) {
-	agentsCli, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		logrus.Fatalf("Cannot create source connection: %v", err)
-	}
+	agentsCli := mustCreateAgentCli()
 	defer agentsCli.Close()
 
 	confDir, err := os.UserConfigDir()
@@ -54,4 +54,21 @@ func run(cmd *cobra.Command, args []string) {
 	gocron.Every(30).Seconds().From(gocron.NextTick()).Do(r.Refresh)
 
 	<-gocron.Start()
+}
+
+func mustCreateAgentCli() *grpc.ClientConn {
+	host := viper.GetString("server.host")
+	var creds credentials.TransportCredentials
+
+	if viper.GetBool("server.insecure") {
+		creds = insecure.NewCredentials()
+	} else {
+		creds = credentials.NewTLS(&tls.Config{})
+	}
+
+	agentsCli, err := grpc.Dial(host, grpc.WithTransportCredentials(creds))
+	if err != nil {
+		logrus.Fatalf("Cannot create source connection: %v", err)
+	}
+	return agentsCli
 }
