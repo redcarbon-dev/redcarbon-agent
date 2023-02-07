@@ -3,11 +3,12 @@ package routines
 import (
 	"context"
 	"fmt"
+	"net"
+	"os"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc/metadata"
-	"net"
-	"os"
 
 	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
 )

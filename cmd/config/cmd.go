@@ -17,6 +17,8 @@ import (
 	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
 )
 
+const confDirPermission = 0755
+
 type ConfigOptions struct {
 	RefreshToken string
 	Host         string
@@ -55,7 +57,7 @@ func run(cmd *cobra.Command, args []string, opts *ConfigOptions) {
 
 	redcarbonConfDir := path.Join(confDir, "redcarbon")
 
-	err = os.MkdirAll(redcarbonConfDir, 0o755)
+	err = os.MkdirAll(redcarbonConfDir, confDirPermission)
 	if err != nil {
 		logrus.Fatalf("can't create redcarbon config directory for error %v", err)
 	}
