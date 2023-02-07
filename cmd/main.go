@@ -4,14 +4,13 @@ import (
 	"os"
 	"path"
 
-	"pkg.redcarbon.ai/internal/build"
-
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"pkg.redcarbon.ai/cmd/config"
 	"pkg.redcarbon.ai/cmd/start"
+	"pkg.redcarbon.ai/internal/build"
 )
 
 func init() {

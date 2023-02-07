@@ -17,7 +17,7 @@ import (
 	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
 )
 
-const confDirPermission = 0755
+const confDirPermission = 0o755
 
 type ConfigOptions struct {
 	RefreshToken string
