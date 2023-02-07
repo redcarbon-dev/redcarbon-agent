@@ -2,12 +2,15 @@ package routines
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
 	"sync"
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+	"google.golang.org/grpc/metadata"
 
 	"pkg.redcarbon.ai/internal/sentinelone"
 	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
@@ -16,7 +19,12 @@ import (
 func (r routineConfig) ConfigRoutine() {
 	logrus.Infof("Start pulling the configurations from the server...\n")
 
-	configs, err := r.agentsCli.PullConfigurations(context.Background(), &agentsExternalApiV1.PullConfigurationsReq{})
+	ctx := context.Background()
+
+	ctxWithTimeout, cFn := context.WithTimeout(ctx, time.Hour)
+	ctxWithTimeAndMeta := metadata.AppendToOutgoingContext(ctxWithTimeout, "authorization", fmt.Sprintf("Bearer %s", viper.Get("auth.access_token")))
+
+	configs, err := r.agentsCli.PullConfigurations(ctxWithTimeAndMeta, &agentsExternalApiV1.PullConfigurationsReq{})
 	if err != nil {
 		logrus.Errorf("Error while retrieving the configurations for error %v", err)
 		return
@@ -24,13 +32,11 @@ func (r routineConfig) ConfigRoutine() {
 
 	logrus.Infof("Configurations successfully pulled! Starting the jobs...")
 
-	ctx, cFn := context.WithTimeout(context.Background(), time.Hour)
-
 	var wg sync.WaitGroup
 
 	for _, conf := range configs.AgentConfigurations {
 		if conf.Data.GetSentinelOne() != nil {
-			r.runService(ctx, sentinelone.RunSentinelOneService, &wg, conf)
+			r.runService(ctxWithTimeAndMeta, sentinelone.RunSentinelOneService, &wg, conf)
 			continue
 		}
 	}

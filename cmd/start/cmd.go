@@ -21,6 +21,7 @@ import (
 const (
 	hzRoutineInterval      = 5
 	refreshRoutineInterval = 30
+	configRoutineInterval  = 10
 )
 
 func NewStartCmd() *cobra.Command {
@@ -57,6 +58,7 @@ func run(cmd *cobra.Command, args []string) {
 
 	gocron.Every(hzRoutineInterval).Seconds().From(gocron.NextTick()).Do(r.HZRoutine)
 	gocron.Every(refreshRoutineInterval).Minutes().From(gocron.NextTick()).Do(r.Refresh)
+	gocron.Every(configRoutineInterval).Minutes().From(gocron.NextTick()).Do(r.ConfigRoutine)
 
 	<-gocron.Start()
 }
