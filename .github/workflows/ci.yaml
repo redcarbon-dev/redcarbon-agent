@@ -9,6 +9,7 @@ on:
 jobs:
   # golangci must be the first job as it has different problems
   golangci:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/setup-go@v2
         with:
@@ -21,6 +22,7 @@ jobs:
           args: --timeout 5m
           skip-pkg-cache: true
   test:
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
@@ -36,6 +38,7 @@ jobs:
       - name: Test
         run: go test -v ./...
   protolint:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: bufbuild/buf-setup-action@v0.6.0
@@ -44,6 +47,7 @@ jobs:
         with:
           against: "https://github.com/${GITHUB_REPOSITORY}.git#branch=main"
   codegen:
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
