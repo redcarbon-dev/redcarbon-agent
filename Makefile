@@ -1,21 +1,14 @@
-.PHONY: generate run
+.PHONY: generate run mocks test
+
+mocks:
+	rm -rf mocks/
+	mockery --with-expecter --all
 
 run:
-	go run main.go sources
-run-check-sources-errors:
-	go run main.go checksources
+	go run cmd/main.go start
 
 test:
 	go test ./...
-
-sync-db:
-	pg_dump postgres://postgres:iv6najnlzz@localhost:5433/sources > /tmp/bk.sql
-	dbmate -u postgres://postgres:postgres@localhost:5432/rc_sources?sslmode=disable drop
-	dbmate -u postgres://postgres:postgres@localhost:5432/rc_sources?sslmode=disable create
-	psql postgres://postgres:postgres@localhost:5432/rc_sources < /tmp/bk.sql
-
-pgcli:
-	pgcli postgres://postgres:postgres@localhost:5432/rc_sources
 
 GOBIN=${PWD}/.bin
 

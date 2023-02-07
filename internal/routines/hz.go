@@ -37,7 +37,7 @@ func (r routineConfig) HZRoutine() {
 		return
 	}
 
-	logrus.Printf("HZ executed %s", res.ReceivedAt.String())
+	logrus.Infof("HZ executed %s", res.ReceivedAt.String())
 }
 
 func getOutboundIP() (string, error) {

@@ -79,7 +79,7 @@ func mustCreateAgentCli() *grpc.ClientConn {
 	host := viper.GetString("server.host")
 	var creds credentials.TransportCredentials
 
-	logrus.Printf("Connecting to the server... %s\n", host)
+	logrus.Infof("Connecting to the server... %s\n", host)
 
 	if viper.GetBool("server.insecure") {
 		creds = insecure.NewCredentials()

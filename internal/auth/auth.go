@@ -39,7 +39,7 @@ func (a AuthenticationService) RefreshToken(refreshToken string) error {
 		logrus.Fatalf("Error while writing the configuration %v", err)
 	}
 
-	logrus.Printf("Token successfully refreshed!")
+	logrus.Infof("Token successfully refreshed!")
 
 	return nil
 }
