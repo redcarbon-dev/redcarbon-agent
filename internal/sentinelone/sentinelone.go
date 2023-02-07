@@ -83,8 +83,13 @@ func RunSentinelOneService(ctx context.Context, ac *agentsExternalApiV1.AgentCon
 		for _, data := range parsedBody {
 			l.Infof("Sending %v\n", data)
 
+			dataJ, err := json.Marshal(data)
+			if err != nil {
+				return
+			}
+
 			_, err = aCli.SendData(ctx, &agentsExternalApiV1.SendDataReq{
-				Data: fmt.Sprintf("%s", data),
+				Data: string(dataJ),
 			})
 			if err != nil {
 				return
