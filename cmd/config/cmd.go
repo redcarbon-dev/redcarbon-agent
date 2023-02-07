@@ -20,7 +20,7 @@ import (
 type ConfigOptions struct {
 	RefreshToken string
 	Host         string
-	Insercure    bool
+	Insecure     bool
 }
 
 func NewConfigCmd() *cobra.Command {
@@ -36,14 +36,14 @@ func NewConfigCmd() *cobra.Command {
 
 	cmd.Flags().StringVarP(&opts.RefreshToken, "token", "t", "", "The token used to execute the login")
 	cmd.Flags().StringVarP(&opts.Host, "server", "s", build.DefaultHost, "The Server used to execute the login")
-	cmd.Flags().BoolVarP(&opts.Insercure, "insecure", "i", false, "connection insecure")
+	cmd.Flags().BoolVarP(&opts.Insecure, "insecure", "i", false, "connection insecure")
 
 	return cmd
 }
 
 func run(cmd *cobra.Command, args []string, opts *ConfigOptions) {
 	viper.Set("server.host", opts.Host)
-	viper.Set("server.insecure", opts.Insercure)
+	viper.Set("server.insecure", opts.Insecure)
 
 	agentsCli := mustCreateAgentCli()
 	defer agentsCli.Close()
@@ -55,7 +55,7 @@ func run(cmd *cobra.Command, args []string, opts *ConfigOptions) {
 
 	redcarbonConfDir := path.Join(confDir, "redcarbon")
 
-	err = os.MkdirAll(redcarbonConfDir, 0755)
+	err = os.MkdirAll(redcarbonConfDir, 0o755)
 	if err != nil {
 		logrus.Fatalf("can't create redcarbon config directory for error %v", err)
 	}
@@ -77,6 +77,7 @@ func run(cmd *cobra.Command, args []string, opts *ConfigOptions) {
 
 func mustCreateAgentCli() *grpc.ClientConn {
 	host := viper.GetString("server.host")
+
 	var creds credentials.TransportCredentials
 
 	logrus.Infof("Connecting to the server... %s\n", host)
@@ -91,5 +92,6 @@ func mustCreateAgentCli() *grpc.ClientConn {
 	if err != nil {
 		logrus.Fatalf("Cannot create source connection: %v", err)
 	}
+
 	return agentsCli
 }

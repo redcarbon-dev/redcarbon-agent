@@ -3,9 +3,11 @@ package auth
 import (
 	"context"
 	"fmt"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc/metadata"
+	
 	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
 )
 

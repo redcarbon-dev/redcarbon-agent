@@ -12,10 +12,15 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
-	"pkg.redcarbon.ai/internal/auth"
 
+	"pkg.redcarbon.ai/internal/auth"
 	"pkg.redcarbon.ai/internal/routines"
 	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
+)
+
+const (
+	hzRoutineInterval      = 5
+	refreshRoutineInterval = 30
 )
 
 func NewStartCmd() *cobra.Command {
@@ -50,14 +55,15 @@ func run(cmd *cobra.Command, args []string) {
 	a := auth.NewAuthService(client, path.Join(confDir, "redcarbon", "config.yaml"))
 	r := routines.NewRoutineJobs(client, a)
 
-	gocron.Every(5).Seconds().From(gocron.NextTick()).Do(r.HZRoutine)
-	gocron.Every(30).Seconds().From(gocron.NextTick()).Do(r.Refresh)
+	gocron.Every(hzRoutineInterval).Seconds().From(gocron.NextTick()).Do(r.HZRoutine)
+	gocron.Every(refreshRoutineInterval).Minutes().From(gocron.NextTick()).Do(r.Refresh)
 
 	<-gocron.Start()
 }
 
 func mustCreateAgentCli() *grpc.ClientConn {
 	host := viper.GetString("server.host")
+
 	var creds credentials.TransportCredentials
 
 	if viper.GetBool("server.insecure") {
@@ -70,5 +76,6 @@ func mustCreateAgentCli() *grpc.ClientConn {
 	if err != nil {
 		logrus.Fatalf("Cannot create source connection: %v", err)
 	}
+
 	return agentsCli
 }
