@@ -35,10 +35,10 @@ func TestShouldSendAllTheSentinelOneData(t *testing.T) {
 		assert.Equal(t, limit, "100")
 
 		if skip == "0" {
-			res, err := json.Marshal([]string{
-				"Hello",
-				"Test",
-			})
+			res, err := json.Marshal(sentinelone.FetchResponse{Data: []map[string]interface{}{
+				{"Hello": "World"},
+				{"bar": []string{"foo"}},
+			}})
 
 			assert.Nil(t, err)
 

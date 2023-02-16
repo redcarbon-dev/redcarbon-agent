@@ -18,6 +18,10 @@ import (
 
 const maxDifferenceOfTimes = time.Hour * 24 * 7
 
+type FetchResponse struct {
+	Data []map[string]interface{} `json:"data"`
+}
+
 func RunSentinelOneService(ctx context.Context, ac *agentsExternalApiV1.AgentConfiguration, aCli agentsExternalApiV1.AgentsExternalV1SrvClient) {
 	l := logrus.WithField("configurationId", ac.AgentConfigurationId)
 
@@ -69,29 +73,33 @@ func RunSentinelOneService(ctx context.Context, ac *agentsExternalApiV1.AgentCon
 			return
 		}
 
-		var parsedBody []any
+		var parsedBody FetchResponse
 
 		err = json.Unmarshal(body, &parsedBody)
 		if err != nil {
 			return
 		}
 
-		if len(parsedBody) == 0 {
+		if len(parsedBody.Data) == 0 {
 			break
 		}
 
-		for _, data := range parsedBody {
-			l.Infof("Sending %v\n", data)
+		for _, data := range parsedBody.Data {
+			l.Infof("Sending a message...\n")
 
 			dataJ, err := json.Marshal(data)
 			if err != nil {
+				logrus.Errorf("Error while marshaling the message %v", err)
 				return
 			}
 
 			_, err = aCli.SendData(ctx, &agentsExternalApiV1.SendDataReq{
-				Data: string(dataJ),
+				Data:                 string(dataJ),
+				DataType:             agentsExternalApiV1.DataType_SENTINEL_ONE,
+				AgentConfigurationId: ac.AgentConfigurationId,
 			})
 			if err != nil {
+				logrus.Errorf("Error while sending the message %v", err)
 				return
 			}
 		}

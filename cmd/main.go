@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"os"
 	"path"
 
@@ -12,6 +13,8 @@ import (
 	"pkg.redcarbon.ai/cmd/start"
 	"pkg.redcarbon.ai/internal/build"
 )
+
+const confDirPermission = 0o755
 
 func init() {
 	confDir, err := os.UserConfigDir()
@@ -25,13 +28,25 @@ func init() {
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(redcarbonConfDir)
 
+	viper.SetDefault("server.host", build.DefaultHost)
+	viper.SetDefault("server.insecure", true)
+
+	if _, err := os.Stat(path.Join(redcarbonConfDir, "config.yaml")); errors.Is(err, os.ErrNotExist) {
+		err = os.MkdirAll(redcarbonConfDir, confDirPermission)
+		if err != nil {
+			logrus.Fatalf("can't create redcarbon config directory for error %v", err)
+		}
+
+		err = viper.WriteConfigAs(path.Join(redcarbonConfDir, "config.yaml"))
+		if err != nil {
+			logrus.Fatalf("can't create redcarbon config file for error %v", err)
+		}
+	}
+
 	err = viper.ReadInConfig()
 	if err != nil {
 		logrus.Fatalf("can't read the configuration %v", err)
 	}
-
-	viper.SetDefault("server.host", "localhost:50051")
-	viper.SetDefault("server.insecure", true)
 }
 
 func main() {

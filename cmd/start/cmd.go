@@ -41,17 +41,6 @@ func run(cmd *cobra.Command, args []string) {
 		logrus.Fatalf("can't extract the user config directory for error %v", err)
 	}
 
-	redcarbonConfDir := path.Join(confDir, "redcarbon")
-
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath(redcarbonConfDir)
-
-	err = viper.ReadInConfig()
-	if err != nil {
-		logrus.Fatalf("can't read the configuration %v", err)
-	}
-
 	client := agentsExternalApiV1.NewAgentsExternalV1SrvClient(agentsCli)
 	a := auth.NewAuthService(client, path.Join(confDir, "redcarbon", "config.yaml"))
 	r := routines.NewRoutineJobs(client, a)

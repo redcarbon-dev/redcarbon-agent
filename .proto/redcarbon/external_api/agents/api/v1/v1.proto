@@ -39,6 +39,8 @@ message PullConfigurationsRes {
 
 message SendDataReq {
   string data = 1;
+  string agent_configuration_id = 2;
+  DataType data_type = 3;
 }
 
 message SendDataRes {

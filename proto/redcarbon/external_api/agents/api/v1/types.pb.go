@@ -21,6 +21,52 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type DataType int32
+
+const (
+	DataType_UNSUPPORTED  DataType = 0
+	DataType_SENTINEL_ONE DataType = 1
+)
+
+// Enum value maps for DataType.
+var (
+	DataType_name = map[int32]string{
+		0: "UNSUPPORTED",
+		1: "SENTINEL_ONE",
+	}
+	DataType_value = map[string]int32{
+		"UNSUPPORTED":  0,
+		"SENTINEL_ONE": 1,
+	}
+)
+
+func (x DataType) Enum() *DataType {
+	p := new(DataType)
+	*p = x
+	return p
+}
+
+func (x DataType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (DataType) Descriptor() protoreflect.EnumDescriptor {
+	return file_redcarbon_external_api_agents_api_v1_types_proto_enumTypes[0].Descriptor()
+}
+
+func (DataType) Type() protoreflect.EnumType {
+	return &file_redcarbon_external_api_agents_api_v1_types_proto_enumTypes[0]
+}
+
+func (x DataType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use DataType.Descriptor instead.
+func (DataType) EnumDescriptor() ([]byte, []int) {
+	return file_redcarbon_external_api_agents_api_v1_types_proto_rawDescGZIP(), []int{0}
+}
+
 type AgentConfiguration struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -272,13 +318,15 @@ var file_redcarbon_external_api_agents_api_v1_types_proto_rawDesc = []byte{
 	0x4f, 0x6e, 0x65, 0x44, 0x61, 0x74, 0x61, 0x12, 0x1b, 0x0a, 0x09, 0x61, 0x70, 0x69, 0x5f, 0x74,
 	0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x61, 0x70, 0x69, 0x54,
 	0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x10, 0x0a, 0x03, 0x75, 0x72, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x42, 0x51, 0x5a, 0x4f, 0x70, 0x6b, 0x67, 0x2e, 0x72, 0x65,
-	0x64, 0x63, 0x61, 0x72, 0x62, 0x6f, 0x6e, 0x2e, 0x61, 0x69, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x2f, 0x72, 0x65, 0x64, 0x63, 0x61, 0x72, 0x62, 0x6f, 0x6e, 0x2f, 0x65, 0x78, 0x74, 0x65, 0x72,
-	0x6e, 0x61, 0x6c, 0x5f, 0x61, 0x70, 0x69, 0x2f, 0x61, 0x67, 0x65, 0x6e, 0x74, 0x73, 0x2f, 0x61,
-	0x70, 0x69, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x67, 0x65, 0x6e, 0x74, 0x73, 0x45, 0x78, 0x74, 0x65,
-	0x72, 0x6e, 0x61, 0x6c, 0x41, 0x70, 0x69, 0x56, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x33,
+	0x09, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x2a, 0x2d, 0x0a, 0x08, 0x44, 0x61, 0x74, 0x61, 0x54, 0x79,
+	0x70, 0x65, 0x12, 0x0f, 0x0a, 0x0b, 0x55, 0x4e, 0x53, 0x55, 0x50, 0x50, 0x4f, 0x52, 0x54, 0x45,
+	0x44, 0x10, 0x00, 0x12, 0x10, 0x0a, 0x0c, 0x53, 0x45, 0x4e, 0x54, 0x49, 0x4e, 0x45, 0x4c, 0x5f,
+	0x4f, 0x4e, 0x45, 0x10, 0x01, 0x42, 0x51, 0x5a, 0x4f, 0x70, 0x6b, 0x67, 0x2e, 0x72, 0x65, 0x64,
+	0x63, 0x61, 0x72, 0x62, 0x6f, 0x6e, 0x2e, 0x61, 0x69, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f,
+	0x72, 0x65, 0x64, 0x63, 0x61, 0x72, 0x62, 0x6f, 0x6e, 0x2f, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e,
+	0x61, 0x6c, 0x5f, 0x61, 0x70, 0x69, 0x2f, 0x61, 0x67, 0x65, 0x6e, 0x74, 0x73, 0x2f, 0x61, 0x70,
+	0x69, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x67, 0x65, 0x6e, 0x74, 0x73, 0x45, 0x78, 0x74, 0x65, 0x72,
+	0x6e, 0x61, 0x6c, 0x41, 0x70, 0x69, 0x56, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -293,18 +341,20 @@ func file_redcarbon_external_api_agents_api_v1_types_proto_rawDescGZIP() []byte 
 	return file_redcarbon_external_api_agents_api_v1_types_proto_rawDescData
 }
 
+var file_redcarbon_external_api_agents_api_v1_types_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_redcarbon_external_api_agents_api_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_redcarbon_external_api_agents_api_v1_types_proto_goTypes = []interface{}{
-	(*AgentConfiguration)(nil),     // 0: redcarbon.external_api.agents.api.v1.AgentConfiguration
-	(*AgentConfigurationData)(nil), // 1: redcarbon.external_api.agents.api.v1.AgentConfigurationData
-	(*SentinelOneData)(nil),        // 2: redcarbon.external_api.agents.api.v1.SentinelOneData
-	(*timestamppb.Timestamp)(nil),  // 3: google.protobuf.Timestamp
+	(DataType)(0),                  // 0: redcarbon.external_api.agents.api.v1.DataType
+	(*AgentConfiguration)(nil),     // 1: redcarbon.external_api.agents.api.v1.AgentConfiguration
+	(*AgentConfigurationData)(nil), // 2: redcarbon.external_api.agents.api.v1.AgentConfigurationData
+	(*SentinelOneData)(nil),        // 3: redcarbon.external_api.agents.api.v1.SentinelOneData
+	(*timestamppb.Timestamp)(nil),  // 4: google.protobuf.Timestamp
 }
 var file_redcarbon_external_api_agents_api_v1_types_proto_depIdxs = []int32{
-	3, // 0: redcarbon.external_api.agents.api.v1.AgentConfiguration.created_at:type_name -> google.protobuf.Timestamp
-	3, // 1: redcarbon.external_api.agents.api.v1.AgentConfiguration.updated_at:type_name -> google.protobuf.Timestamp
-	1, // 2: redcarbon.external_api.agents.api.v1.AgentConfiguration.data:type_name -> redcarbon.external_api.agents.api.v1.AgentConfigurationData
-	2, // 3: redcarbon.external_api.agents.api.v1.AgentConfigurationData.sentinel_one:type_name -> redcarbon.external_api.agents.api.v1.SentinelOneData
+	4, // 0: redcarbon.external_api.agents.api.v1.AgentConfiguration.created_at:type_name -> google.protobuf.Timestamp
+	4, // 1: redcarbon.external_api.agents.api.v1.AgentConfiguration.updated_at:type_name -> google.protobuf.Timestamp
+	2, // 2: redcarbon.external_api.agents.api.v1.AgentConfiguration.data:type_name -> redcarbon.external_api.agents.api.v1.AgentConfigurationData
+	3, // 3: redcarbon.external_api.agents.api.v1.AgentConfigurationData.sentinel_one:type_name -> redcarbon.external_api.agents.api.v1.SentinelOneData
 	4, // [4:4] is the sub-list for method output_type
 	4, // [4:4] is the sub-list for method input_type
 	4, // [4:4] is the sub-list for extension type_name
@@ -363,13 +413,14 @@ func file_redcarbon_external_api_agents_api_v1_types_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_redcarbon_external_api_agents_api_v1_types_proto_rawDesc,
-			NumEnums:      0,
+			NumEnums:      1,
 			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_redcarbon_external_api_agents_api_v1_types_proto_goTypes,
 		DependencyIndexes: file_redcarbon_external_api_agents_api_v1_types_proto_depIdxs,
+		EnumInfos:         file_redcarbon_external_api_agents_api_v1_types_proto_enumTypes,
 		MessageInfos:      file_redcarbon_external_api_agents_api_v1_types_proto_msgTypes,
 	}.Build()
 	File_redcarbon_external_api_agents_api_v1_types_proto = out.File

@@ -25,3 +25,8 @@ message SentinelOneData {
   string api_token = 1;
   string url = 2;
 }
+
+enum DataType {
+  UNSUPPORTED = 0;
+  SENTINEL_ONE = 1;
+}
