@@ -4,6 +4,7 @@ package redcarbon.external_api.agents.api.v1;
 
 option go_package = "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1;agentsExternalApiV1";
 
+import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 
 message AgentConfiguration {
@@ -18,6 +19,7 @@ message AgentConfiguration {
 message AgentConfigurationData {
   oneof data {
     SentinelOneData sentinel_one = 1;
+    ImpossibleTravelData impossible_travel = 2;
   }
 }
 
@@ -26,7 +28,15 @@ message SentinelOneData {
   string url = 2;
 }
 
+message ImpossibleTravelData {
+  string token = 1;
+  string url = 2;
+  bool skip_ssl = 3;
+  google.protobuf.Duration time_window = 4;
+}
+
 enum DataType {
   UNSUPPORTED = 0;
   SENTINEL_ONE = 1;
+  IMPOSSIBLE_TRAVEL = 2;
 }

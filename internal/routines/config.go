@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/viper"
 	"google.golang.org/grpc/metadata"
 
-	"pkg.redcarbon.ai/internal/sentinelone"
+	"pkg.redcarbon.ai/internal/services"
 	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
 )
 
@@ -35,10 +35,12 @@ func (r routineConfig) ConfigRoutine() {
 	var wg sync.WaitGroup
 
 	for _, conf := range configs.AgentConfigurations {
-		if conf.Data.GetSentinelOne() != nil {
-			r.runService(ctxWithTimeAndMeta, sentinelone.RunSentinelOneService, &wg, conf)
-			continue
+		s := services.NewServiceFromConfiguration(conf, r.agentsCli)
+		if s == nil {
+			logrus.Warnf("Configuration %s skipped as is not supported.", conf.AgentConfigurationId)
 		}
+
+		r.runService(ctxWithTimeAndMeta, s, &wg)
 	}
 
 	c := make(chan os.Signal, 1)
@@ -54,11 +56,11 @@ func (r routineConfig) ConfigRoutine() {
 	logrus.Infof("Jobs completed!")
 }
 
-func (r routineConfig) runService(ctx context.Context, runner func(context.Context, *agentsExternalApiV1.AgentConfiguration, agentsExternalApiV1.AgentsExternalV1SrvClient), wg *sync.WaitGroup, ac *agentsExternalApiV1.AgentConfiguration) {
+func (r routineConfig) runService(ctx context.Context, s services.Service, wg *sync.WaitGroup) {
 	wg.Add(1)
 
 	go func() {
-		runner(ctx, ac, r.agentsCli)
+		s.RunService(ctx)
 		wg.Done()
 	}()
 }

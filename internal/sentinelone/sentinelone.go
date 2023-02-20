@@ -22,12 +22,24 @@ type FetchResponse struct {
 	Data []map[string]interface{} `json:"data"`
 }
 
-func RunSentinelOneService(ctx context.Context, ac *agentsExternalApiV1.AgentConfiguration, aCli agentsExternalApiV1.AgentsExternalV1SrvClient) {
-	l := logrus.WithField("configurationId", ac.AgentConfigurationId)
+type ServiceSentinelOne struct {
+	ac   *agentsExternalApiV1.AgentConfiguration
+	aCli agentsExternalApiV1.AgentsExternalV1SrvClient
+}
+
+func NewSentinelOneService(conf *agentsExternalApiV1.AgentConfiguration, cli agentsExternalApiV1.AgentsExternalV1SrvClient) *ServiceSentinelOne {
+	return &ServiceSentinelOne{
+		ac:   conf,
+		aCli: cli,
+	}
+}
+
+func (s ServiceSentinelOne) RunService(ctx context.Context) {
+	l := logrus.WithField("configurationId", s.ac.AgentConfigurationId)
 
 	l.Infof("Starting SentinelOne Configuration...")
 
-	sentinelOneConfig := ac.Data.GetSentinelOne()
+	sentinelOneConfig := s.ac.Data.GetSentinelOne()
 
 	baseUrl, err := url.Parse(sentinelOneConfig.Url)
 	if err != nil {
@@ -36,7 +48,7 @@ func RunSentinelOneService(ctx context.Context, ac *agentsExternalApiV1.AgentCon
 
 	reqUrl := baseUrl.JoinPath("/web/api/v2.1/threats")
 
-	from, to := retrieveTimeBoundariesForConfiguration(ac)
+	from, to := s.retrieveTimeBoundariesForConfiguration()
 
 	query := reqUrl.Query()
 
@@ -93,10 +105,10 @@ func RunSentinelOneService(ctx context.Context, ac *agentsExternalApiV1.AgentCon
 				return
 			}
 
-			_, err = aCli.SendData(ctx, &agentsExternalApiV1.SendDataReq{
+			_, err = s.aCli.SendData(ctx, &agentsExternalApiV1.SendDataReq{
 				Data:                 string(dataJ),
 				DataType:             agentsExternalApiV1.DataType_SENTINEL_ONE,
-				AgentConfigurationId: ac.AgentConfigurationId,
+				AgentConfigurationId: s.ac.AgentConfigurationId,
 			})
 			if err != nil {
 				logrus.Errorf("Error while sending the message %v", err)
@@ -107,7 +119,7 @@ func RunSentinelOneService(ctx context.Context, ac *agentsExternalApiV1.AgentCon
 		skip += limit
 	}
 
-	viper.Set(fmt.Sprintf("configurations.%s.from", ac.AgentConfigurationId), to)
+	viper.Set(fmt.Sprintf("configurations.%s.from", s.ac.AgentConfigurationId), to)
 
 	err = viper.WriteConfig()
 	if err != nil {
@@ -117,10 +129,10 @@ func RunSentinelOneService(ctx context.Context, ac *agentsExternalApiV1.AgentCon
 	l.Infof("SentinelOne Configuration - Successfully Executed\n")
 }
 
-func retrieveTimeBoundariesForConfiguration(ac *agentsExternalApiV1.AgentConfiguration) (time.Time, time.Time) {
+func (s ServiceSentinelOne) retrieveTimeBoundariesForConfiguration() (time.Time, time.Time) {
 	now := time.Now()
 
-	from := viper.GetTime(fmt.Sprintf("configurations.%s.from", ac.AgentConfigurationId))
+	from := viper.GetTime(fmt.Sprintf("configurations.%s.from", s.ac.AgentConfigurationId))
 
 	zero := time.Time{}
 	if from == zero {

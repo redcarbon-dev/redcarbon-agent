@@ -16,6 +16,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"pkg.redcarbon.ai/internal/sentinelone"
+	"pkg.redcarbon.ai/internal/services"
 	"pkg.redcarbon.ai/mocks"
 	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
 )
@@ -52,8 +53,6 @@ func TestShouldSendAllTheSentinelOneData(t *testing.T) {
 			_, err = w.Write(res)
 			assert.Nil(t, err)
 		}
-
-		w.WriteHeader(http.StatusOK)
 	}))
 
 	defer ts.Close()
@@ -70,7 +69,7 @@ func TestShouldSendAllTheSentinelOneData(t *testing.T) {
 
 	cli.On("SendData", mock.Anything, mock.Anything).Return(&agentsExternalApiV1.SendDataRes{ReceivedAt: timestamppb.Now()}, nil)
 
-	sentinelone.RunSentinelOneService(context.Background(), &agentsExternalApiV1.AgentConfiguration{
+	s := services.NewServiceFromConfiguration(&agentsExternalApiV1.AgentConfiguration{
 		AgentConfigurationId: "cf:1234567890",
 		Name:                 "test",
 		Type:                 "sentinel_one",
@@ -85,6 +84,8 @@ func TestShouldSendAllTheSentinelOneData(t *testing.T) {
 			},
 		},
 	}, &cli)
+
+	s.RunService(context.Background())
 
 	cli.AssertNumberOfCalls(t, "SendData", 2)
 	assert.NotEqual(t, time.Time{}, viper.Get("configurations.cf:1234567890.from"))
