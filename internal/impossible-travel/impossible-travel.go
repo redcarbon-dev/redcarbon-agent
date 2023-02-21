@@ -20,10 +20,10 @@ type ServiceImpossibleTravel struct {
 }
 
 type findings struct {
-	User      string
-	Ips       []string
-	Countries []string
-	Logs      []map[string]string
+	User      string              `json:"user"`
+	Ips       []string            `json:"ips"`
+	Countries []string            `json:"countries"`
+	Logs      []map[string]string `json:"logs"`
 }
 
 func NewImpossibleTravelService(conf *agentsExternalApiV1.AgentConfiguration, cli agentsExternalApiV1.AgentsExternalV1SrvClient) *ServiceImpossibleTravel {
