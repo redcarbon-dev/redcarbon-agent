@@ -19,7 +19,7 @@ message AgentConfiguration {
 message AgentConfigurationData {
   oneof data {
     SentinelOneData sentinel_one = 1;
-    ImpossibleTravelData impossible_travel = 2;
+    GrayLogImpossibleTravelData graylog_impossible_travel = 2;
   }
 }
 
@@ -28,7 +28,7 @@ message SentinelOneData {
   string url = 2;
 }
 
-message ImpossibleTravelData {
+message GrayLogImpossibleTravelData {
   string token = 1;
   string url = 2;
   bool skip_ssl = 3;
@@ -38,5 +38,5 @@ message ImpossibleTravelData {
 enum DataType {
   UNSUPPORTED = 0;
   SENTINEL_ONE = 1;
-  IMPOSSIBLE_TRAVEL = 2;
+  GRAYLOG_IMPOSSIBLE_TRAVEL = 2;
 }

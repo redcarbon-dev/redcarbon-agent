@@ -1,4 +1,4 @@
-package impossibleTravel
+package grayLogImpossibleTravel
 
 import (
 	"context"
@@ -12,9 +12,9 @@ import (
 	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
 )
 
-type ServiceImpossibleTravel struct {
+type ServiceGrayLogImpossibleTravel struct {
 	ac     *agentsExternalApiV1.AgentConfiguration
-	itConf *agentsExternalApiV1.ImpossibleTravelData
+	itConf *agentsExternalApiV1.GrayLogImpossibleTravelData
 	aCli   agentsExternalApiV1.AgentsExternalV1SrvClient
 	glCli  graylog.Client
 }
@@ -26,10 +26,10 @@ type findings struct {
 	Logs      []map[string]string `json:"logs"`
 }
 
-func NewImpossibleTravelService(conf *agentsExternalApiV1.AgentConfiguration, cli agentsExternalApiV1.AgentsExternalV1SrvClient) *ServiceImpossibleTravel {
-	itConf := conf.Data.GetImpossibleTravel()
+func NewGrayLogImpossibleTravelService(conf *agentsExternalApiV1.AgentConfiguration, cli agentsExternalApiV1.AgentsExternalV1SrvClient) *ServiceGrayLogImpossibleTravel {
+	itConf := conf.Data.GetGraylogImpossibleTravel()
 
-	return &ServiceImpossibleTravel{
+	return &ServiceGrayLogImpossibleTravel{
 		ac:     conf,
 		aCli:   cli,
 		itConf: itConf,
@@ -37,7 +37,7 @@ func NewImpossibleTravelService(conf *agentsExternalApiV1.AgentConfiguration, cl
 	}
 }
 
-func (s ServiceImpossibleTravel) RunService(ctx context.Context) {
+func (s ServiceGrayLogImpossibleTravel) RunService(ctx context.Context) {
 	l := logrus.WithField("configurationId", s.ac.AgentConfigurationId)
 
 	to := time.Now()
@@ -69,7 +69,7 @@ func (s ServiceImpossibleTravel) RunService(ctx context.Context) {
 
 		_, err = s.aCli.SendData(ctx, &agentsExternalApiV1.SendDataReq{
 			Data:                 string(data),
-			DataType:             agentsExternalApiV1.DataType_IMPOSSIBLE_TRAVEL,
+			DataType:             agentsExternalApiV1.DataType_GRAYLOG_IMPOSSIBLE_TRAVEL,
 			AgentConfigurationId: s.ac.AgentConfigurationId,
 		})
 		if err != nil {
@@ -79,7 +79,7 @@ func (s ServiceImpossibleTravel) RunService(ctx context.Context) {
 	}
 }
 
-func (s ServiceImpossibleTravel) findImpossibleTravel(logs []map[string]string) []findings {
+func (s ServiceGrayLogImpossibleTravel) findImpossibleTravel(logs []map[string]string) []findings {
 	var finds []findings
 
 	byUser := utils.GroupMapByColumn(logs, "UserId")

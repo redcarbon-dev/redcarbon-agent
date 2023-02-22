@@ -1,4 +1,4 @@
-package impossibleTravel_test
+package grayLogImpossibleTravel_test
 
 import (
 	"context"
@@ -90,8 +90,8 @@ func TestImpossibleTravel(t *testing.T) {
 		CreatedAt:            timestamppb.Now(),
 		UpdatedAt:            timestamppb.Now(),
 		Data: &agentsExternalApiV1.AgentConfigurationData{
-			Data: &agentsExternalApiV1.AgentConfigurationData_ImpossibleTravel{
-				ImpossibleTravel: &agentsExternalApiV1.ImpossibleTravelData{
+			Data: &agentsExternalApiV1.AgentConfigurationData_GraylogImpossibleTravel{
+				GraylogImpossibleTravel: &agentsExternalApiV1.GrayLogImpossibleTravelData{
 					Url:        ts.URL,
 					Token:      "xxx",
 					SkipSsl:    true,
@@ -125,7 +125,7 @@ func TestImpossibleTravel(t *testing.T) {
 	assert.Nil(t, err)
 	cli.AssertCalled(t, "SendData", mock.Anything, &agentsExternalApiV1.SendDataReq{
 		Data:                 string(dFoo),
-		DataType:             agentsExternalApiV1.DataType_IMPOSSIBLE_TRAVEL,
+		DataType:             agentsExternalApiV1.DataType_GRAYLOG_IMPOSSIBLE_TRAVEL,
 		AgentConfigurationId: "cf:1234567890",
 	})
 }

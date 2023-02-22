@@ -3,7 +3,7 @@ package services
 import (
 	"context"
 
-	"pkg.redcarbon.ai/internal/impossible-travel"
+	"pkg.redcarbon.ai/internal/graylog-impossible-travel"
 	"pkg.redcarbon.ai/internal/sentinelone"
 	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
 )
@@ -17,8 +17,8 @@ func NewServiceFromConfiguration(conf *agentsExternalApiV1.AgentConfiguration, c
 		return sentinelone.NewSentinelOneService(conf, cli)
 	}
 
-	if conf.Data.GetImpossibleTravel() != nil {
-		return impossibleTravel.NewImpossibleTravelService(conf, cli)
+	if conf.Data.GetGraylogImpossibleTravel() != nil {
+		return grayLogImpossibleTravel.NewGrayLogImpossibleTravelService(conf, cli)
 	}
 
 	return nil
