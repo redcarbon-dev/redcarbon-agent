@@ -105,9 +105,8 @@ func (s ServiceSentinelOne) RunService(ctx context.Context) {
 				return
 			}
 
-			_, err = s.aCli.SendData(ctx, &agentsExternalApiV1.SendDataReq{
+			_, err = s.aCli.SendSentinelOneData(ctx, &agentsExternalApiV1.SendSentinelOneDataReq{
 				Data:                 string(dataJ),
-				DataType:             agentsExternalApiV1.DataType_SENTINEL_ONE,
 				AgentConfigurationId: s.ac.AgentConfigurationId,
 			})
 			if err != nil {

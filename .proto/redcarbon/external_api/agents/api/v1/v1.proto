@@ -14,11 +14,20 @@ service AgentsExternalV1Srv {
   rpc PullConfigurations(PullConfigurationsReq)
       returns (PullConfigurationsRes) {}
 
-  rpc SendData(SendDataReq)
-      returns (SendDataRes) {}
+  rpc SendSentinelOneData(SendSentinelOneDataReq)
+      returns (SendSentinelOneDataRes) {}
+  rpc SendGrayLogImpossibleTravelData(SendGrayLogImpossibleTravelDataReq)
+      returns (SendGrayLogImpossibleTravelDataRes) {}
+  rpc SendGrayLogDatamineQueryResultsData(SendGrayLogDatamineQueryResultsDataReq)
+      returns (SendGrayLogDatamineQueryResultsDataRes) {}
+  rpc SendGrayLogDatamineQueryErrorData (SendGrayLogDatamineQueryErrorDataReq)
+      returns (SendGrayLogDatamineQueryErrorDataRes) {}
 
   rpc RefreshToken(RefreshTokenReq)
       returns (RefreshTokenRes) {}
+
+  rpc GetGrayLogDataMinePendingQueries(GetGrayLogDataMinePendingQueriesReq)
+      returns (GetGrayLogDataMinePendingQueriesRes) {}
 }
 
 message HZReq {
@@ -37,13 +46,44 @@ message PullConfigurationsRes {
   repeated AgentConfiguration agent_configurations = 1;
 }
 
-message SendDataReq {
-  string data = 1;
-  string agent_configuration_id = 2;
-  DataType data_type = 3;
+message SendSentinelOneDataReq {
+  string agent_configuration_id = 1;
+  string data = 2;
 }
 
-message SendDataRes {
+message SendSentinelOneDataRes {
+  google.protobuf.Timestamp received_at = 1;
+}
+
+message SendGrayLogImpossibleTravelDataReq {
+  string agent_configuration_id = 1;
+  string user = 2;
+  repeated string ips = 3;
+  repeated string countries = 4;
+  repeated GrayLogImpossibleTravelLog impossible_travel_logs = 5;
+}
+
+message SendGrayLogImpossibleTravelDataRes {
+  google.protobuf.Timestamp received_at = 1;
+}
+
+message SendGrayLogDatamineQueryResultsDataReq {
+  string agent_configuration_id = 1;
+  string query_id = 2;
+  repeated GrayLogDataMineResult results = 3;
+}
+
+message SendGrayLogDatamineQueryResultsDataRes {
+  google.protobuf.Timestamp received_at = 1;
+}
+
+message SendGrayLogDatamineQueryErrorDataReq {
+  string agent_configuration_id = 1;
+  string query_id = 2;
+  string error = 3;
+}
+
+message SendGrayLogDatamineQueryErrorDataRes {
   google.protobuf.Timestamp received_at = 1;
 }
 
@@ -53,4 +93,12 @@ message RefreshTokenReq {
 message RefreshTokenRes {
   string token = 1;
   string refresh_token = 2;
+}
+
+message GetGrayLogDataMinePendingQueriesReq {
+  string agent_configuration_id = 1;
+}
+
+message GetGrayLogDataMinePendingQueriesRes {
+  repeated GrayLogDataMineQuery graylog_datamine_queries = 1;
 }

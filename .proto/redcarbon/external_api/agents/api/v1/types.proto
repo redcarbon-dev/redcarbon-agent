@@ -20,6 +20,7 @@ message AgentConfigurationData {
   oneof data {
     SentinelOneData sentinel_one = 1;
     GrayLogImpossibleTravelData graylog_impossible_travel = 2;
+    GrayLogDataMineData graylog_datamine = 3;
   }
 }
 
@@ -35,8 +36,33 @@ message GrayLogImpossibleTravelData {
   google.protobuf.Duration time_window = 4;
 }
 
+message GrayLogDataMineData {
+  string token = 1;
+  string url = 2;
+  bool skip_ssl = 3;
+}
+
+message GrayLogImpossibleTravelLog {
+  map<string,string> logs = 1;
+}
+
+message GrayLogDataMineResult {
+  google.protobuf.Timestamp timestamp = 1;
+  string uuid = 2;
+  string source = 3;
+  string message = 4;
+}
+
 enum DataType {
   UNSUPPORTED = 0;
   SENTINEL_ONE = 1;
   GRAYLOG_IMPOSSIBLE_TRAVEL = 2;
+  GRAYLOG_DATAMINE = 3;
+}
+
+message GrayLogDataMineQuery {
+  string id = 1;
+  google.protobuf.Timestamp search_start_time = 2;
+  google.protobuf.Timestamp search_stop_time = 3;
+  string query = 4;
 }
