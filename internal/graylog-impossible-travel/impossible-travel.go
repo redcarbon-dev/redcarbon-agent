@@ -2,7 +2,6 @@ package grayLogImpossibleTravel
 
 import (
 	"context"
-	"encoding/json"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -19,13 +18,6 @@ type ServiceGrayLogImpossibleTravel struct {
 	glCli  graylog.Client
 }
 
-type findings struct {
-	User      string              `json:"user"`
-	Ips       []string            `json:"ips"`
-	Countries []string            `json:"countries"`
-	Logs      []map[string]string `json:"logs"`
-}
-
 func NewGrayLogImpossibleTravelService(conf *agentsExternalApiV1.AgentConfiguration, cli agentsExternalApiV1.AgentsExternalV1SrvClient) *ServiceGrayLogImpossibleTravel {
 	itConf := conf.Data.GetGraylogImpossibleTravel()
 
@@ -33,7 +25,7 @@ func NewGrayLogImpossibleTravelService(conf *agentsExternalApiV1.AgentConfigurat
 		ac:     conf,
 		aCli:   cli,
 		itConf: itConf,
-		glCli:  graylog.NewGrayLogClient(itConf.Token, itConf.Url, false),
+		glCli:  graylog.NewGrayLogClient(itConf.Token, itConf.Url, itConf.SkipSsl),
 	}
 }
 
@@ -58,29 +50,19 @@ func (s ServiceGrayLogImpossibleTravel) RunService(ctx context.Context) {
 		},
 	)
 
-	finds := s.findImpossibleTravel(logs)
+	impossibleTravels := s.findImpossibleTravel(logs, s.ac.AgentConfigurationId)
 
-	for _, find := range finds {
-		data, err := json.Marshal(find)
+	for _, it := range impossibleTravels {
+		_, err := s.aCli.SendGrayLogImpossibleTravelData(ctx, it)
 		if err != nil {
-			l.Errorf("Error while converting the data in json for error %v - data %v", err, find)
-			continue
-		}
-
-		_, err = s.aCli.SendData(ctx, &agentsExternalApiV1.SendDataReq{
-			Data:                 string(data),
-			DataType:             agentsExternalApiV1.DataType_GRAYLOG_IMPOSSIBLE_TRAVEL,
-			AgentConfigurationId: s.ac.AgentConfigurationId,
-		})
-		if err != nil {
-			l.Errorf("Error while sending data for error %v - data %s", err, string(data))
+			l.Errorf("Error while sending impossible travel for error %v - data %v", err, it)
 			continue
 		}
 	}
 }
 
-func (s ServiceGrayLogImpossibleTravel) findImpossibleTravel(logs []map[string]string) []findings {
-	var finds []findings
+func (s ServiceGrayLogImpossibleTravel) findImpossibleTravel(logs []map[string]string, acID string) []*agentsExternalApiV1.SendGrayLogImpossibleTravelDataReq {
+	var finds []*agentsExternalApiV1.SendGrayLogImpossibleTravelDataReq
 
 	byUser := utils.GroupMapByColumn(logs, "UserId")
 
@@ -90,13 +72,22 @@ func (s ServiceGrayLogImpossibleTravel) findImpossibleTravel(logs []map[string]s
 			continue
 		}
 
+		var its []*agentsExternalApiV1.GrayLogImpossibleTravelLog
+
+		for _, userLog := range userLogs {
+			its = append(its, &agentsExternalApiV1.GrayLogImpossibleTravelLog{
+				Logs: userLog,
+			})
+		}
+
 		ips := utils.GetUniqueDataForColumnInMap(userLogs, "ClientIP")
 
-		finds = append(finds, findings{
-			Ips:       ips,
-			Logs:      userLogs,
-			User:      user,
-			Countries: c,
+		finds = append(finds, &agentsExternalApiV1.SendGrayLogImpossibleTravelDataReq{
+			Ips:                  ips,
+			User:                 user,
+			Countries:            c,
+			AgentConfigurationId: acID,
+			ImpossibleTravelLogs: its,
 		})
 	}
 

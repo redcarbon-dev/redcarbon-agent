@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	graylog_datamine "pkg.redcarbon.ai/internal/graylog-datamine"
 	"pkg.redcarbon.ai/internal/graylog-impossible-travel"
 	"pkg.redcarbon.ai/internal/sentinelone"
 	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
@@ -19,6 +20,10 @@ func NewServiceFromConfiguration(conf *agentsExternalApiV1.AgentConfiguration, c
 
 	if conf.Data.GetGraylogImpossibleTravel() != nil {
 		return grayLogImpossibleTravel.NewGrayLogImpossibleTravelService(conf, cli)
+	}
+
+	if conf.Data.GetGraylogDatamine() != nil {
+		return graylog_datamine.NewGrayLogDataMineService(conf, cli)
 	}
 
 	return nil

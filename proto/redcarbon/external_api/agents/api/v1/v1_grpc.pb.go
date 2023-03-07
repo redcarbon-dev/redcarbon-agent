@@ -24,8 +24,12 @@ const _ = grpc.SupportPackageIsVersion7
 type AgentsExternalV1SrvClient interface {
 	HZ(ctx context.Context, in *HZReq, opts ...grpc.CallOption) (*HZRes, error)
 	PullConfigurations(ctx context.Context, in *PullConfigurationsReq, opts ...grpc.CallOption) (*PullConfigurationsRes, error)
-	SendData(ctx context.Context, in *SendDataReq, opts ...grpc.CallOption) (*SendDataRes, error)
+	SendSentinelOneData(ctx context.Context, in *SendSentinelOneDataReq, opts ...grpc.CallOption) (*SendSentinelOneDataRes, error)
+	SendGrayLogImpossibleTravelData(ctx context.Context, in *SendGrayLogImpossibleTravelDataReq, opts ...grpc.CallOption) (*SendGrayLogImpossibleTravelDataRes, error)
+	SendGrayLogDatamineQueryResultsData(ctx context.Context, in *SendGrayLogDatamineQueryResultsDataReq, opts ...grpc.CallOption) (*SendGrayLogDatamineQueryResultsDataRes, error)
+	SendGrayLogDatamineQueryErrorData(ctx context.Context, in *SendGrayLogDatamineQueryErrorDataReq, opts ...grpc.CallOption) (*SendGrayLogDatamineQueryErrorDataRes, error)
 	RefreshToken(ctx context.Context, in *RefreshTokenReq, opts ...grpc.CallOption) (*RefreshTokenRes, error)
+	GetGrayLogDataMinePendingQueries(ctx context.Context, in *GetGrayLogDataMinePendingQueriesReq, opts ...grpc.CallOption) (*GetGrayLogDataMinePendingQueriesRes, error)
 }
 
 type agentsExternalV1SrvClient struct {
@@ -54,9 +58,36 @@ func (c *agentsExternalV1SrvClient) PullConfigurations(ctx context.Context, in *
 	return out, nil
 }
 
-func (c *agentsExternalV1SrvClient) SendData(ctx context.Context, in *SendDataReq, opts ...grpc.CallOption) (*SendDataRes, error) {
-	out := new(SendDataRes)
-	err := c.cc.Invoke(ctx, "/redcarbon.external_api.agents.api.v1.AgentsExternalV1Srv/SendData", in, out, opts...)
+func (c *agentsExternalV1SrvClient) SendSentinelOneData(ctx context.Context, in *SendSentinelOneDataReq, opts ...grpc.CallOption) (*SendSentinelOneDataRes, error) {
+	out := new(SendSentinelOneDataRes)
+	err := c.cc.Invoke(ctx, "/redcarbon.external_api.agents.api.v1.AgentsExternalV1Srv/SendSentinelOneData", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *agentsExternalV1SrvClient) SendGrayLogImpossibleTravelData(ctx context.Context, in *SendGrayLogImpossibleTravelDataReq, opts ...grpc.CallOption) (*SendGrayLogImpossibleTravelDataRes, error) {
+	out := new(SendGrayLogImpossibleTravelDataRes)
+	err := c.cc.Invoke(ctx, "/redcarbon.external_api.agents.api.v1.AgentsExternalV1Srv/SendGrayLogImpossibleTravelData", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *agentsExternalV1SrvClient) SendGrayLogDatamineQueryResultsData(ctx context.Context, in *SendGrayLogDatamineQueryResultsDataReq, opts ...grpc.CallOption) (*SendGrayLogDatamineQueryResultsDataRes, error) {
+	out := new(SendGrayLogDatamineQueryResultsDataRes)
+	err := c.cc.Invoke(ctx, "/redcarbon.external_api.agents.api.v1.AgentsExternalV1Srv/SendGrayLogDatamineQueryResultsData", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *agentsExternalV1SrvClient) SendGrayLogDatamineQueryErrorData(ctx context.Context, in *SendGrayLogDatamineQueryErrorDataReq, opts ...grpc.CallOption) (*SendGrayLogDatamineQueryErrorDataRes, error) {
+	out := new(SendGrayLogDatamineQueryErrorDataRes)
+	err := c.cc.Invoke(ctx, "/redcarbon.external_api.agents.api.v1.AgentsExternalV1Srv/SendGrayLogDatamineQueryErrorData", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -72,14 +103,27 @@ func (c *agentsExternalV1SrvClient) RefreshToken(ctx context.Context, in *Refres
 	return out, nil
 }
 
+func (c *agentsExternalV1SrvClient) GetGrayLogDataMinePendingQueries(ctx context.Context, in *GetGrayLogDataMinePendingQueriesReq, opts ...grpc.CallOption) (*GetGrayLogDataMinePendingQueriesRes, error) {
+	out := new(GetGrayLogDataMinePendingQueriesRes)
+	err := c.cc.Invoke(ctx, "/redcarbon.external_api.agents.api.v1.AgentsExternalV1Srv/GetGrayLogDataMinePendingQueries", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AgentsExternalV1SrvServer is the server API for AgentsExternalV1Srv service.
 // All implementations should embed UnimplementedAgentsExternalV1SrvServer
 // for forward compatibility
 type AgentsExternalV1SrvServer interface {
 	HZ(context.Context, *HZReq) (*HZRes, error)
 	PullConfigurations(context.Context, *PullConfigurationsReq) (*PullConfigurationsRes, error)
-	SendData(context.Context, *SendDataReq) (*SendDataRes, error)
+	SendSentinelOneData(context.Context, *SendSentinelOneDataReq) (*SendSentinelOneDataRes, error)
+	SendGrayLogImpossibleTravelData(context.Context, *SendGrayLogImpossibleTravelDataReq) (*SendGrayLogImpossibleTravelDataRes, error)
+	SendGrayLogDatamineQueryResultsData(context.Context, *SendGrayLogDatamineQueryResultsDataReq) (*SendGrayLogDatamineQueryResultsDataRes, error)
+	SendGrayLogDatamineQueryErrorData(context.Context, *SendGrayLogDatamineQueryErrorDataReq) (*SendGrayLogDatamineQueryErrorDataRes, error)
 	RefreshToken(context.Context, *RefreshTokenReq) (*RefreshTokenRes, error)
+	GetGrayLogDataMinePendingQueries(context.Context, *GetGrayLogDataMinePendingQueriesReq) (*GetGrayLogDataMinePendingQueriesRes, error)
 }
 
 // UnimplementedAgentsExternalV1SrvServer should be embedded to have forward compatible implementations.
@@ -92,11 +136,23 @@ func (UnimplementedAgentsExternalV1SrvServer) HZ(context.Context, *HZReq) (*HZRe
 func (UnimplementedAgentsExternalV1SrvServer) PullConfigurations(context.Context, *PullConfigurationsReq) (*PullConfigurationsRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PullConfigurations not implemented")
 }
-func (UnimplementedAgentsExternalV1SrvServer) SendData(context.Context, *SendDataReq) (*SendDataRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SendData not implemented")
+func (UnimplementedAgentsExternalV1SrvServer) SendSentinelOneData(context.Context, *SendSentinelOneDataReq) (*SendSentinelOneDataRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendSentinelOneData not implemented")
+}
+func (UnimplementedAgentsExternalV1SrvServer) SendGrayLogImpossibleTravelData(context.Context, *SendGrayLogImpossibleTravelDataReq) (*SendGrayLogImpossibleTravelDataRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendGrayLogImpossibleTravelData not implemented")
+}
+func (UnimplementedAgentsExternalV1SrvServer) SendGrayLogDatamineQueryResultsData(context.Context, *SendGrayLogDatamineQueryResultsDataReq) (*SendGrayLogDatamineQueryResultsDataRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendGrayLogDatamineQueryResultsData not implemented")
+}
+func (UnimplementedAgentsExternalV1SrvServer) SendGrayLogDatamineQueryErrorData(context.Context, *SendGrayLogDatamineQueryErrorDataReq) (*SendGrayLogDatamineQueryErrorDataRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendGrayLogDatamineQueryErrorData not implemented")
 }
 func (UnimplementedAgentsExternalV1SrvServer) RefreshToken(context.Context, *RefreshTokenReq) (*RefreshTokenRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RefreshToken not implemented")
+}
+func (UnimplementedAgentsExternalV1SrvServer) GetGrayLogDataMinePendingQueries(context.Context, *GetGrayLogDataMinePendingQueriesReq) (*GetGrayLogDataMinePendingQueriesRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetGrayLogDataMinePendingQueries not implemented")
 }
 
 // UnsafeAgentsExternalV1SrvServer may be embedded to opt out of forward compatibility for this service.
@@ -146,20 +202,74 @@ func _AgentsExternalV1Srv_PullConfigurations_Handler(srv interface{}, ctx contex
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AgentsExternalV1Srv_SendData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SendDataReq)
+func _AgentsExternalV1Srv_SendSentinelOneData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendSentinelOneDataReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AgentsExternalV1SrvServer).SendData(ctx, in)
+		return srv.(AgentsExternalV1SrvServer).SendSentinelOneData(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/redcarbon.external_api.agents.api.v1.AgentsExternalV1Srv/SendData",
+		FullMethod: "/redcarbon.external_api.agents.api.v1.AgentsExternalV1Srv/SendSentinelOneData",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AgentsExternalV1SrvServer).SendData(ctx, req.(*SendDataReq))
+		return srv.(AgentsExternalV1SrvServer).SendSentinelOneData(ctx, req.(*SendSentinelOneDataReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AgentsExternalV1Srv_SendGrayLogImpossibleTravelData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendGrayLogImpossibleTravelDataReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AgentsExternalV1SrvServer).SendGrayLogImpossibleTravelData(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/redcarbon.external_api.agents.api.v1.AgentsExternalV1Srv/SendGrayLogImpossibleTravelData",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AgentsExternalV1SrvServer).SendGrayLogImpossibleTravelData(ctx, req.(*SendGrayLogImpossibleTravelDataReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AgentsExternalV1Srv_SendGrayLogDatamineQueryResultsData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendGrayLogDatamineQueryResultsDataReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AgentsExternalV1SrvServer).SendGrayLogDatamineQueryResultsData(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/redcarbon.external_api.agents.api.v1.AgentsExternalV1Srv/SendGrayLogDatamineQueryResultsData",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AgentsExternalV1SrvServer).SendGrayLogDatamineQueryResultsData(ctx, req.(*SendGrayLogDatamineQueryResultsDataReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AgentsExternalV1Srv_SendGrayLogDatamineQueryErrorData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendGrayLogDatamineQueryErrorDataReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AgentsExternalV1SrvServer).SendGrayLogDatamineQueryErrorData(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/redcarbon.external_api.agents.api.v1.AgentsExternalV1Srv/SendGrayLogDatamineQueryErrorData",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AgentsExternalV1SrvServer).SendGrayLogDatamineQueryErrorData(ctx, req.(*SendGrayLogDatamineQueryErrorDataReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -182,6 +292,24 @@ func _AgentsExternalV1Srv_RefreshToken_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AgentsExternalV1Srv_GetGrayLogDataMinePendingQueries_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetGrayLogDataMinePendingQueriesReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AgentsExternalV1SrvServer).GetGrayLogDataMinePendingQueries(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/redcarbon.external_api.agents.api.v1.AgentsExternalV1Srv/GetGrayLogDataMinePendingQueries",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AgentsExternalV1SrvServer).GetGrayLogDataMinePendingQueries(ctx, req.(*GetGrayLogDataMinePendingQueriesReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AgentsExternalV1Srv_ServiceDesc is the grpc.ServiceDesc for AgentsExternalV1Srv service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -198,12 +326,28 @@ var AgentsExternalV1Srv_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AgentsExternalV1Srv_PullConfigurations_Handler,
 		},
 		{
-			MethodName: "SendData",
-			Handler:    _AgentsExternalV1Srv_SendData_Handler,
+			MethodName: "SendSentinelOneData",
+			Handler:    _AgentsExternalV1Srv_SendSentinelOneData_Handler,
+		},
+		{
+			MethodName: "SendGrayLogImpossibleTravelData",
+			Handler:    _AgentsExternalV1Srv_SendGrayLogImpossibleTravelData_Handler,
+		},
+		{
+			MethodName: "SendGrayLogDatamineQueryResultsData",
+			Handler:    _AgentsExternalV1Srv_SendGrayLogDatamineQueryResultsData_Handler,
+		},
+		{
+			MethodName: "SendGrayLogDatamineQueryErrorData",
+			Handler:    _AgentsExternalV1Srv_SendGrayLogDatamineQueryErrorData_Handler,
 		},
 		{
 			MethodName: "RefreshToken",
 			Handler:    _AgentsExternalV1Srv_RefreshToken_Handler,
+		},
+		{
+			MethodName: "GetGrayLogDataMinePendingQueries",
+			Handler:    _AgentsExternalV1Srv_GetGrayLogDataMinePendingQueries_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

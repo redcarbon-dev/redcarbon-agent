@@ -67,7 +67,7 @@ func TestShouldSendAllTheSentinelOneData(t *testing.T) {
 
 	cli := mocks.AgentsExternalV1SrvClient{}
 
-	cli.On("SendData", mock.Anything, mock.Anything).Return(&agentsExternalApiV1.SendDataRes{ReceivedAt: timestamppb.Now()}, nil)
+	cli.On("SendSentinelOneData", mock.Anything, mock.Anything).Return(&agentsExternalApiV1.SendSentinelOneDataRes{ReceivedAt: timestamppb.Now()}, nil)
 
 	s := services.NewServiceFromConfiguration(&agentsExternalApiV1.AgentConfiguration{
 		AgentConfigurationId: "cf:1234567890",
@@ -87,6 +87,6 @@ func TestShouldSendAllTheSentinelOneData(t *testing.T) {
 
 	s.RunService(context.Background())
 
-	cli.AssertNumberOfCalls(t, "SendData", 2)
+	cli.AssertNumberOfCalls(t, "SendSentinelOneData", 2)
 	assert.NotEqual(t, time.Time{}, viper.Get("configurations.cf:1234567890.from"))
 }

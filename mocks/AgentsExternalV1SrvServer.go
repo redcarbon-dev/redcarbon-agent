@@ -23,6 +23,53 @@ func (_m *AgentsExternalV1SrvServer) EXPECT() *AgentsExternalV1SrvServer_Expecte
 	return &AgentsExternalV1SrvServer_Expecter{mock: &_m.Mock}
 }
 
+// GetGrayLogDataMinePendingQueries provides a mock function with given fields: _a0, _a1
+func (_m *AgentsExternalV1SrvServer) GetGrayLogDataMinePendingQueries(_a0 context.Context, _a1 *agentsExternalApiV1.GetGrayLogDataMinePendingQueriesReq) (*agentsExternalApiV1.GetGrayLogDataMinePendingQueriesRes, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 *agentsExternalApiV1.GetGrayLogDataMinePendingQueriesRes
+	if rf, ok := ret.Get(0).(func(context.Context, *agentsExternalApiV1.GetGrayLogDataMinePendingQueriesReq) *agentsExternalApiV1.GetGrayLogDataMinePendingQueriesRes); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*agentsExternalApiV1.GetGrayLogDataMinePendingQueriesRes)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *agentsExternalApiV1.GetGrayLogDataMinePendingQueriesReq) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// AgentsExternalV1SrvServer_GetGrayLogDataMinePendingQueries_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetGrayLogDataMinePendingQueries'
+type AgentsExternalV1SrvServer_GetGrayLogDataMinePendingQueries_Call struct {
+	*mock.Call
+}
+
+// GetGrayLogDataMinePendingQueries is a helper method to define mock.On call
+//   - _a0 context.Context
+//   - _a1 *agentsExternalApiV1.GetGrayLogDataMinePendingQueriesReq
+func (_e *AgentsExternalV1SrvServer_Expecter) GetGrayLogDataMinePendingQueries(_a0 interface{}, _a1 interface{}) *AgentsExternalV1SrvServer_GetGrayLogDataMinePendingQueries_Call {
+	return &AgentsExternalV1SrvServer_GetGrayLogDataMinePendingQueries_Call{Call: _e.mock.On("GetGrayLogDataMinePendingQueries", _a0, _a1)}
+}
+
+func (_c *AgentsExternalV1SrvServer_GetGrayLogDataMinePendingQueries_Call) Run(run func(_a0 context.Context, _a1 *agentsExternalApiV1.GetGrayLogDataMinePendingQueriesReq)) *AgentsExternalV1SrvServer_GetGrayLogDataMinePendingQueries_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*agentsExternalApiV1.GetGrayLogDataMinePendingQueriesReq))
+	})
+	return _c
+}
+
+func (_c *AgentsExternalV1SrvServer_GetGrayLogDataMinePendingQueries_Call) Return(_a0 *agentsExternalApiV1.GetGrayLogDataMinePendingQueriesRes, _a1 error) *AgentsExternalV1SrvServer_GetGrayLogDataMinePendingQueries_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
 // HZ provides a mock function with given fields: _a0, _a1
 func (_m *AgentsExternalV1SrvServer) HZ(_a0 context.Context, _a1 *agentsExternalApiV1.HZReq) (*agentsExternalApiV1.HZRes, error) {
 	ret := _m.Called(_a0, _a1)
@@ -164,21 +211,21 @@ func (_c *AgentsExternalV1SrvServer_RefreshToken_Call) Return(_a0 *agentsExterna
 	return _c
 }
 
-// SendData provides a mock function with given fields: _a0, _a1
-func (_m *AgentsExternalV1SrvServer) SendData(_a0 context.Context, _a1 *agentsExternalApiV1.SendDataReq) (*agentsExternalApiV1.SendDataRes, error) {
+// SendGrayLogDatamineQueryErrorData provides a mock function with given fields: _a0, _a1
+func (_m *AgentsExternalV1SrvServer) SendGrayLogDatamineQueryErrorData(_a0 context.Context, _a1 *agentsExternalApiV1.SendGrayLogDatamineQueryErrorDataReq) (*agentsExternalApiV1.SendGrayLogDatamineQueryErrorDataRes, error) {
 	ret := _m.Called(_a0, _a1)
 
-	var r0 *agentsExternalApiV1.SendDataRes
-	if rf, ok := ret.Get(0).(func(context.Context, *agentsExternalApiV1.SendDataReq) *agentsExternalApiV1.SendDataRes); ok {
+	var r0 *agentsExternalApiV1.SendGrayLogDatamineQueryErrorDataRes
+	if rf, ok := ret.Get(0).(func(context.Context, *agentsExternalApiV1.SendGrayLogDatamineQueryErrorDataReq) *agentsExternalApiV1.SendGrayLogDatamineQueryErrorDataRes); ok {
 		r0 = rf(_a0, _a1)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*agentsExternalApiV1.SendDataRes)
+			r0 = ret.Get(0).(*agentsExternalApiV1.SendGrayLogDatamineQueryErrorDataRes)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *agentsExternalApiV1.SendDataReq) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *agentsExternalApiV1.SendGrayLogDatamineQueryErrorDataReq) error); ok {
 		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)
@@ -187,26 +234,167 @@ func (_m *AgentsExternalV1SrvServer) SendData(_a0 context.Context, _a1 *agentsEx
 	return r0, r1
 }
 
-// AgentsExternalV1SrvServer_SendData_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SendData'
-type AgentsExternalV1SrvServer_SendData_Call struct {
+// AgentsExternalV1SrvServer_SendGrayLogDatamineQueryErrorData_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SendGrayLogDatamineQueryErrorData'
+type AgentsExternalV1SrvServer_SendGrayLogDatamineQueryErrorData_Call struct {
 	*mock.Call
 }
 
-// SendData is a helper method to define mock.On call
+// SendGrayLogDatamineQueryErrorData is a helper method to define mock.On call
 //   - _a0 context.Context
-//   - _a1 *agentsExternalApiV1.SendDataReq
-func (_e *AgentsExternalV1SrvServer_Expecter) SendData(_a0 interface{}, _a1 interface{}) *AgentsExternalV1SrvServer_SendData_Call {
-	return &AgentsExternalV1SrvServer_SendData_Call{Call: _e.mock.On("SendData", _a0, _a1)}
+//   - _a1 *agentsExternalApiV1.SendGrayLogDatamineQueryErrorDataReq
+func (_e *AgentsExternalV1SrvServer_Expecter) SendGrayLogDatamineQueryErrorData(_a0 interface{}, _a1 interface{}) *AgentsExternalV1SrvServer_SendGrayLogDatamineQueryErrorData_Call {
+	return &AgentsExternalV1SrvServer_SendGrayLogDatamineQueryErrorData_Call{Call: _e.mock.On("SendGrayLogDatamineQueryErrorData", _a0, _a1)}
 }
 
-func (_c *AgentsExternalV1SrvServer_SendData_Call) Run(run func(_a0 context.Context, _a1 *agentsExternalApiV1.SendDataReq)) *AgentsExternalV1SrvServer_SendData_Call {
+func (_c *AgentsExternalV1SrvServer_SendGrayLogDatamineQueryErrorData_Call) Run(run func(_a0 context.Context, _a1 *agentsExternalApiV1.SendGrayLogDatamineQueryErrorDataReq)) *AgentsExternalV1SrvServer_SendGrayLogDatamineQueryErrorData_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*agentsExternalApiV1.SendDataReq))
+		run(args[0].(context.Context), args[1].(*agentsExternalApiV1.SendGrayLogDatamineQueryErrorDataReq))
 	})
 	return _c
 }
 
-func (_c *AgentsExternalV1SrvServer_SendData_Call) Return(_a0 *agentsExternalApiV1.SendDataRes, _a1 error) *AgentsExternalV1SrvServer_SendData_Call {
+func (_c *AgentsExternalV1SrvServer_SendGrayLogDatamineQueryErrorData_Call) Return(_a0 *agentsExternalApiV1.SendGrayLogDatamineQueryErrorDataRes, _a1 error) *AgentsExternalV1SrvServer_SendGrayLogDatamineQueryErrorData_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+// SendGrayLogDatamineQueryResultsData provides a mock function with given fields: _a0, _a1
+func (_m *AgentsExternalV1SrvServer) SendGrayLogDatamineQueryResultsData(_a0 context.Context, _a1 *agentsExternalApiV1.SendGrayLogDatamineQueryResultsDataReq) (*agentsExternalApiV1.SendGrayLogDatamineQueryResultsDataRes, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 *agentsExternalApiV1.SendGrayLogDatamineQueryResultsDataRes
+	if rf, ok := ret.Get(0).(func(context.Context, *agentsExternalApiV1.SendGrayLogDatamineQueryResultsDataReq) *agentsExternalApiV1.SendGrayLogDatamineQueryResultsDataRes); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*agentsExternalApiV1.SendGrayLogDatamineQueryResultsDataRes)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *agentsExternalApiV1.SendGrayLogDatamineQueryResultsDataReq) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// AgentsExternalV1SrvServer_SendGrayLogDatamineQueryResultsData_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SendGrayLogDatamineQueryResultsData'
+type AgentsExternalV1SrvServer_SendGrayLogDatamineQueryResultsData_Call struct {
+	*mock.Call
+}
+
+// SendGrayLogDatamineQueryResultsData is a helper method to define mock.On call
+//   - _a0 context.Context
+//   - _a1 *agentsExternalApiV1.SendGrayLogDatamineQueryResultsDataReq
+func (_e *AgentsExternalV1SrvServer_Expecter) SendGrayLogDatamineQueryResultsData(_a0 interface{}, _a1 interface{}) *AgentsExternalV1SrvServer_SendGrayLogDatamineQueryResultsData_Call {
+	return &AgentsExternalV1SrvServer_SendGrayLogDatamineQueryResultsData_Call{Call: _e.mock.On("SendGrayLogDatamineQueryResultsData", _a0, _a1)}
+}
+
+func (_c *AgentsExternalV1SrvServer_SendGrayLogDatamineQueryResultsData_Call) Run(run func(_a0 context.Context, _a1 *agentsExternalApiV1.SendGrayLogDatamineQueryResultsDataReq)) *AgentsExternalV1SrvServer_SendGrayLogDatamineQueryResultsData_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*agentsExternalApiV1.SendGrayLogDatamineQueryResultsDataReq))
+	})
+	return _c
+}
+
+func (_c *AgentsExternalV1SrvServer_SendGrayLogDatamineQueryResultsData_Call) Return(_a0 *agentsExternalApiV1.SendGrayLogDatamineQueryResultsDataRes, _a1 error) *AgentsExternalV1SrvServer_SendGrayLogDatamineQueryResultsData_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+// SendGrayLogImpossibleTravelData provides a mock function with given fields: _a0, _a1
+func (_m *AgentsExternalV1SrvServer) SendGrayLogImpossibleTravelData(_a0 context.Context, _a1 *agentsExternalApiV1.SendGrayLogImpossibleTravelDataReq) (*agentsExternalApiV1.SendGrayLogImpossibleTravelDataRes, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 *agentsExternalApiV1.SendGrayLogImpossibleTravelDataRes
+	if rf, ok := ret.Get(0).(func(context.Context, *agentsExternalApiV1.SendGrayLogImpossibleTravelDataReq) *agentsExternalApiV1.SendGrayLogImpossibleTravelDataRes); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*agentsExternalApiV1.SendGrayLogImpossibleTravelDataRes)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *agentsExternalApiV1.SendGrayLogImpossibleTravelDataReq) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// AgentsExternalV1SrvServer_SendGrayLogImpossibleTravelData_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SendGrayLogImpossibleTravelData'
+type AgentsExternalV1SrvServer_SendGrayLogImpossibleTravelData_Call struct {
+	*mock.Call
+}
+
+// SendGrayLogImpossibleTravelData is a helper method to define mock.On call
+//   - _a0 context.Context
+//   - _a1 *agentsExternalApiV1.SendGrayLogImpossibleTravelDataReq
+func (_e *AgentsExternalV1SrvServer_Expecter) SendGrayLogImpossibleTravelData(_a0 interface{}, _a1 interface{}) *AgentsExternalV1SrvServer_SendGrayLogImpossibleTravelData_Call {
+	return &AgentsExternalV1SrvServer_SendGrayLogImpossibleTravelData_Call{Call: _e.mock.On("SendGrayLogImpossibleTravelData", _a0, _a1)}
+}
+
+func (_c *AgentsExternalV1SrvServer_SendGrayLogImpossibleTravelData_Call) Run(run func(_a0 context.Context, _a1 *agentsExternalApiV1.SendGrayLogImpossibleTravelDataReq)) *AgentsExternalV1SrvServer_SendGrayLogImpossibleTravelData_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*agentsExternalApiV1.SendGrayLogImpossibleTravelDataReq))
+	})
+	return _c
+}
+
+func (_c *AgentsExternalV1SrvServer_SendGrayLogImpossibleTravelData_Call) Return(_a0 *agentsExternalApiV1.SendGrayLogImpossibleTravelDataRes, _a1 error) *AgentsExternalV1SrvServer_SendGrayLogImpossibleTravelData_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+// SendSentinelOneData provides a mock function with given fields: _a0, _a1
+func (_m *AgentsExternalV1SrvServer) SendSentinelOneData(_a0 context.Context, _a1 *agentsExternalApiV1.SendSentinelOneDataReq) (*agentsExternalApiV1.SendSentinelOneDataRes, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 *agentsExternalApiV1.SendSentinelOneDataRes
+	if rf, ok := ret.Get(0).(func(context.Context, *agentsExternalApiV1.SendSentinelOneDataReq) *agentsExternalApiV1.SendSentinelOneDataRes); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*agentsExternalApiV1.SendSentinelOneDataRes)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *agentsExternalApiV1.SendSentinelOneDataReq) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// AgentsExternalV1SrvServer_SendSentinelOneData_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SendSentinelOneData'
+type AgentsExternalV1SrvServer_SendSentinelOneData_Call struct {
+	*mock.Call
+}
+
+// SendSentinelOneData is a helper method to define mock.On call
+//   - _a0 context.Context
+//   - _a1 *agentsExternalApiV1.SendSentinelOneDataReq
+func (_e *AgentsExternalV1SrvServer_Expecter) SendSentinelOneData(_a0 interface{}, _a1 interface{}) *AgentsExternalV1SrvServer_SendSentinelOneData_Call {
+	return &AgentsExternalV1SrvServer_SendSentinelOneData_Call{Call: _e.mock.On("SendSentinelOneData", _a0, _a1)}
+}
+
+func (_c *AgentsExternalV1SrvServer_SendSentinelOneData_Call) Run(run func(_a0 context.Context, _a1 *agentsExternalApiV1.SendSentinelOneDataReq)) *AgentsExternalV1SrvServer_SendSentinelOneData_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*agentsExternalApiV1.SendSentinelOneDataReq))
+	})
+	return _c
+}
+
+func (_c *AgentsExternalV1SrvServer_SendSentinelOneData_Call) Return(_a0 *agentsExternalApiV1.SendSentinelOneDataRes, _a1 error) *AgentsExternalV1SrvServer_SendSentinelOneData_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
