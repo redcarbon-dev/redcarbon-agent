@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/google/go-github/v50/github"
+	"golang.org/x/mod/semver"
 	"io"
 	"net/http"
 	"pkg.redcarbon.ai/internal/build"
@@ -18,6 +19,16 @@ import (
 func (r routineConfig) UpdateRoutine() {
 	rel, _, err := r.gh.Repositories.GetLatestRelease(context.Background(), "redcarbon-dev", "redcarbon-agent")
 	if err != nil {
+		return
+	}
+
+	if build.Version == "DEV" {
+		logrus.Info("Skipping update as the agent is running in a development status")
+		return
+	}
+
+	if semver.Compare(fmt.Sprintf("v%s", build.Version), *rel.TagName) >= 0 {
+		logrus.Info("Skipping update as the agent is already at the last version")
 		return
 	}
 
