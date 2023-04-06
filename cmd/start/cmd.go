@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/google/go-github/v50/github"
 	"github.com/jasonlvhit/gocron"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -22,6 +23,7 @@ const (
 	hzRoutineInterval      = 5
 	refreshRoutineInterval = 30
 	configRoutineInterval  = 10
+	updateRoutineInterval  = 1
 )
 
 func NewStartCmd() *cobra.Command {
@@ -43,8 +45,10 @@ func run(cmd *cobra.Command, args []string) {
 
 	client := agentsExternalApiV1.NewAgentsExternalV1SrvClient(agentsCli)
 	a := auth.NewAuthService(client, path.Join(confDir, "redcarbon", "config.yaml"))
-	r := routines.NewRoutineJobs(client, a)
+	gh := github.NewClient(nil)
+	r := routines.NewRoutineJobs(client, a, gh)
 
+	gocron.Every(updateRoutineInterval).Day().From(gocron.NextTick()).Do(r.UpdateRoutine)
 	gocron.Every(hzRoutineInterval).Seconds().From(gocron.NextTick()).Do(r.HZRoutine)
 	gocron.Every(refreshRoutineInterval).Minutes().From(gocron.NextTick()).Do(r.Refresh)
 	gocron.Every(configRoutineInterval).Minutes().From(gocron.NextTick()).Do(r.ConfigRoutine)

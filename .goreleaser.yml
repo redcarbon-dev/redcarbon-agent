@@ -13,13 +13,13 @@ builds:
       binary: bin/redcarbon
       main: ./cmd
       ldflags:
-        - -s -w -X pkg.redcarbon.ai/internal/build.Version={{.Version}} -X pkg.redcarbon.ai/internal/build.DefaultHost={{.Env.API_HOST}}
+        - -s -w -X pkg.redcarbon.ai/internal/build.Version={{.Version}} -X pkg.redcarbon.ai/internal/build.Architecture={{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }} -X pkg.redcarbon.ai/internal/build.DefaultHost={{.Env.API_HOST}}
       env:
         - CGO_ENABLED=0
     id: linux
     goos: [linux]
     goarch: [amd64, arm64]
-  
+
   - <<: *build_defaults
     id: macos
     goos: [darwin]
