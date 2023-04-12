@@ -1,19 +1,24 @@
 package routines
 
 import (
+	"bytes"
 	"context"
 	"crypto"
 	"encoding/hex"
 	"fmt"
-	"github.com/google/go-github/v50/github"
-	"golang.org/x/mod/semver"
 	"io"
 	"net/http"
-	"pkg.redcarbon.ai/internal/build"
+	"os"
+	"path/filepath"
 	"strings"
 
+	"github.com/google/go-github/v50/github"
 	"github.com/inconshreveable/go-update"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/mod/semver"
+
+	"pkg.redcarbon.ai/internal/build"
+	"pkg.redcarbon.ai/internal/utils"
 )
 
 func (r routineConfig) UpdateRoutine() {
@@ -40,42 +45,41 @@ func (r routineConfig) UpdateRoutine() {
 		if strings.Contains(*asset.Name, fmt.Sprintf("%s.tar.gz", build.Architecture)) {
 			checksum, err := r.retrieveChecksumForAsset(*asset.Name, rel.Assets)
 			if err != nil {
+				logrus.Errorf("Error while retrieving the checksum for the latest version for error %v", err)
 				return
 			}
 
-			err = r.doUpdate(*asset.BrowserDownloadURL, checksum)
+			err = r.doUpdate(*asset.BrowserDownloadURL, *asset.Name, checksum)
 			if err != nil {
+				logrus.Errorf("Unexpected error while updating the binary %v", err)
 				return
 			}
+
+			logrus.Info("Update executed successfully!")
+
+			r.done <- true
+			return
 		}
 	}
 }
 
-func (r routineConfig) doUpdate(url string, hexChecksum string) error {
-	logrus.Info("Downloading new version...")
-
-	checksum, err := hex.DecodeString(hexChecksum)
+func (r routineConfig) doUpdate(url string, name string, hexChecksum string) error {
+	executable, err := r.downloadAsset(url, name, hexChecksum)
 	if err != nil {
 		return err
 	}
-
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
 
 	logrus.Info("Performing update...")
 
-	err = update.Apply(resp.Body, update.Options{
-		Hash:     crypto.SHA256,
-		Checksum: checksum,
-	})
+	err = update.Apply(executable, update.Options{})
 	if err != nil {
+		logrus.Errorf("Rollbacking for error found during update %v", err)
+
 		if rErr := update.RollbackError(err); rErr != nil {
 			logrus.Fatalf("Failed to rollback from bad update: %v", rErr)
 		}
+
+		logrus.Errorf("Rollback executed successfully")
 	}
 
 	return nil
@@ -118,4 +122,67 @@ func (r routineConfig) retrieveChecksumsList(asset *github.ReleaseAsset) ([]stri
 	}
 
 	return strings.Split(string(data), "\n"), nil
+}
+
+func (r routineConfig) downloadAsset(url string, name string, hexChecksum string) (io.Reader, error) {
+	logrus.Info("Downloading new version...")
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	archive, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = r.verifyChecksum(bytes.NewReader(archive), hexChecksum)
+	if err != nil {
+		return nil, err
+	}
+
+	logrus.Info("Extracting the binary...")
+
+	outDir, err := os.MkdirTemp("", "*_redcarbon_agent")
+	if err != nil {
+		return nil, err
+	}
+
+	if err := utils.Untar(bytes.NewReader(archive), outDir); err != nil {
+		return nil, err
+	}
+
+	target := filepath.Join(outDir, strings.Replace(name, ".tar.gz", "", -1), "bin", "redcarbon")
+
+	file, err := os.Open(target)
+	if err != nil {
+		return nil, err
+	}
+
+	return file, nil
+}
+
+func (r routineConfig) verifyChecksum(file io.Reader, hexChecksum string) error {
+	checksum, err := hex.DecodeString(hexChecksum)
+	if err != nil {
+		return err
+	}
+
+	content, err := io.ReadAll(file)
+	if err != nil {
+		return err
+	}
+
+	h := crypto.SHA256.New()
+	h.Write(content)
+	fileChecksum := h.Sum([]byte{})
+
+	if !bytes.Equal(fileChecksum, checksum) {
+		return fmt.Errorf("updated file has wrong checksum. Expected: %x, got: %x", checksum, fileChecksum)
+	}
+
+	return nil
 }

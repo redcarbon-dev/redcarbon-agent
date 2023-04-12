@@ -10,12 +10,14 @@ type routineConfig struct {
 	agentsCli agentsExternalApiV1.AgentsExternalV1SrvClient
 	authSrv   auth.AuthenticationService
 	gh        *github.Client
+	done      chan bool
 }
 
-func NewRoutineJobs(a agentsExternalApiV1.AgentsExternalV1SrvClient, authSrv auth.AuthenticationService, gh *github.Client) routineConfig {
+func NewRoutineJobs(a agentsExternalApiV1.AgentsExternalV1SrvClient, authSrv auth.AuthenticationService, gh *github.Client, done chan bool) routineConfig {
 	return routineConfig{
 		agentsCli: a,
 		authSrv:   authSrv,
 		gh:        gh,
+		done:      done,
 	}
 }
