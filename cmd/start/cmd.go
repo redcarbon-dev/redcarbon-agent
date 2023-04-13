@@ -41,6 +41,10 @@ func NewStartCmd() *cobra.Command {
 func run(cmd *cobra.Command, args []string) {
 	logrus.Infof("Starting RedCarbon Agent v%s on %s", build.Version, build.Architecture)
 
+	if viper.GetString("auth.access_token") == "" {
+		logrus.Fatal("No access token found. Please run `redcarbon config` to configure the agent")
+	}
+
 	ctx, cancelFn := context.WithCancel(context.Background())
 	defer cancelFn()
 
