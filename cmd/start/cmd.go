@@ -1,10 +1,11 @@
 package start
 
 import (
+	"context"
 	"crypto/tls"
 	"os"
+	"os/signal"
 	"path"
-	"pkg.redcarbon.ai/internal/build"
 	"time"
 
 	"github.com/go-co-op/gocron"
@@ -17,6 +18,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"pkg.redcarbon.ai/internal/auth"
+	"pkg.redcarbon.ai/internal/build"
 	"pkg.redcarbon.ai/internal/routines"
 	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
 )
@@ -39,6 +41,9 @@ func NewStartCmd() *cobra.Command {
 func run(cmd *cobra.Command, args []string) {
 	logrus.Infof("Starting RedCarbon Agent v%s on %s", build.Version, build.Architecture)
 
+	ctx, cancelFn := context.WithCancel(context.Background())
+	defer cancelFn()
+
 	agentsCli := mustCreateAgentCli()
 	defer agentsCli.Close()
 
@@ -55,14 +60,25 @@ func run(cmd *cobra.Command, args []string) {
 
 	s := gocron.NewScheduler(time.UTC)
 
-	s.Every(updateRoutineInterval).Day().StartImmediately().SingletonMode().Do(r.UpdateRoutine)
-	s.Every(hzRoutineInterval).Seconds().StartImmediately().Do(r.HZRoutine)
-	s.Every(refreshRoutineInterval).Minutes().StartImmediately().SingletonMode().Do(r.Refresh)
-	s.Every(configRoutineInterval).Minutes().StartImmediately().SingletonMode().Do(r.ConfigRoutine)
+	s.Every(updateRoutineInterval).Day().StartImmediately().SingletonMode().Do(r.UpdateRoutine, ctx)
+	s.Every(hzRoutineInterval).Seconds().StartImmediately().Do(r.HZRoutine, ctx)
+	s.Every(refreshRoutineInterval).Minutes().StartImmediately().SingletonMode().Do(r.Refresh, ctx)
+	s.Every(configRoutineInterval).Minutes().StartImmediately().SingletonMode().Do(r.ConfigRoutine, ctx)
 
 	s.StartAsync()
 
-	<-done
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+
+	go func() {
+		<-c
+		cancelFn()
+	}()
+
+	select {
+	case <-ctx.Done():
+	case <-done:
+	}
 
 	s.Stop()
 

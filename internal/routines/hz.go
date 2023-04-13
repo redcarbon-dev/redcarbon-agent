@@ -13,7 +13,7 @@ import (
 	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
 )
 
-func (r routineConfig) HZRoutine() {
+func (r routineConfig) HZRoutine(ctx context.Context) {
 	hostname, err := os.Hostname()
 	if err != nil {
 		logrus.Fatalf("Error while retrieving the Hostname %v", err)
@@ -23,8 +23,6 @@ func (r routineConfig) HZRoutine() {
 	if err != nil {
 		return
 	}
-
-	ctx := context.Background()
 
 	updCtx := metadata.AppendToOutgoingContext(ctx, "authorization", fmt.Sprintf("Bearer %s", viper.Get("auth.access_token")))
 

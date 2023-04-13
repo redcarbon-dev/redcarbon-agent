@@ -33,11 +33,18 @@ archives:
     format: tar.gz
 
 nfpms:
-  - license: MIT
-    maintainer: RedCarbon
+  - license: Apache 2.0
+    maintainer: RedCarbon SA
+    vendor: RedCarbon SA
     homepage: https://redcarbon.ai
-    bindir: /usr
+    bindir: /usr/bin
     description: RedCarbon's Agent
     formats:
       - deb
       - rpm
+    contents:
+      - src: ./service/redcarbon.service
+        dst: /etc/systemd/system/redcarbon.service
+        type: config
+    scripts:
+      postinstall: ./service/post_install.sh

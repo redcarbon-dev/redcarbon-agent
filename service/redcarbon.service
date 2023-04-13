@@ -1,0 +1,8 @@
+[Unit]
+Description=RedCarbon's Agent
+
+[Service]
+KillMode=process
+ExecStart=/usr/bin/redcarbon start
+ExecStop=/bin/kill -HUP $MAINPID
+Restart=always

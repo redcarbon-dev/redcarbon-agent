@@ -21,8 +21,8 @@ import (
 	"pkg.redcarbon.ai/internal/utils"
 )
 
-func (r routineConfig) UpdateRoutine() {
-	rel, _, err := r.gh.Repositories.GetLatestRelease(context.Background(), "redcarbon-dev", "redcarbon-agent")
+func (r routineConfig) UpdateRoutine(ctx context.Context) {
+	rel, _, err := r.gh.Repositories.GetLatestRelease(ctx, "redcarbon-dev", "redcarbon-agent")
 	if err != nil {
 		return
 	}
@@ -55,7 +55,7 @@ func (r routineConfig) UpdateRoutine() {
 				return
 			}
 
-			logrus.Info("Update executed successfully!")
+			logrus.Info("Update executed successfully! Shutting down the agent...")
 
 			r.done <- true
 			return
