@@ -97,7 +97,7 @@ func (s ServiceSentinelOne) RunService(ctx context.Context) {
 		}
 
 		for _, data := range parsedBody.Data {
-			l.Infof("Sending a message...\n")
+			l.Infof("Sending a message...")
 
 			dataJ, err := json.Marshal(data)
 			if err != nil {
