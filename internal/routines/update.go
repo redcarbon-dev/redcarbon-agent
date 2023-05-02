@@ -58,6 +58,7 @@ func (r routineConfig) UpdateRoutine(ctx context.Context) {
 			logrus.Info("Update executed successfully! Shutting down the agent...")
 
 			r.done <- true
+
 			return
 		}
 	}

@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 )
 
+const dirPermission = 0o755
+
 func Untar(archive io.Reader, target string) error {
 	gzr, err := gzip.NewReader(archive)
 	if err != nil {
@@ -36,7 +38,7 @@ func Untar(archive io.Reader, target string) error {
 		switch header.Typeflag {
 		case tar.TypeDir:
 			if _, err := os.Stat(target); err != nil {
-				if err := os.MkdirAll(target, 0755); err != nil {
+				if err := os.MkdirAll(target, dirPermission); err != nil {
 					return err
 				}
 			}
@@ -44,7 +46,7 @@ func Untar(archive io.Reader, target string) error {
 		case tar.TypeReg:
 			dirPath := filepath.Dir(target)
 			if _, err := os.Stat(dirPath); err != nil {
-				if err := os.MkdirAll(dirPath, 0755); err != nil {
+				if err := os.MkdirAll(dirPath, dirPermission); err != nil {
 					return err
 				}
 			}
