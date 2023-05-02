@@ -47,4 +47,4 @@ nfpms:
         dst: /etc/systemd/system/redcarbon.service
         type: config
     scripts:
-      postinstall: ./service/post_install.sh
+      postinstall: ./scripts/post_install.sh
