@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"os"
 	"path"
-	agentsPublicApiV1 "pkg.redcarbon.ai/proto/redcarbon/public_apis/agents/api/v1"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -15,6 +14,7 @@ import (
 
 	"pkg.redcarbon.ai/internal/auth"
 	"pkg.redcarbon.ai/internal/build"
+	agentsPublicApiV1 "pkg.redcarbon.ai/proto/redcarbon/public_apis/agents/api/v1"
 )
 
 type ConfigOptions struct {

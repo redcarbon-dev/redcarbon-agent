@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	agentsPublicApiV1 "pkg.redcarbon.ai/proto/redcarbon/public_apis/agents/api/v1"
 	"testing"
 	"time"
 
@@ -19,6 +18,7 @@ import (
 	"pkg.redcarbon.ai/internal/sentinelone"
 	"pkg.redcarbon.ai/internal/services"
 	"pkg.redcarbon.ai/mocks"
+	agentsPublicApiV1 "pkg.redcarbon.ai/proto/redcarbon/public_apis/agents/api/v1"
 )
 
 var s *grpc.Server
