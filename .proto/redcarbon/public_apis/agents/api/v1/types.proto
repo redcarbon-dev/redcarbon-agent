@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package redcarbon.external_api.agents.api.v1;
+package redcarbon.public_apis.agents.api.v1;
 
-option go_package = "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1;agentsExternalApiV1";
+option go_package = "pkg.redcarbon.ai/proto/redcarbon/public_apis/agents/api/v1;agentsPublicApiV1";
 
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";

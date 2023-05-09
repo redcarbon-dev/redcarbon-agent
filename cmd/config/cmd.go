@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"os"
 	"path"
+	agentsPublicApiV1 "pkg.redcarbon.ai/proto/redcarbon/public_apis/agents/api/v1"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -14,7 +15,6 @@ import (
 
 	"pkg.redcarbon.ai/internal/auth"
 	"pkg.redcarbon.ai/internal/build"
-	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
 )
 
 type ConfigOptions struct {
@@ -59,7 +59,7 @@ func run(cmd *cobra.Command, args []string, opts *ConfigOptions) {
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(redcarbonConfDir)
 
-	client := agentsExternalApiV1.NewAgentsExternalV1SrvClient(agentsCli)
+	client := agentsPublicApiV1.NewAgentsPublicApiV1SrvClient(agentsCli)
 	a := auth.NewAuthService(client, path.Join(confDir, "redcarbon", "config.yaml"))
 
 	err = a.RefreshToken(opts.RefreshToken)

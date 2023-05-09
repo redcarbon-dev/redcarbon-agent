@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	"pkg.redcarbon.ai/internal/services"
-	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
+	agentsPublicApiV1 "pkg.redcarbon.ai/proto/redcarbon/public_apis/agents/api/v1"
 )
 
 func (r routineConfig) ConfigRoutine(ctx context.Context) {
@@ -22,7 +22,7 @@ func (r routineConfig) ConfigRoutine(ctx context.Context) {
 	ctxWithTimeout, cFn := context.WithTimeout(ctx, time.Hour)
 	ctxWithTimeAndMeta := metadata.AppendToOutgoingContext(ctxWithTimeout, "authorization", fmt.Sprintf("Bearer %s", viper.Get("auth.access_token")))
 
-	configs, err := r.agentsCli.PullConfigurations(ctxWithTimeAndMeta, &agentsExternalApiV1.PullConfigurationsReq{})
+	configs, err := r.agentsCli.PullConfigurations(ctxWithTimeAndMeta, &agentsPublicApiV1.PullConfigurationsReq{})
 	if err != nil {
 		logrus.Errorf("Error while retrieving the configurations for error %v", err)
 		return

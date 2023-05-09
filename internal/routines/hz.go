@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/viper"
 	"google.golang.org/grpc/metadata"
 
-	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
+	agentsPublicApiV1 "pkg.redcarbon.ai/proto/redcarbon/public_apis/agents/api/v1"
 )
 
 func (r routineConfig) HZRoutine(ctx context.Context) {
@@ -26,7 +26,7 @@ func (r routineConfig) HZRoutine(ctx context.Context) {
 
 	updCtx := metadata.AppendToOutgoingContext(ctx, "authorization", fmt.Sprintf("Bearer %s", viper.Get("auth.access_token")))
 
-	res, err := r.agentsCli.HZ(updCtx, &agentsExternalApiV1.HZReq{
+	res, err := r.agentsCli.HZ(updCtx, &agentsPublicApiV1.HZReq{
 		Ip:       localAddr,
 		Hostname: hostname,
 	})

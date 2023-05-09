@@ -17,7 +17,7 @@ import (
 
 	"pkg.redcarbon.ai/internal/services"
 	"pkg.redcarbon.ai/mocks"
-	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
+	agentsPublicApiV1 "pkg.redcarbon.ai/proto/redcarbon/public_apis/agents/api/v1"
 )
 
 type grayLogDataMine struct {
@@ -55,10 +55,10 @@ func TestNewGrayLogDataMineService(t *testing.T) {
 		assert.Nil(t, err)
 	}))
 
-	cli := mocks.AgentsExternalV1SrvClient{}
+	cli := mocks.AgentsPublicApiV1SrvClient{}
 
-	cli.On("GetGrayLogDataMinePendingQueries", mock.Anything, mock.Anything).Return(&agentsExternalApiV1.GetGrayLogDataMinePendingQueriesRes{
-		GraylogDatamineQueries: []*agentsExternalApiV1.GrayLogDataMineQuery{
+	cli.On("GetGrayLogDataMinePendingQueries", mock.Anything, mock.Anything).Return(&agentsPublicApiV1.GetGrayLogDataMinePendingQueriesRes{
+		GraylogDatamineQueries: []*agentsPublicApiV1.GrayLogDataMineQuery{
 			{
 				Id:              "0",
 				SearchStartTime: timestamppb.New(time.Now().Add(-time.Hour)),
@@ -67,17 +67,17 @@ func TestNewGrayLogDataMineService(t *testing.T) {
 			},
 		},
 	}, nil)
-	cli.On("SendGrayLogDatamineQueryResultsData", mock.Anything, mock.Anything).Return(&agentsExternalApiV1.SendGrayLogDatamineQueryResultsDataRes{ReceivedAt: timestamppb.Now()}, nil)
+	cli.On("SendGrayLogDatamineQueryResultsData", mock.Anything, mock.Anything).Return(&agentsPublicApiV1.SendGrayLogDatamineQueryResultsDataRes{ReceivedAt: timestamppb.Now()}, nil)
 
-	s := services.NewServiceFromConfiguration(&agentsExternalApiV1.AgentConfiguration{
+	s := services.NewServiceFromConfiguration(&agentsPublicApiV1.AgentConfiguration{
 		AgentConfigurationId: "cf:1234567890",
 		Name:                 "test",
 		Type:                 "sentinel_one",
 		CreatedAt:            timestamppb.Now(),
 		UpdatedAt:            timestamppb.Now(),
-		Data: &agentsExternalApiV1.AgentConfigurationData{
-			Data: &agentsExternalApiV1.AgentConfigurationData_GraylogDatamine{
-				GraylogDatamine: &agentsExternalApiV1.GrayLogDataMineData{
+		Data: &agentsPublicApiV1.AgentConfigurationData{
+			Data: &agentsPublicApiV1.AgentConfigurationData_GraylogDatamine{
+				GraylogDatamine: &agentsPublicApiV1.GrayLogDataMineData{
 					Url:     ts.URL,
 					Token:   "xxx",
 					SkipSsl: true,
@@ -120,10 +120,10 @@ func TestShouldSendTheErrorInCaseSomethingWentWrong(t *testing.T) {
 		assert.Nil(t, err)
 	}))
 
-	cli := mocks.AgentsExternalV1SrvClient{}
+	cli := mocks.AgentsPublicApiV1SrvClient{}
 
-	cli.On("GetGrayLogDataMinePendingQueries", mock.Anything, mock.Anything).Return(&agentsExternalApiV1.GetGrayLogDataMinePendingQueriesRes{
-		GraylogDatamineQueries: []*agentsExternalApiV1.GrayLogDataMineQuery{
+	cli.On("GetGrayLogDataMinePendingQueries", mock.Anything, mock.Anything).Return(&agentsPublicApiV1.GetGrayLogDataMinePendingQueriesRes{
+		GraylogDatamineQueries: []*agentsPublicApiV1.GrayLogDataMineQuery{
 			{
 				Id:              "0",
 				SearchStartTime: timestamppb.New(time.Now().Add(-time.Hour)),
@@ -138,19 +138,19 @@ func TestShouldSendTheErrorInCaseSomethingWentWrong(t *testing.T) {
 			},
 		},
 	}, nil)
-	cli.On("SendGrayLogDatamineQueryResultsData", mock.Anything, mock.Anything).Return(&agentsExternalApiV1.SendGrayLogDatamineQueryResultsDataRes{ReceivedAt: timestamppb.Now()}, nil).Once()
+	cli.On("SendGrayLogDatamineQueryResultsData", mock.Anything, mock.Anything).Return(&agentsPublicApiV1.SendGrayLogDatamineQueryResultsDataRes{ReceivedAt: timestamppb.Now()}, nil).Once()
 	cli.On("SendGrayLogDatamineQueryResultsData", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("test error")).Once()
-	cli.On("SendGrayLogDatamineQueryErrorData", mock.Anything, mock.Anything).Return(&agentsExternalApiV1.SendGrayLogDatamineQueryErrorDataRes{ReceivedAt: timestamppb.Now()}, nil)
+	cli.On("SendGrayLogDatamineQueryErrorData", mock.Anything, mock.Anything).Return(&agentsPublicApiV1.SendGrayLogDatamineQueryErrorDataRes{ReceivedAt: timestamppb.Now()}, nil)
 
-	s := services.NewServiceFromConfiguration(&agentsExternalApiV1.AgentConfiguration{
+	s := services.NewServiceFromConfiguration(&agentsPublicApiV1.AgentConfiguration{
 		AgentConfigurationId: "cf:1234567890",
 		Name:                 "test",
 		Type:                 "sentinel_one",
 		CreatedAt:            timestamppb.Now(),
 		UpdatedAt:            timestamppb.Now(),
-		Data: &agentsExternalApiV1.AgentConfigurationData{
-			Data: &agentsExternalApiV1.AgentConfigurationData_GraylogDatamine{
-				GraylogDatamine: &agentsExternalApiV1.GrayLogDataMineData{
+		Data: &agentsPublicApiV1.AgentConfigurationData{
+			Data: &agentsPublicApiV1.AgentConfigurationData_GraylogDatamine{
+				GraylogDatamine: &agentsPublicApiV1.GrayLogDataMineData{
 					Url:     ts.URL,
 					Token:   "xxx",
 					SkipSsl: true,

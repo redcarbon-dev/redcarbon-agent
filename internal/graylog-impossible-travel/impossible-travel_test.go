@@ -17,7 +17,7 @@ import (
 
 	"pkg.redcarbon.ai/internal/services"
 	"pkg.redcarbon.ai/mocks"
-	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
+	agentsPublicApiV1 "pkg.redcarbon.ai/proto/redcarbon/public_apis/agents/api/v1"
 )
 
 type graylogData struct {
@@ -72,19 +72,19 @@ func TestImpossibleTravel(t *testing.T) {
 		assert.Nil(t, err)
 	}))
 
-	cli := mocks.AgentsExternalV1SrvClient{}
+	cli := mocks.AgentsPublicApiV1SrvClient{}
 
-	cli.On("SendGrayLogImpossibleTravelData", mock.Anything, mock.Anything).Return(&agentsExternalApiV1.SendGrayLogImpossibleTravelDataRes{ReceivedAt: timestamppb.Now()}, nil)
+	cli.On("SendGrayLogImpossibleTravelData", mock.Anything, mock.Anything).Return(&agentsPublicApiV1.SendGrayLogImpossibleTravelDataRes{ReceivedAt: timestamppb.Now()}, nil)
 
-	s := services.NewServiceFromConfiguration(&agentsExternalApiV1.AgentConfiguration{
+	s := services.NewServiceFromConfiguration(&agentsPublicApiV1.AgentConfiguration{
 		AgentConfigurationId: "cf:1234567890",
 		Name:                 "test",
 		Type:                 "sentinel_one",
 		CreatedAt:            timestamppb.Now(),
 		UpdatedAt:            timestamppb.Now(),
-		Data: &agentsExternalApiV1.AgentConfigurationData{
-			Data: &agentsExternalApiV1.AgentConfigurationData_GraylogImpossibleTravel{
-				GraylogImpossibleTravel: &agentsExternalApiV1.GrayLogImpossibleTravelData{
+		Data: &agentsPublicApiV1.AgentConfigurationData{
+			Data: &agentsPublicApiV1.AgentConfigurationData_GraylogImpossibleTravel{
+				GraylogImpossibleTravel: &agentsPublicApiV1.GrayLogImpossibleTravelData{
 					Url:        ts.URL,
 					Token:      "xxx",
 					SkipSsl:    true,
@@ -98,12 +98,12 @@ func TestImpossibleTravel(t *testing.T) {
 
 	cli.AssertNumberOfCalls(t, "SendGrayLogImpossibleTravelData", 2)
 
-	cli.AssertCalled(t, "SendGrayLogImpossibleTravelData", mock.Anything, &agentsExternalApiV1.SendGrayLogImpossibleTravelDataReq{
+	cli.AssertCalled(t, "SendGrayLogImpossibleTravelData", mock.Anything, &agentsPublicApiV1.SendGrayLogImpossibleTravelDataReq{
 		AgentConfigurationId: "cf:1234567890",
 		Countries:            []string{"US", "IT"},
 		Ips:                  []string{"8.8.8.8", "8.8.6.6"},
 		User:                 "foo",
-		ImpossibleTravelLogs: []*agentsExternalApiV1.GrayLogImpossibleTravelLog{
+		ImpossibleTravelLogs: []*agentsPublicApiV1.GrayLogImpossibleTravelLog{
 			{
 				Logs: map[string]string{
 					"ClientIP":              "8.8.8.8",
