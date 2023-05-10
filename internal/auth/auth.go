@@ -8,15 +8,15 @@ import (
 	"github.com/spf13/viper"
 	"google.golang.org/grpc/metadata"
 
-	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
+	agentsPublicApiV1 "pkg.redcarbon.ai/proto/redcarbon/public_apis/agents/api/v1"
 )
 
 type AuthenticationService struct {
-	agentsCli  agentsExternalApiV1.AgentsExternalV1SrvClient
+	agentsCli  agentsPublicApiV1.AgentsPublicApiV1SrvClient
 	configFile string
 }
 
-func NewAuthService(a agentsExternalApiV1.AgentsExternalV1SrvClient, configFile string) AuthenticationService {
+func NewAuthService(a agentsPublicApiV1.AgentsPublicApiV1SrvClient, configFile string) AuthenticationService {
 	return AuthenticationService{
 		agentsCli:  a,
 		configFile: configFile,
@@ -28,7 +28,7 @@ func (a AuthenticationService) RefreshToken(refreshToken string) error {
 
 	updateCtx := metadata.AppendToOutgoingContext(ctx, "authorization", fmt.Sprintf("Bearer %s", refreshToken))
 
-	res, err := a.agentsCli.RefreshToken(updateCtx, &agentsExternalApiV1.RefreshTokenReq{})
+	res, err := a.agentsCli.RefreshToken(updateCtx, &agentsPublicApiV1.RefreshTokenReq{})
 	if err != nil {
 		return err
 	}

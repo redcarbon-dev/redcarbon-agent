@@ -18,7 +18,7 @@ import (
 	"pkg.redcarbon.ai/internal/sentinelone"
 	"pkg.redcarbon.ai/internal/services"
 	"pkg.redcarbon.ai/mocks"
-	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
+	agentsPublicApiV1 "pkg.redcarbon.ai/proto/redcarbon/public_apis/agents/api/v1"
 )
 
 var s *grpc.Server
@@ -65,19 +65,19 @@ func TestShouldSendAllTheSentinelOneData(t *testing.T) {
 	viper.SetConfigFile(f.Name())
 	viper.SetConfigType("yaml")
 
-	cli := mocks.AgentsExternalV1SrvClient{}
+	cli := mocks.AgentsPublicApiV1SrvClient{}
 
-	cli.On("SendSentinelOneData", mock.Anything, mock.Anything).Return(&agentsExternalApiV1.SendSentinelOneDataRes{ReceivedAt: timestamppb.Now()}, nil)
+	cli.On("SendSentinelOneData", mock.Anything, mock.Anything).Return(&agentsPublicApiV1.SendSentinelOneDataRes{ReceivedAt: timestamppb.Now()}, nil)
 
-	s := services.NewServiceFromConfiguration(&agentsExternalApiV1.AgentConfiguration{
+	s := services.NewServiceFromConfiguration(&agentsPublicApiV1.AgentConfiguration{
 		AgentConfigurationId: "cf:1234567890",
 		Name:                 "test",
 		Type:                 "sentinel_one",
 		CreatedAt:            timestamppb.Now(),
 		UpdatedAt:            timestamppb.Now(),
-		Data: &agentsExternalApiV1.AgentConfigurationData{
-			Data: &agentsExternalApiV1.AgentConfigurationData_SentinelOne{
-				SentinelOne: &agentsExternalApiV1.SentinelOneData{
+		Data: &agentsPublicApiV1.AgentConfigurationData{
+			Data: &agentsPublicApiV1.AgentConfigurationData_SentinelOne{
+				SentinelOne: &agentsPublicApiV1.SentinelOneData{
 					Url:      ts.URL,
 					ApiToken: "xxx",
 				},

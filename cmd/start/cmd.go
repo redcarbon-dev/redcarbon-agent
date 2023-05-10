@@ -20,7 +20,7 @@ import (
 	"pkg.redcarbon.ai/internal/auth"
 	"pkg.redcarbon.ai/internal/build"
 	"pkg.redcarbon.ai/internal/routines"
-	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
+	agentsPublicApiV1 "pkg.redcarbon.ai/proto/redcarbon/public_apis/agents/api/v1"
 )
 
 const (
@@ -56,7 +56,7 @@ func run(cmd *cobra.Command, args []string) {
 		logrus.Fatalf("can't extract the user config directory for error %v", err)
 	}
 
-	client := agentsExternalApiV1.NewAgentsExternalV1SrvClient(agentsCli)
+	client := agentsPublicApiV1.NewAgentsPublicApiV1SrvClient(agentsCli)
 	a := auth.NewAuthService(client, path.Join(confDir, "redcarbon", "config.yaml"))
 	gh := github.NewClient(nil)
 	done := make(chan bool)

@@ -8,17 +8,17 @@ import (
 
 	"pkg.redcarbon.ai/internal/graylog"
 	"pkg.redcarbon.ai/internal/utils"
-	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
+	agentsPublicApiV1 "pkg.redcarbon.ai/proto/redcarbon/public_apis/agents/api/v1"
 )
 
 type ServiceGrayLogImpossibleTravel struct {
-	ac     *agentsExternalApiV1.AgentConfiguration
-	itConf *agentsExternalApiV1.GrayLogImpossibleTravelData
-	aCli   agentsExternalApiV1.AgentsExternalV1SrvClient
+	ac     *agentsPublicApiV1.AgentConfiguration
+	itConf *agentsPublicApiV1.GrayLogImpossibleTravelData
+	aCli   agentsPublicApiV1.AgentsPublicApiV1SrvClient
 	glCli  graylog.Client
 }
 
-func NewGrayLogImpossibleTravelService(conf *agentsExternalApiV1.AgentConfiguration, cli agentsExternalApiV1.AgentsExternalV1SrvClient) *ServiceGrayLogImpossibleTravel {
+func NewGrayLogImpossibleTravelService(conf *agentsPublicApiV1.AgentConfiguration, cli agentsPublicApiV1.AgentsPublicApiV1SrvClient) *ServiceGrayLogImpossibleTravel {
 	itConf := conf.Data.GetGraylogImpossibleTravel()
 
 	return &ServiceGrayLogImpossibleTravel{
@@ -61,8 +61,8 @@ func (s ServiceGrayLogImpossibleTravel) RunService(ctx context.Context) {
 	}
 }
 
-func (s ServiceGrayLogImpossibleTravel) findImpossibleTravel(logs []map[string]string, acID string) []*agentsExternalApiV1.SendGrayLogImpossibleTravelDataReq {
-	var finds []*agentsExternalApiV1.SendGrayLogImpossibleTravelDataReq
+func (s ServiceGrayLogImpossibleTravel) findImpossibleTravel(logs []map[string]string, acID string) []*agentsPublicApiV1.SendGrayLogImpossibleTravelDataReq {
+	var finds []*agentsPublicApiV1.SendGrayLogImpossibleTravelDataReq
 
 	byUser := utils.GroupMapByColumn(logs, "UserId")
 
@@ -72,17 +72,17 @@ func (s ServiceGrayLogImpossibleTravel) findImpossibleTravel(logs []map[string]s
 			continue
 		}
 
-		var its []*agentsExternalApiV1.GrayLogImpossibleTravelLog
+		var its []*agentsPublicApiV1.GrayLogImpossibleTravelLog
 
 		for _, userLog := range userLogs {
-			its = append(its, &agentsExternalApiV1.GrayLogImpossibleTravelLog{
+			its = append(its, &agentsPublicApiV1.GrayLogImpossibleTravelLog{
 				Logs: userLog,
 			})
 		}
 
 		ips := utils.GetUniqueDataForColumnInMap(userLogs, "ClientIP")
 
-		finds = append(finds, &agentsExternalApiV1.SendGrayLogImpossibleTravelDataReq{
+		finds = append(finds, &agentsPublicApiV1.SendGrayLogImpossibleTravelDataReq{
 			Ips:                  ips,
 			User:                 user,
 			Countries:            c,

@@ -9,17 +9,17 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"pkg.redcarbon.ai/internal/graylog"
-	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
+	agentsPublicApiV1 "pkg.redcarbon.ai/proto/redcarbon/public_apis/agents/api/v1"
 )
 
 type ServiceGrayLogDataMine struct {
-	ac      *agentsExternalApiV1.AgentConfiguration
-	gdmConf *agentsExternalApiV1.GrayLogDataMineData
-	aCli    agentsExternalApiV1.AgentsExternalV1SrvClient
+	ac      *agentsPublicApiV1.AgentConfiguration
+	gdmConf *agentsPublicApiV1.GrayLogDataMineData
+	aCli    agentsPublicApiV1.AgentsPublicApiV1SrvClient
 	glCli   graylog.Client
 }
 
-func NewGrayLogDataMineService(conf *agentsExternalApiV1.AgentConfiguration, cli agentsExternalApiV1.AgentsExternalV1SrvClient) *ServiceGrayLogDataMine {
+func NewGrayLogDataMineService(conf *agentsPublicApiV1.AgentConfiguration, cli agentsPublicApiV1.AgentsPublicApiV1SrvClient) *ServiceGrayLogDataMine {
 	gdmConf := conf.Data.GetGraylogDatamine()
 
 	return &ServiceGrayLogDataMine{
@@ -35,7 +35,7 @@ func (s ServiceGrayLogDataMine) RunService(ctx context.Context) {
 
 	l.Infof("Retrieving pending queries...")
 
-	qs, err := s.aCli.GetGrayLogDataMinePendingQueries(ctx, &agentsExternalApiV1.GetGrayLogDataMinePendingQueriesReq{
+	qs, err := s.aCli.GetGrayLogDataMinePendingQueries(ctx, &agentsPublicApiV1.GetGrayLogDataMinePendingQueriesReq{
 		AgentConfigurationId: s.ac.AgentConfigurationId,
 	})
 	if err != nil {
@@ -48,7 +48,7 @@ func (s ServiceGrayLogDataMine) RunService(ctx context.Context) {
 	for _, q := range qs.GraylogDatamineQueries {
 		wg.Add(1)
 
-		go func(query *agentsExternalApiV1.GrayLogDataMineQuery) {
+		go func(query *agentsPublicApiV1.GrayLogDataMineQuery) {
 			defer wg.Done()
 
 			err := s.runQuery(ctx, query, l)
@@ -58,7 +58,7 @@ func (s ServiceGrayLogDataMine) RunService(ctx context.Context) {
 
 			l.Errorf("Error while executing the query %s for error %v", query.Id, err)
 
-			_, err = s.aCli.SendGrayLogDatamineQueryErrorData(ctx, &agentsExternalApiV1.SendGrayLogDatamineQueryErrorDataReq{
+			_, err = s.aCli.SendGrayLogDatamineQueryErrorData(ctx, &agentsPublicApiV1.SendGrayLogDatamineQueryErrorDataReq{
 				AgentConfigurationId: s.ac.AgentConfigurationId,
 				QueryId:              query.Id,
 				Error:                err.Error(),
@@ -74,7 +74,7 @@ func (s ServiceGrayLogDataMine) RunService(ctx context.Context) {
 	l.Infof("Done")
 }
 
-func (s ServiceGrayLogDataMine) runQuery(ctx context.Context, q *agentsExternalApiV1.GrayLogDataMineQuery, l *logrus.Entry) error {
+func (s ServiceGrayLogDataMine) runQuery(ctx context.Context, q *agentsPublicApiV1.GrayLogDataMineQuery, l *logrus.Entry) error {
 	l.Infof("Starting query %s...", q.Id)
 
 	res, err := s.glCli.QueryData(ctx, q.Query, q.SearchStartTime.AsTime(), q.SearchStopTime.AsTime(), []string{"timestamp", "gl2_message_id", "source", "message"})
@@ -82,7 +82,7 @@ func (s ServiceGrayLogDataMine) runQuery(ctx context.Context, q *agentsExternalA
 		return err
 	}
 
-	var results []*agentsExternalApiV1.GrayLogDataMineResult
+	var results []*agentsPublicApiV1.GrayLogDataMineResult
 
 	for _, v := range res {
 		t, err := time.Parse(time.RFC3339Nano, v["timestamp"])
@@ -90,7 +90,7 @@ func (s ServiceGrayLogDataMine) runQuery(ctx context.Context, q *agentsExternalA
 			return err
 		}
 
-		results = append(results, &agentsExternalApiV1.GrayLogDataMineResult{
+		results = append(results, &agentsPublicApiV1.GrayLogDataMineResult{
 			Uuid:      v["gl2_message_id"],
 			Source:    v["source"],
 			Message:   v["message"],
@@ -98,7 +98,7 @@ func (s ServiceGrayLogDataMine) runQuery(ctx context.Context, q *agentsExternalA
 		})
 	}
 
-	_, err = s.aCli.SendGrayLogDatamineQueryResultsData(ctx, &agentsExternalApiV1.SendGrayLogDatamineQueryResultsDataReq{
+	_, err = s.aCli.SendGrayLogDatamineQueryResultsData(ctx, &agentsPublicApiV1.SendGrayLogDatamineQueryResultsDataReq{
 		QueryId:              q.Id,
 		AgentConfigurationId: s.ac.AgentConfigurationId,
 		Results:              results,

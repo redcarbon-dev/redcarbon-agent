@@ -6,14 +6,14 @@ import (
 	graylog_datamine "pkg.redcarbon.ai/internal/graylog-datamine"
 	"pkg.redcarbon.ai/internal/graylog-impossible-travel"
 	"pkg.redcarbon.ai/internal/sentinelone"
-	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
+	agentsPublicApiV1 "pkg.redcarbon.ai/proto/redcarbon/public_apis/agents/api/v1"
 )
 
 type Service interface {
 	RunService(ctx context.Context)
 }
 
-func NewServiceFromConfiguration(conf *agentsExternalApiV1.AgentConfiguration, cli agentsExternalApiV1.AgentsExternalV1SrvClient) Service {
+func NewServiceFromConfiguration(conf *agentsPublicApiV1.AgentConfiguration, cli agentsPublicApiV1.AgentsPublicApiV1SrvClient) Service {
 	if conf.Data.GetSentinelOne() != nil {
 		return sentinelone.NewSentinelOneService(conf, cli)
 	}

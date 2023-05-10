@@ -13,7 +13,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
-	agentsExternalApiV1 "pkg.redcarbon.ai/proto/redcarbon/external_api/agents/api/v1"
+	agentsPublicApiV1 "pkg.redcarbon.ai/proto/redcarbon/public_apis/agents/api/v1"
 )
 
 const maxDifferenceOfTimes = time.Hour * 24 * 7
@@ -23,11 +23,11 @@ type FetchResponse struct {
 }
 
 type ServiceSentinelOne struct {
-	ac   *agentsExternalApiV1.AgentConfiguration
-	aCli agentsExternalApiV1.AgentsExternalV1SrvClient
+	ac   *agentsPublicApiV1.AgentConfiguration
+	aCli agentsPublicApiV1.AgentsPublicApiV1SrvClient
 }
 
-func NewSentinelOneService(conf *agentsExternalApiV1.AgentConfiguration, cli agentsExternalApiV1.AgentsExternalV1SrvClient) *ServiceSentinelOne {
+func NewSentinelOneService(conf *agentsPublicApiV1.AgentConfiguration, cli agentsPublicApiV1.AgentsPublicApiV1SrvClient) *ServiceSentinelOne {
 	return &ServiceSentinelOne{
 		ac:   conf,
 		aCli: cli,
@@ -105,7 +105,7 @@ func (s ServiceSentinelOne) RunService(ctx context.Context) {
 				return
 			}
 
-			_, err = s.aCli.SendSentinelOneData(ctx, &agentsExternalApiV1.SendSentinelOneDataReq{
+			_, err = s.aCli.SendSentinelOneData(ctx, &agentsPublicApiV1.SendSentinelOneDataReq{
 				Data:                 string(dataJ),
 				AgentConfigurationId: s.ac.AgentConfigurationId,
 			})
