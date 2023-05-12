@@ -17,7 +17,7 @@ import (
 )
 
 func (r routineConfig) ConfigRoutine(ctx context.Context) {
-	logrus.Infof("Start pulling the configurations from the server...\n")
+	logrus.Infof("Start pulling the configurations from the server...")
 
 	ctxWithTimeout, cFn := context.WithTimeout(ctx, time.Hour)
 	ctxWithTimeAndMeta := metadata.AppendToOutgoingContext(ctxWithTimeout, "authorization", fmt.Sprintf("Bearer %s", viper.Get("auth.access_token")))
