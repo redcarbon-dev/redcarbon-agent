@@ -37,7 +37,7 @@ nfpms:
     maintainer: RedCarbon SA
     vendor: RedCarbon SA
     homepage: https://redcarbon.ai
-    bindir: /usr/bin
+    bindir: /usr
     description: RedCarbon's Agent
     formats:
       - deb
