@@ -32,6 +32,7 @@ archives:
     wrap_in_directory: true
     format: tar.gz
     files:
-      - assets/**/*
-      - src: templates/**/*
-        dst: templates
+      - src: assets/*
+        dst: .
+      - src: templates/*
+        dst: bin/templates

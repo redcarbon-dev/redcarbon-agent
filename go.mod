@@ -14,7 +14,6 @@ require (
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.2
 	golang.org/x/mod v0.8.0
-	google.golang.org/grpc v1.52.3
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.2.0
 	google.golang.org/protobuf v1.31.0
 )

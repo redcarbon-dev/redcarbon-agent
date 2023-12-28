@@ -13,11 +13,11 @@ UNIT_PATH=/etc/systemd/system/${SVC_NAME}
 TEMPLATE_PATH=$REDCARBON_AGENT_SERVICE_TEMPLATE
 IS_CUSTOM_TEMPLATE=0
 if [[ -z $TEMPLATE_PATH ]]; then
-    TEMPLATE_PATH=./bin/redcarbon.agent.service.template
+    TEMPLATE_PATH=./bin/template/redcarbon.agent.service.template
 else
     IS_CUSTOM_TEMPLATE=1
 fi
-TEMP_PATH=./bin/redcarbon.agent.service.temp
+TEMP_PATH=./redcarbon.agent.service.temp
 CONFIG_PATH=.service
 
 user_id=`id -u`
