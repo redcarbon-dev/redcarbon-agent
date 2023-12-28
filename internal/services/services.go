@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+
 	agents_publicv1 "pkg.redcarbon.ai/proto/redcarbon/agents_public/v1"
 	"pkg.redcarbon.ai/proto/redcarbon/agents_public/v1/agents_publicv1connect"
 )

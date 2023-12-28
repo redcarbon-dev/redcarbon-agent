@@ -15,6 +15,20 @@ import (
 	"time"
 )
 
+const (
+	maximumMagnitudeLow    = 6
+	minimumMagnitudeMedium = 7
+	maximumMagnitudeMedium = 8
+	magnitudeHigh          = 9
+
+	rcSeverityLow      = 10
+	rcSeverityMedium   = 40
+	rcSeverityHigh     = 70
+	rcSeverityCritical = 90
+
+	hoursToFetch = 2
+)
+
 type srv struct {
 	cli       qradar.QRadarClient
 	agentsCli agents_publicv1connect.AgentsPublicAPIsV1SrvClient
@@ -143,19 +157,19 @@ func (s srv) SafeFetchIds(ctx context.Context, ids []int, f func(context.Context
 }
 
 func mapSeverity(magnitude int) uint32 {
-	if magnitude <= 6 {
-		return 10
+	if magnitude <= maximumMagnitudeLow {
+		return rcSeverityLow
 	}
 
-	if magnitude >= 7 && magnitude <= 8 {
-		return 40
+	if magnitude >= minimumMagnitudeMedium && magnitude <= maximumMagnitudeMedium {
+		return rcSeverityMedium
 	}
 
-	if magnitude == 9 {
-		return 70
+	if magnitude == magnitudeHigh {
+		return rcSeverityHigh
 	}
 
-	return 90
+	return rcSeverityCritical
 }
 
 func retrieveTimeRangeForSearch() (start, end time.Time) {
@@ -163,7 +177,7 @@ func retrieveTimeRangeForSearch() (start, end time.Time) {
 	start = viper.GetTime("qradar.last_execution")
 
 	if start.IsZero() {
-		start = end.Add(-4 * time.Hour)
+		start = end.Add(-hoursToFetch * time.Hour)
 	}
 
 	return
