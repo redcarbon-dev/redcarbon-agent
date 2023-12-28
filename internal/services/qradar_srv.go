@@ -1,18 +1,20 @@
 package services
 
 import (
-	"connectrpc.com/connect"
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
+	"time"
+
+	"connectrpc.com/connect"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+
 	"pkg.redcarbon.ai/internal/services/qradar"
 	agents_publicv1 "pkg.redcarbon.ai/proto/redcarbon/agents_public/v1"
 	"pkg.redcarbon.ai/proto/redcarbon/agents_public/v1/agents_publicv1connect"
-	"strings"
-	"time"
 )
 
 const (
@@ -56,6 +58,7 @@ func (s srv) RunService(ctx context.Context) {
 
 	l.Info("Starting QRadar service")
 	start, end := retrieveTimeRangeForSearch()
+
 	offenses, err := s.cli.FetchOffenses(ctx, start, end)
 	if err != nil {
 		return
@@ -80,6 +83,7 @@ func (s srv) RunService(ctx context.Context) {
 	}
 
 	viper.Set("qradar.last_execution", end)
+
 	if err := viper.WriteConfig(); err != nil {
 		l.WithError(err).Error("failed to write config")
 	}

@@ -21,6 +21,8 @@ const (
 	hzRoutineInterval     = 5
 	configRoutineInterval = 10
 	updateRoutineInterval = 1
+
+	updateErrorCode = 3
 )
 
 func NewStartCmd() *cobra.Command {
@@ -72,6 +74,6 @@ func run(cmd *cobra.Command, args []string) {
 	case <-done:
 		s.Stop()
 		logrus.Info("RedCarbon Agent stopped due update")
-		os.Exit(3)
+		os.Exit(updateErrorCode)
 	}
 }

@@ -1,18 +1,19 @@
 package routines
 
 import (
-	"connectrpc.com/connect"
 	"context"
 	"fmt"
 	"os"
 	"os/signal"
-	"pkg.redcarbon.ai/internal/services"
-	agents_publicv1 "pkg.redcarbon.ai/proto/redcarbon/agents_public/v1"
 	"sync"
 	"time"
 
+	"connectrpc.com/connect"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+
+	"pkg.redcarbon.ai/internal/services"
+	agents_publicv1 "pkg.redcarbon.ai/proto/redcarbon/agents_public/v1"
 )
 
 func (r RoutineConfig) ConfigRoutine(ctx context.Context) {

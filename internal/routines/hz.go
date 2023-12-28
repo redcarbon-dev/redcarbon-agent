@@ -1,13 +1,12 @@
 package routines
 
 import (
-	"connectrpc.com/connect"
 	"context"
 	"fmt"
 	"net"
 	"os"
-	agents_publicv1 "pkg.redcarbon.ai/proto/redcarbon/agents_public/v1"
 
+	"connectrpc.com/connect"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
