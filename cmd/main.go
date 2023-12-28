@@ -3,13 +3,12 @@ package main
 import (
 	"errors"
 	"os"
-	"path"
+	"pkg.redcarbon.ai/cmd/configure"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"pkg.redcarbon.ai/cmd/config"
 	"pkg.redcarbon.ai/cmd/start"
 	"pkg.redcarbon.ai/internal/build"
 )
@@ -17,35 +16,24 @@ import (
 const confDirPermission = 0o755
 
 func init() {
-	confDir, err := os.UserConfigDir()
+	confDir, err := os.Getwd()
 	if err != nil {
-		logrus.Fatalf("can't extract the user config directory for error %v", err)
+		logrus.Fatalf("can't extract the user working directory for error %v", err)
 	}
 
-	redcarbonConfDir := path.Join(confDir, "redcarbon")
-
-	viper.SetConfigName("config")
+	viper.SetConfigName(".config")
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath(redcarbonConfDir)
+	viper.AddConfigPath(confDir)
 
-	viper.SetDefault("server.host", build.DefaultHost)
-	viper.SetDefault("server.insecure", true)
-
-	if _, err := os.Stat(path.Join(redcarbonConfDir, "config.yaml")); errors.Is(err, os.ErrNotExist) {
-		err = os.MkdirAll(redcarbonConfDir, confDirPermission)
-		if err != nil {
-			logrus.Fatalf("can't create redcarbon config directory for error %v", err)
+	if err = viper.ReadInConfig(); err != nil {
+		var e viper.ConfigFileNotFoundError
+		if !errors.As(err, &e) {
+			logrus.WithError(err).Fatal("error while reading the configuration")
 		}
 
-		err = viper.WriteConfigAs(path.Join(redcarbonConfDir, "config.yaml"))
-		if err != nil {
-			logrus.Fatalf("can't create redcarbon config file for error %v", err)
+		if err = viper.SafeWriteConfig(); err != nil {
+			logrus.WithError(err).Fatal("error while writing the configuration")
 		}
-	}
-
-	err = viper.ReadInConfig()
-	if err != nil {
-		logrus.Fatalf("can't read the configuration %v", err)
 	}
 }
 
@@ -55,7 +43,7 @@ func main() {
 		Short: "RedCarbon Agent",
 	}
 
-	rootCmd.AddCommand(config.NewConfigCmd())
+	rootCmd.AddCommand(configure.NewConfigureCmd())
 	rootCmd.AddCommand(start.NewStartCmd())
 
 	rootCmd.Version = build.Version

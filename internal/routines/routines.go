@@ -2,22 +2,18 @@ package routines
 
 import (
 	"github.com/google/go-github/v50/github"
-
-	"pkg.redcarbon.ai/internal/auth"
-	agentsPublicApiV1 "pkg.redcarbon.ai/proto/redcarbon/public_apis/agents/api/v1"
+	"pkg.redcarbon.ai/proto/redcarbon/agents_public/v1/agents_publicv1connect"
 )
 
-type routineConfig struct {
-	agentsCli agentsPublicApiV1.AgentsPublicApiV1SrvClient
-	authSrv   auth.AuthenticationService
+type RoutineConfig struct {
+	agentsCli agents_publicv1connect.AgentsPublicAPIsV1SrvClient
 	gh        *github.Client
 	done      chan bool
 }
 
-func NewRoutineJobs(a agentsPublicApiV1.AgentsPublicApiV1SrvClient, authSrv auth.AuthenticationService, gh *github.Client, done chan bool) routineConfig {
-	return routineConfig{
+func NewRoutineJobs(a agents_publicv1connect.AgentsPublicAPIsV1SrvClient, gh *github.Client, done chan bool) RoutineConfig {
+	return RoutineConfig{
 		agentsCli: a,
-		authSrv:   authSrv,
 		gh:        gh,
 		done:      done,
 	}

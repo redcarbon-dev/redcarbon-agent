@@ -1,28 +1,31 @@
 package routines
 
 import (
+	"connectrpc.com/connect"
 	"context"
 	"fmt"
 	"os"
 	"os/signal"
+	"pkg.redcarbon.ai/internal/services"
+	agents_publicv1 "pkg.redcarbon.ai/proto/redcarbon/agents_public/v1"
 	"sync"
 	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"google.golang.org/grpc/metadata"
-
-	"pkg.redcarbon.ai/internal/services"
-	agentsPublicApiV1 "pkg.redcarbon.ai/proto/redcarbon/public_apis/agents/api/v1"
 )
 
-func (r routineConfig) ConfigRoutine(ctx context.Context) {
+func (r RoutineConfig) ConfigRoutine(ctx context.Context) {
 	logrus.Infof("Start pulling the configurations from the server...")
 
 	ctxWithTimeout, cFn := context.WithTimeout(ctx, time.Hour)
-	ctxWithTimeAndMeta := metadata.AppendToOutgoingContext(ctxWithTimeout, "authorization", fmt.Sprintf("Bearer %s", viper.Get("auth.access_token")))
+	defer cFn()
 
-	configs, err := r.agentsCli.PullConfigurations(ctxWithTimeAndMeta, &agentsPublicApiV1.PullConfigurationsReq{})
+	req := connect.NewRequest(&agents_publicv1.FetchAgentConfigurationRequest{})
+
+	req.Header().Set("authorization", fmt.Sprintf("ApiToken %s", viper.Get("auth.access_token")))
+
+	config, err := r.agentsCli.FetchAgentConfiguration(ctxWithTimeout, req)
 	if err != nil {
 		logrus.Errorf("Error while retrieving the configurations for error %v", err)
 		return
@@ -32,13 +35,10 @@ func (r routineConfig) ConfigRoutine(ctx context.Context) {
 
 	var wg sync.WaitGroup
 
-	for _, conf := range configs.AgentConfigurations {
-		s := services.NewServiceFromConfiguration(conf, r.agentsCli)
-		if s == nil {
-			logrus.Warnf("Configuration %s skipped as is not supported.", conf.AgentConfigurationId)
-		}
+	jobs := services.NewServicesFromConfig(r.agentsCli, config.Msg.Configuration)
 
-		r.runService(ctxWithTimeAndMeta, s, &wg)
+	for _, job := range jobs {
+		r.runService(ctxWithTimeout, job, &wg)
 	}
 
 	c := make(chan os.Signal, 1)
@@ -54,7 +54,7 @@ func (r routineConfig) ConfigRoutine(ctx context.Context) {
 	logrus.Infof("Jobs completed!")
 }
 
-func (r routineConfig) runService(ctx context.Context, s services.Service, wg *sync.WaitGroup) {
+func (r RoutineConfig) runService(ctx context.Context, s services.Service, wg *sync.WaitGroup) {
 	wg.Add(1)
 
 	go func() {

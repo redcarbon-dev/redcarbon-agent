@@ -2,10 +2,10 @@ package start
 
 import (
 	"context"
-	"crypto/tls"
+	"net/http"
 	"os"
 	"os/signal"
-	"path"
+	"pkg.redcarbon.ai/proto/redcarbon/agents_public/v1/agents_publicv1connect"
 	"time"
 
 	"github.com/go-co-op/gocron"
@@ -13,21 +13,14 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/credentials/insecure"
-
-	"pkg.redcarbon.ai/internal/auth"
 	"pkg.redcarbon.ai/internal/build"
 	"pkg.redcarbon.ai/internal/routines"
-	agentsPublicApiV1 "pkg.redcarbon.ai/proto/redcarbon/public_apis/agents/api/v1"
 )
 
 const (
-	hzRoutineInterval      = 5
-	refreshRoutineInterval = 30
-	configRoutineInterval  = 10
-	updateRoutineInterval  = 1
+	hzRoutineInterval     = 5
+	configRoutineInterval = 10
+	updateRoutineInterval = 1
 )
 
 func NewStartCmd() *cobra.Command {
@@ -48,25 +41,17 @@ func run(cmd *cobra.Command, args []string) {
 	ctx, cancelFn := context.WithCancel(context.Background())
 	defer cancelFn()
 
-	agentsCli := mustCreateAgentCli()
-	defer agentsCli.Close()
+	host := viper.GetString("server.host")
 
-	confDir, err := os.UserConfigDir()
-	if err != nil {
-		logrus.Fatalf("can't extract the user config directory for error %v", err)
-	}
-
-	client := agentsPublicApiV1.NewAgentsPublicApiV1SrvClient(agentsCli)
-	a := auth.NewAuthService(client, path.Join(confDir, "redcarbon", "config.yaml"))
+	client := agents_publicv1connect.NewAgentsPublicAPIsV1SrvClient(http.DefaultClient, host)
 	gh := github.NewClient(nil)
 	done := make(chan bool)
-	r := routines.NewRoutineJobs(client, a, gh, done)
+	r := routines.NewRoutineJobs(client, gh, done)
 
 	s := gocron.NewScheduler(time.UTC)
 
 	s.Every(updateRoutineInterval).Day().StartImmediately().SingletonMode().Do(r.UpdateRoutine, ctx)
 	s.Every(hzRoutineInterval).Seconds().StartImmediately().Do(r.HZRoutine, ctx)
-	s.Every(refreshRoutineInterval).Minutes().StartImmediately().SingletonMode().Do(r.Refresh, ctx)
 	s.Every(configRoutineInterval).Minutes().StartImmediately().SingletonMode().Do(r.ConfigRoutine, ctx)
 
 	s.StartAsync()
@@ -81,29 +66,12 @@ func run(cmd *cobra.Command, args []string) {
 
 	select {
 	case <-ctx.Done():
+		s.Stop()
+		logrus.Info("RedCarbon Agent stopped")
+		os.Exit(0)
 	case <-done:
+		s.Stop()
+		logrus.Info("RedCarbon Agent stopped due update")
+		os.Exit(3)
 	}
-
-	s.Stop()
-
-	logrus.Info("RedCarbon Agent stopped")
-}
-
-func mustCreateAgentCli() *grpc.ClientConn {
-	host := viper.GetString("server.host")
-
-	var creds credentials.TransportCredentials
-
-	if viper.GetBool("server.insecure") {
-		creds = insecure.NewCredentials()
-	} else {
-		creds = credentials.NewTLS(&tls.Config{})
-	}
-
-	agentsCli, err := grpc.Dial(host, grpc.WithTransportCredentials(creds))
-	if err != nil {
-		logrus.Fatalf("Cannot create source connection: %v", err)
-	}
-
-	return agentsCli
 }
