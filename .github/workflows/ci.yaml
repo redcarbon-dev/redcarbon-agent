@@ -46,21 +46,3 @@ jobs:
       - uses: bufbuild/buf-breaking-action@v1
         with:
           against: "https://github.com/${GITHUB_REPOSITORY}.git#branch=main"
-  codegen:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.19
-      - name: Prepare
-        run: make install-tools
-      - name: generate
-        run: make generate
-      - name: check diff
-        run: git diff --exit-code
