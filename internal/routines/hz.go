@@ -9,6 +9,8 @@ import (
 	"connectrpc.com/connect"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+
+	agents_publicv1 "pkg.redcarbon.ai/proto/redcarbon/agents_public/v1"
 )
 
 func (r RoutineConfig) HZRoutine(ctx context.Context) {
