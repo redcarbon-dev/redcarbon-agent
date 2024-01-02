@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package redcarbon.agents_public.v1;
+
+message AgentConfiguration {
+  optional QRadarJobConfiguration qradar_job_configuration = 1;
+}
+
+message QRadarJobConfiguration {
+  string host = 1;
+  string token = 2;
+  bool verify_ssl = 3;
+}

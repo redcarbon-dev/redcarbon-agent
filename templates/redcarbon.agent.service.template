@@ -1,0 +1,15 @@
+[Unit]
+Description={{Description}}
+After=network.target
+
+[Service]
+ExecStart={{RunnerRoot}}/bin/redcarbon
+User={{User}}
+WorkingDirectory={{RunnerRoot}}
+KillMode=process
+KillSignal=SIGTERM
+TimeoutStopSec=5min
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

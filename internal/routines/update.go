@@ -21,7 +21,7 @@ import (
 	"pkg.redcarbon.ai/internal/utils"
 )
 
-func (r routineConfig) UpdateRoutine(ctx context.Context) {
+func (r RoutineConfig) UpdateRoutine(ctx context.Context) {
 	rel, _, err := r.gh.Repositories.GetLatestRelease(ctx, "redcarbon-dev", "redcarbon-agent")
 	if err != nil {
 		return
@@ -64,7 +64,7 @@ func (r routineConfig) UpdateRoutine(ctx context.Context) {
 	}
 }
 
-func (r routineConfig) doUpdate(url string, name string, hexChecksum string) error {
+func (r RoutineConfig) doUpdate(url string, name string, hexChecksum string) error {
 	executable, err := r.downloadAsset(url, name, hexChecksum)
 	if err != nil {
 		return err
@@ -86,7 +86,7 @@ func (r routineConfig) doUpdate(url string, name string, hexChecksum string) err
 	return nil
 }
 
-func (r routineConfig) retrieveChecksumForAsset(assetName string, assets []*github.ReleaseAsset) (string, error) {
+func (r RoutineConfig) retrieveChecksumForAsset(assetName string, assets []*github.ReleaseAsset) (string, error) {
 	for _, asset := range assets {
 		if asset.Name == nil {
 			continue
@@ -109,7 +109,7 @@ func (r routineConfig) retrieveChecksumForAsset(assetName string, assets []*gith
 	return "", fmt.Errorf("checksum not found")
 }
 
-func (r routineConfig) retrieveChecksumsList(asset *github.ReleaseAsset) ([]string, error) {
+func (r RoutineConfig) retrieveChecksumsList(asset *github.ReleaseAsset) ([]string, error) {
 	resp, err := http.Get(*asset.BrowserDownloadURL)
 	if err != nil {
 		return nil, err
@@ -125,7 +125,7 @@ func (r routineConfig) retrieveChecksumsList(asset *github.ReleaseAsset) ([]stri
 	return strings.Split(string(data), "\n"), nil
 }
 
-func (r routineConfig) downloadAsset(url string, name string, hexChecksum string) (io.Reader, error) {
+func (r RoutineConfig) downloadAsset(url string, name string, hexChecksum string) (io.Reader, error) {
 	logrus.Info("Downloading new version...")
 
 	resp, err := http.Get(url)
@@ -166,7 +166,7 @@ func (r routineConfig) downloadAsset(url string, name string, hexChecksum string
 	return file, nil
 }
 
-func (r routineConfig) verifyChecksum(file io.Reader, hexChecksum string) error {
+func (r RoutineConfig) verifyChecksum(file io.Reader, hexChecksum string) error {
 	checksum, err := hex.DecodeString(hexChecksum)
 	if err != nil {
 		return err

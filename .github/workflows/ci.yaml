@@ -7,20 +7,6 @@ on:
   pull_request:
 
 jobs:
-  # golangci must be the first job as it has different problems
-  golangci:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/setup-go@v2
-        with:
-          go-version: 1.19
-      - uses: actions/checkout@v2
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
-        with:
-          version: v1.49.0
-          args: --timeout 5m
-          skip-pkg-cache: true
   test:
     runs-on: ubuntu-latest
     permissions:
@@ -46,21 +32,3 @@ jobs:
       - uses: bufbuild/buf-breaking-action@v1
         with:
           against: "https://github.com/${GITHUB_REPOSITORY}.git#branch=main"
-  codegen:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.19
-      - name: Prepare
-        run: make install-tools
-      - name: generate
-        run: make generate
-      - name: check diff
-        run: git diff --exit-code

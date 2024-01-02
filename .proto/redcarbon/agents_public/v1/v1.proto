@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package redcarbon.agents_public.v1;
+
+import "google/protobuf/timestamp.proto";
+import "redcarbon/agents_public/v1/types.proto";
+
+service AgentsPublicAPIsV1Srv {
+  rpc HZ(HZRequest) returns (HZResponse) {}
+  rpc IngestIncident(IngestIncidentRequest) returns (IngestIncidentResponse) {}
+  rpc FetchAgentConfiguration(FetchAgentConfigurationRequest) returns (FetchAgentConfigurationResponse) {}
+}
+
+message HZRequest {
+  string hostname = 1;
+  string ip = 2;
+}
+
+message HZResponse {
+  google.protobuf.Timestamp received_at = 1;
+}
+
+message IngestIncidentRequest {
+  string title = 1;
+  string description = 2;
+  string raw_data = 3;
+  uint32 severity = 4;
+  string origin = 5;
+  optional string original_id = 6;
+}
+
+message IngestIncidentResponse {}
+
+message FetchAgentConfigurationRequest {}
+
+message FetchAgentConfigurationResponse {
+  AgentConfiguration configuration = 1;
+}

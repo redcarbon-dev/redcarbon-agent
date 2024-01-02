@@ -3,28 +3,20 @@ package services
 import (
 	"context"
 
-	graylog_datamine "pkg.redcarbon.ai/internal/graylog-datamine"
-	"pkg.redcarbon.ai/internal/graylog-impossible-travel"
-	"pkg.redcarbon.ai/internal/sentinelone"
-	agentsPublicApiV1 "pkg.redcarbon.ai/proto/redcarbon/public_apis/agents/api/v1"
+	agents_publicv1 "pkg.redcarbon.ai/proto/redcarbon/agents_public/v1"
+	"pkg.redcarbon.ai/proto/redcarbon/agents_public/v1/agents_publicv1connect"
 )
 
 type Service interface {
 	RunService(ctx context.Context)
 }
 
-func NewServiceFromConfiguration(conf *agentsPublicApiV1.AgentConfiguration, cli agentsPublicApiV1.AgentsPublicApiV1SrvClient) Service {
-	if conf.Data.GetSentinelOne() != nil {
-		return sentinelone.NewSentinelOneService(conf, cli)
+func NewServicesFromConfig(agentsCli agents_publicv1connect.AgentsPublicAPIsV1SrvClient, config *agents_publicv1.AgentConfiguration) []Service {
+	services := []Service{}
+
+	if config.GetQradarJobConfiguration() != nil {
+		services = append(services, NewService(config.GetQradarJobConfiguration(), agentsCli))
 	}
 
-	if conf.Data.GetGraylogImpossibleTravel() != nil {
-		return grayLogImpossibleTravel.NewGrayLogImpossibleTravelService(conf, cli)
-	}
-
-	if conf.Data.GetGraylogDatamine() != nil {
-		return graylog_datamine.NewGrayLogDataMineService(conf, cli)
-	}
-
-	return nil
+	return services
 }
