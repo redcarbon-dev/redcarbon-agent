@@ -1,16 +1,14 @@
 package services
 
 import (
+	"connectrpc.com/connect"
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
-	"time"
-
-	"connectrpc.com/connect"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"strings"
 
 	"pkg.redcarbon.ai/internal/services/qradar"
 	agents_publicv1 "pkg.redcarbon.ai/proto/redcarbon/agents_public/v1"
@@ -43,7 +41,7 @@ type incidentToIngest struct {
 	SourceAddresses           []map[string]interface{} `json:"source_addresses"`
 }
 
-func NewService(conf *agents_publicv1.QRadarJobConfiguration, agentsCli agents_publicv1connect.AgentsPublicAPIsV1SrvClient) Service {
+func newQRadarService(conf *agents_publicv1.QRadarJobConfiguration, agentsCli agents_publicv1connect.AgentsPublicAPIsV1SrvClient) Service {
 	return &srv{
 		cli:       qradar.NewQRadarClient(conf.Host, conf.Token, conf.VerifySsl),
 		agentsCli: agentsCli,
@@ -57,7 +55,7 @@ func (s srv) RunService(ctx context.Context) {
 	})
 
 	l.Info("Starting QRadar service")
-	start, end := retrieveTimeRangeForSearch()
+	start, end := retrieveSearchTimeRangeForKey("qradar")
 
 	offenses, err := s.cli.FetchOffenses(ctx, start, end)
 	if err != nil {
@@ -175,15 +173,4 @@ func mapSeverity(magnitude int) uint32 {
 	}
 
 	return rcSeverityCritical
-}
-
-func retrieveTimeRangeForSearch() (start, end time.Time) {
-	end = time.Now()
-	start = viper.GetTime("qradar.last_execution")
-
-	if start.IsZero() {
-		start = end.Add(-hoursToFetch * time.Hour)
-	}
-
-	return
 }

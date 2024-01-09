@@ -4,9 +4,16 @@ package redcarbon.agents_public.v1;
 
 message AgentConfiguration {
   optional QRadarJobConfiguration qradar_job_configuration = 1;
+  optional SentinelOneJobConfiguration sentinelone_job_configuration = 2;
 }
 
 message QRadarJobConfiguration {
+  string host = 1;
+  string token = 2;
+  bool verify_ssl = 3;
+}
+
+message SentinelOneJobConfiguration {
   string host = 1;
   string token = 2;
   bool verify_ssl = 3;
