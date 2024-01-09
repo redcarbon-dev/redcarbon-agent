@@ -27,6 +27,7 @@ message IngestIncidentRequest {
   uint32 severity = 4;
   string origin = 5;
   optional string original_id = 6;
+  optional string original_url = 7;
 }
 
 message IngestIncidentResponse {}

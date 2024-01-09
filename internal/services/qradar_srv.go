@@ -133,6 +133,7 @@ func (s srv) retrieveIncidentDataForOffense(ctx context.Context, offense map[str
 		Severity:    mapSeverity(of.Magnitude),
 		Origin:      "qradar",
 		OriginalId:  &idStr,
+		OriginalUrl: s.cli.RetrieveOffenseUrl(of.ID),
 	}, nil
 }
 

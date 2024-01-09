@@ -195,6 +195,15 @@ func (q *QRadarClient) FetchOffenseType(ctx context.Context, offenseTypeId int) 
 	return offenseType, nil
 }
 
+func (q *QRadarClient) RetrieveOffenseUrl(offenseId int) *string {
+	cUrl, err := url.JoinPath(q.url, fmt.Sprintf("/console/do/sem/offensesummary?appName=Sem&pageId=OffenseSummary&summaryId=%d", offenseId))
+	if err != nil {
+		return nil
+	}
+
+	return &cUrl
+}
+
 func addIdsFilteringToRequest(req *http.Request, ids []int) {
 	var idsStr []string
 
