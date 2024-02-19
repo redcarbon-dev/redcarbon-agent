@@ -15,7 +15,11 @@ func NewServicesFromConfig(agentsCli agents_publicv1connect.AgentsPublicAPIsV1Sr
 	services := []Service{}
 
 	if config.GetQradarJobConfiguration() != nil {
-		services = append(services, NewService(config.GetQradarJobConfiguration(), agentsCli))
+		services = append(services, newQRadarService(config.GetQradarJobConfiguration(), agentsCli))
+	}
+
+	if config.GetSentineloneJobConfiguration() != nil {
+		services = append(services, newSentinelOneService(config.GetSentineloneJobConfiguration(), agentsCli))
 	}
 
 	return services
