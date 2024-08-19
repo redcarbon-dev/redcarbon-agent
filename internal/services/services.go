@@ -22,5 +22,9 @@ func NewServicesFromConfig(agentsCli agents_publicv1connect.AgentsPublicAPIsV1Sr
 		services = append(services, newSentinelOneService(config.GetSentineloneJobConfiguration(), agentsCli))
 	}
 
+	if config.GetFortisiemJobConfiguration() != nil {
+		services = append(services, newFortiSIEMService(config.GetFortisiemJobConfiguration(), agentsCli))
+	}
+
 	return services
 }
