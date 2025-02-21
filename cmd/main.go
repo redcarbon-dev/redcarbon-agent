@@ -5,12 +5,14 @@ import (
 	"errors"
 	"github.com/go-co-op/gocron"
 	"github.com/google/go-github/v50/github"
-	"net/http"
+	"golang.org/x/sync/errgroup"
 	"os"
 	"os/signal"
-	"pkg.redcarbon.ai/cmd/configure"
+	"pkg.redcarbon.ai/cmd/profile"
+	"pkg.redcarbon.ai/internal/cli"
+	"pkg.redcarbon.ai/internal/config"
 	"pkg.redcarbon.ai/internal/routines"
-	"pkg.redcarbon.ai/proto/redcarbon/agents_public/v1/agents_publicv1connect"
+	"syscall"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -21,9 +23,10 @@ import (
 )
 
 const (
-	hzRoutineInterval     = 5
-	configRoutineInterval = 10
-	updateRoutineInterval = 1
+	hzRoutineInterval     = "5s"
+	configRoutineInterval = "10m"
+	updateRoutineInterval = "1d"
+	debugRoutineInterval  = "2s"
 
 	updateErrorCode = 3
 )
@@ -57,7 +60,7 @@ func main() {
 		Run:   run,
 	}
 
-	rootCmd.AddCommand(configure.NewConfigureCmd())
+	rootCmd.AddCommand(profile.NewProfileCmd())
 
 	rootCmd.Version = build.Version
 
@@ -70,44 +73,58 @@ func main() {
 func run(cmd *cobra.Command, args []string) {
 	logrus.Infof("Starting RedCarbon Agent v%s on %s", build.Version, build.Architecture)
 
-	if viper.GetString("auth.access_token") == "" {
-		logrus.Fatal("No access token found. Please run `redcarbon config` to configure the agent")
+	conf := config.LoadConfiguration()
+
+	if len(conf.Profiles) == 0 {
+		logrus.Fatal("No profiles found, please add one by running `redcarbon profile add`")
 	}
 
-	ctx, cancelFn := context.WithCancel(context.Background())
+	ctx, cancelFn := signal.NotifyContext(context.Background(), syscall.SIGINT)
+
 	defer cancelFn()
 
-	host := viper.GetString("server.host")
-
-	client := agents_publicv1connect.NewAgentsPublicAPIsV1SrvClient(http.DefaultClient, host)
-	gh := github.NewClient(nil)
-	done := make(chan bool)
-	r := routines.NewRoutineJobs(client, gh, done)
+	g, ctx := errgroup.WithContext(ctx)
 
 	s := gocron.NewScheduler(time.UTC)
 
-	s.Every(updateRoutineInterval).Day().StartImmediately().SingletonMode().Do(r.UpdateRoutine, ctx)
-	s.Every(hzRoutineInterval).Seconds().StartImmediately().Do(r.HZRoutine, ctx)
-	s.Every(configRoutineInterval).Minutes().StartImmediately().SingletonMode().Do(r.ConfigRoutine, ctx)
+	clientFactory := cli.NewClientFactory()
+	gh := github.NewClient(nil)
+	done := make(chan bool)
 
-	s.StartAsync()
+	for _, prof := range conf.Profiles {
+		configRoutine := configRoutineInterval
+		if prof.Debug.Active {
+			configRoutine = debugRoutineInterval
+		}
+		g.Go(func() error {
+			r := routines.NewRoutineJobs(prof, clientFactory, gh, done)
+			s.Every(updateRoutineInterval).StartImmediately().SingletonMode().Do(r.UpdateRoutine, ctx)
+			s.Every(hzRoutineInterval).StartImmediately().Do(r.HZRoutine, ctx)
+			s.Every(configRoutine).StartImmediately().SingletonMode().Do(r.ConfigRoutine, ctx)
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
+			s.StartAsync()
 
-	go func() {
-		<-c
-		cancelFn()
-	}()
+			return nil
+		})
+	}
 
-	select {
-	case <-ctx.Done():
+	g.Go(func() error {
+		<-ctx.Done()
 		s.Stop()
 		logrus.Info("RedCarbon Agent stopped")
 		os.Exit(0)
-	case <-done:
+		return nil
+	})
+
+	g.Go(func() error {
+		<-done
 		s.Stop()
 		logrus.Info("RedCarbon Agent stopped due update")
 		os.Exit(updateErrorCode)
+		return nil
+	})
+
+	if err := g.Wait(); err != nil {
+		logrus.WithError(err).Fatal("error while running the agent")
 	}
 }

@@ -28,7 +28,7 @@ func (r RoutineConfig) UpdateRoutine(ctx context.Context) {
 	}
 
 	if build.Version == "DEV" || strings.Contains(build.Version, "SNAPSHOT") {
-		logrus.Info("Skipping update as the agent is running in a development status")
+		logrus.Info("Skipping update as the agent is running in development mode")
 		return
 	}
 

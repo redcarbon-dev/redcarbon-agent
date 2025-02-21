@@ -10,8 +10,6 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
-
 	"pkg.redcarbon.ai/internal/services"
 	agents_publicv1 "pkg.redcarbon.ai/proto/redcarbon/agents_public/v1"
 )
@@ -24,7 +22,7 @@ func (r RoutineConfig) ConfigRoutine(ctx context.Context) {
 
 	req := connect.NewRequest(&agents_publicv1.FetchAgentConfigurationRequest{})
 
-	req.Header().Set("authorization", fmt.Sprintf("ApiToken %s", viper.Get("auth.access_token")))
+	req.Header().Set("authorization", fmt.Sprintf("ApiToken %s", r.profile.Profile.Token))
 
 	config, err := r.agentsCli.FetchAgentConfiguration(ctxWithTimeout, req)
 	if err != nil {
@@ -36,7 +34,7 @@ func (r RoutineConfig) ConfigRoutine(ctx context.Context) {
 
 	var wg sync.WaitGroup
 
-	jobs := services.NewServicesFromConfig(r.agentsCli, config.Msg.Configuration)
+	jobs := services.NewServicesFromConfig(r.agentsCli, config.Msg.Configuration, r.profile)
 
 	for _, job := range jobs {
 		r.runService(ctxWithTimeout, job, &wg)

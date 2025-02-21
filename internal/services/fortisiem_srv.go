@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
+	"pkg.redcarbon.ai/internal/config"
 	"pkg.redcarbon.ai/internal/services/fortisiem"
 	agents_publicv1 "pkg.redcarbon.ai/proto/redcarbon/agents_public/v1"
 	"pkg.redcarbon.ai/proto/redcarbon/agents_public/v1/agents_publicv1connect"
@@ -16,12 +16,14 @@ import (
 type srvFortiSIEM struct {
 	cli       fortisiem.FortiSIEMClient
 	agentsCli agents_publicv1connect.AgentsPublicAPIsV1SrvClient
+	profile   config.Profile
 }
 
-func newFortiSIEMService(conf *agents_publicv1.FortiSIEMJobConfiguration, agentsCli agents_publicv1connect.AgentsPublicAPIsV1SrvClient) Service {
+func newFortiSIEMService(conf *agents_publicv1.FortiSIEMJobConfiguration, agentsCli agents_publicv1connect.AgentsPublicAPIsV1SrvClient, p config.Profile) Service {
 	return &srvFortiSIEM{
 		cli:       fortisiem.NewFortiSIEMClient(conf.Host, conf.Username, conf.Password, conf.VerifySsl),
 		agentsCli: agentsCli,
+		profile:   p,
 	}
 }
 
@@ -32,7 +34,9 @@ func (s srvFortiSIEM) RunService(ctx context.Context) {
 	})
 
 	l.Info("Starting FortiSIEM service")
-	start, end := retrieveSearchTimeRangeForKey("fortisiem")
+	s.profile = config.LoadProfile(s.profile.Name)
+
+	start, end := retrieveStartAndEndTime(s.profile.FortiSIEM.LastExecution)
 
 	alerts, err := s.cli.FetchAlerts(ctx, start, end)
 	if err != nil {
@@ -49,7 +53,7 @@ func (s srvFortiSIEM) RunService(ctx context.Context) {
 		}
 
 		req := connect.NewRequest(incident)
-		req.Header().Set("authorization", fmt.Sprintf("ApiToken %s", viper.Get("auth.access_token")))
+		req.Header().Set("authorization", fmt.Sprintf("ApiToken %s", s.profile.Profile.Token))
 
 		_, err = s.agentsCli.IngestIncident(ctx, req)
 		if err != nil {
@@ -58,11 +62,9 @@ func (s srvFortiSIEM) RunService(ctx context.Context) {
 		}
 	}
 
-	viper.Set("fortisiem.last_execution", end)
+	s.profile.FortiSIEM.LastExecution = end
 
-	if err := viper.WriteConfig(); err != nil {
-		l.WithError(err).Error("failed to write config")
-	}
+	config.OverwriteProfileInConfig(l, s.profile)
 
 	l.Info("FortiSIEM service completed")
 }
