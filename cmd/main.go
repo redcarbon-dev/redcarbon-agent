@@ -102,10 +102,10 @@ func run(cmd *cobra.Command, args []string) {
 			s.Every(hzRoutineInterval).StartImmediately().Do(r.HZRoutine, ctx)
 			s.Every(configRoutine).StartImmediately().SingletonMode().Do(r.ConfigRoutine, ctx)
 
-			s.StartAsync()
-
 			return nil
 		})
+
+		s.StartAsync()
 	}
 
 	g.Go(func() error {
