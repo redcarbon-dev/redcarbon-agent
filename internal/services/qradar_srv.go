@@ -7,12 +7,11 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
-	"strings"
-
+	"pkg.redcarbon.ai/internal/config"
 	"pkg.redcarbon.ai/internal/services/qradar"
 	agents_publicv1 "pkg.redcarbon.ai/proto/redcarbon/agents_public/v1"
 	"pkg.redcarbon.ai/proto/redcarbon/agents_public/v1/agents_publicv1connect"
+	"strings"
 )
 
 const (
@@ -32,6 +31,7 @@ const (
 type srv struct {
 	cli       qradar.QRadarClient
 	agentsCli agents_publicv1connect.AgentsPublicAPIsV1SrvClient
+	profile   config.Profile
 }
 
 type incidentToIngest struct {
@@ -41,10 +41,11 @@ type incidentToIngest struct {
 	SourceAddresses           []map[string]interface{} `json:"source_addresses"`
 }
 
-func newQRadarService(conf *agents_publicv1.QRadarJobConfiguration, agentsCli agents_publicv1connect.AgentsPublicAPIsV1SrvClient) Service {
+func newQRadarService(conf *agents_publicv1.QRadarJobConfiguration, agentsCli agents_publicv1connect.AgentsPublicAPIsV1SrvClient, p config.Profile) Service {
 	return &srv{
 		cli:       qradar.NewQRadarClient(conf.Host, conf.Token, conf.VerifySsl),
 		agentsCli: agentsCli,
+		profile:   p,
 	}
 }
 
@@ -55,7 +56,9 @@ func (s srv) RunService(ctx context.Context) {
 	})
 
 	l.Info("Starting QRadar service")
-	start, end := retrieveSearchTimeRangeForKey("qradar")
+	s.profile = config.LoadProfile(s.profile.Name)
+
+	start, end := retrieveStartAndEndTime(s.profile.QRadar.LastExecution)
 
 	offenses, err := s.cli.FetchOffenses(ctx, start, end)
 	if err != nil {
@@ -71,7 +74,7 @@ func (s srv) RunService(ctx context.Context) {
 		}
 
 		req := connect.NewRequest(i)
-		req.Header().Set("authorization", fmt.Sprintf("ApiToken %s", viper.Get("auth.access_token")))
+		req.Header().Set("authorization", fmt.Sprintf("ApiToken %s", s.profile.Profile.Token))
 
 		_, err = s.agentsCli.IngestIncident(ctx, req)
 		if err != nil {
@@ -80,11 +83,9 @@ func (s srv) RunService(ctx context.Context) {
 		}
 	}
 
-	viper.Set("qradar.last_execution", end)
+	s.profile.QRadar.LastExecution = end
 
-	if err := viper.WriteConfig(); err != nil {
-		l.WithError(err).Error("failed to write config")
-	}
+	config.OverwriteProfileInConfig(l, s.profile)
 
 	l.Info("QRadar service completed")
 }

@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
+	"pkg.redcarbon.ai/internal/config"
 	"pkg.redcarbon.ai/internal/services/sentinel_one"
 	agents_publicv1 "pkg.redcarbon.ai/proto/redcarbon/agents_public/v1"
 	"pkg.redcarbon.ai/proto/redcarbon/agents_public/v1/agents_publicv1connect"
@@ -16,12 +16,14 @@ import (
 type srvSentinel struct {
 	cli       sentinel_one.SentinelOneClient
 	agentsCli agents_publicv1connect.AgentsPublicAPIsV1SrvClient
+	profile   config.Profile
 }
 
-func newSentinelOneService(conf *agents_publicv1.SentinelOneJobConfiguration, agentsCli agents_publicv1connect.AgentsPublicAPIsV1SrvClient) Service {
+func newSentinelOneService(conf *agents_publicv1.SentinelOneJobConfiguration, agentsCli agents_publicv1connect.AgentsPublicAPIsV1SrvClient, p config.Profile) Service {
 	return &srvSentinel{
 		cli:       sentinel_one.NewSentinelOneClient(conf.Host, conf.Token, conf.VerifySsl),
 		agentsCli: agentsCli,
+		profile:   p,
 	}
 }
 
@@ -32,7 +34,9 @@ func (s srvSentinel) RunService(ctx context.Context) {
 	})
 
 	l.Info("Starting SentinelOne service")
-	start, end := retrieveSearchTimeRangeForKey("sentinel_one")
+	s.profile = config.LoadProfile(s.profile.Name)
+
+	start, end := retrieveStartAndEndTime(s.profile.SentinelONE.LastExecution)
 
 	threats, err := s.cli.FetchThreats(ctx, start, end)
 	if err != nil {
@@ -47,7 +51,7 @@ func (s srvSentinel) RunService(ctx context.Context) {
 		}
 
 		req := connect.NewRequest(i)
-		req.Header().Set("authorization", fmt.Sprintf("ApiToken %s", viper.Get("auth.access_token")))
+		req.Header().Set("authorization", fmt.Sprintf("ApiToken %s", s.profile.Profile.Token))
 
 		_, err = s.agentsCli.IngestIncident(ctx, req)
 		if err != nil {
@@ -56,11 +60,9 @@ func (s srvSentinel) RunService(ctx context.Context) {
 		}
 	}
 
-	viper.Set("sentinel_one.last_execution", end)
+	s.profile.SentinelONE.LastExecution = end
 
-	if err := viper.WriteConfig(); err != nil {
-		l.WithError(err).Error("failed to write config")
-	}
+	config.OverwriteProfileInConfig(l, s.profile)
 
 	l.Info("SentinelOne service completed")
 }

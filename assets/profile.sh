@@ -20,4 +20,4 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 cd "$DIR"
 
 shopt -s nocasematch
-./bin/redcarbon configure "$@"
+./bin/redcarbon profile "$@"
