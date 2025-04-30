@@ -1,17 +1,18 @@
 package services
 
 import (
-	"connectrpc.com/connect"
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
+
+	"connectrpc.com/connect"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"pkg.redcarbon.ai/internal/config"
 	"pkg.redcarbon.ai/internal/services/qradar"
 	agents_publicv1 "pkg.redcarbon.ai/proto/redcarbon/agents_public/v1"
 	"pkg.redcarbon.ai/proto/redcarbon/agents_public/v1/agents_publicv1connect"
-	"strings"
 )
 
 const (
@@ -35,10 +36,11 @@ type srv struct {
 }
 
 type incidentToIngest struct {
-	Incident                  map[string]interface{}   `json:"incident"`
-	OffenseType               map[string]interface{}   `json:"offense_type"`
-	LocalDestinationAddresses []map[string]interface{} `json:"local_destination_addresses"`
-	SourceAddresses           []map[string]interface{} `json:"source_addresses"`
+	Incident                  map[string]any   `json:"incident"`
+	OffenseType               map[string]any   `json:"offense_type"`
+	LocalDestinationAddresses []map[string]any `json:"local_destination_addresses"`
+	SourceAddresses           []map[string]any `json:"source_addresses"`
+	Events                    []map[string]any `json:"events"`
 }
 
 func newQRadarService(conf *agents_publicv1.QRadarJobConfiguration, agentsCli agents_publicv1connect.AgentsPublicAPIsV1SrvClient, p config.Profile) Service {
@@ -62,6 +64,7 @@ func (s srv) RunService(ctx context.Context) {
 
 	offenses, err := s.cli.FetchOffenses(ctx, start, end)
 	if err != nil {
+		l.WithError(err).Error("failed to fetch offenses")
 		return
 	}
 
@@ -111,11 +114,14 @@ func (s srv) retrieveIncidentDataForOffense(ctx context.Context, offense map[str
 		return nil, err
 	}
 
+	events := s.cli.SafeSearchOffenseEvents(ctx, of.ID, int64(of.StartTime))
+
 	i := incidentToIngest{
 		Incident:                  offense,
 		OffenseType:               ot,
 		LocalDestinationAddresses: la,
 		SourceAddresses:           sa,
+		Events:                    events,
 	}
 
 	iStr, err := json.Marshal(i)
