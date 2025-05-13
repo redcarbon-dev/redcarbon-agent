@@ -14,7 +14,7 @@ import (
 func (r RoutineConfig) HZRoutine(ctx context.Context) {
 	hostname, err := os.Hostname()
 	if err != nil {
-		logrus.Fatalf("Error while retrieving the Hostname %v", err)
+		r.Logger().Fatalf("Error while retrieving the Hostname %v", err)
 	}
 
 	localAddr, err := getOutboundIP()
@@ -35,7 +35,7 @@ func (r RoutineConfig) HZRoutine(ctx context.Context) {
 		return
 	}
 
-	logrus.Infof("HZ executed %s", res.Msg.ReceivedAt.String())
+	r.Logger().Infof("HZ executed %s", res.Msg.ReceivedAt.String())
 }
 
 func getOutboundIP() (string, error) {

@@ -55,6 +55,7 @@ func (s srv) RunService(ctx context.Context) {
 	l := logrus.WithFields(logrus.Fields{
 		"service": "qradar",
 		"trace":   uuid.NewString(),
+		"profile": s.profile.Name,
 	})
 
 	l.Info("Starting QRadar service")
