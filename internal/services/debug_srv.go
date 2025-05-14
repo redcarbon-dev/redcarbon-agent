@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"pkg.redcarbon.ai/internal/config"
@@ -21,6 +22,7 @@ func (s srvDebug) RunService(ctx context.Context) {
 	l := logrus.WithFields(logrus.Fields{
 		"service": "debug",
 		"trace":   uuid.NewString(),
+		"profile": s.profile.Name,
 	})
 
 	s.profile = config.LoadProfile(s.profile.Name)
