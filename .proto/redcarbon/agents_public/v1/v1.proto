@@ -9,6 +9,8 @@ service AgentsPublicAPIsV1Srv {
   rpc HZ(HZRequest) returns (HZResponse) {}
   rpc IngestIncident(IngestIncidentRequest) returns (IngestIncidentResponse) {}
   rpc FetchAgentConfiguration(FetchAgentConfigurationRequest) returns (FetchAgentConfigurationResponse) {}
+  rpc FetchAgentRequests(FetchAgentRequestsRequest) returns (FetchAgentRequestsResponse) {}
+  rpc SubmitAgentResponse(SubmitAgentResponseRequest) returns (SubmitAgentResponseResponse) {}
 }
 
 message HZRequest {
@@ -37,3 +39,16 @@ message FetchAgentConfigurationRequest {}
 message FetchAgentConfigurationResponse {
   AgentConfiguration configuration = 1;
 }
+
+message FetchAgentRequestsRequest {}
+
+message FetchAgentRequestsResponse {
+  repeated AgentRequest requests = 1;
+}
+
+message SubmitAgentResponseRequest {
+  string request_id = 1;
+  AgentResponse response = 2;
+}
+
+message SubmitAgentResponseResponse {}
