@@ -3,17 +3,18 @@ package main
 import (
 	"context"
 	"errors"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	"github.com/go-co-op/gocron"
 	"github.com/google/go-github/v50/github"
 	"golang.org/x/sync/errgroup"
-	"os"
-	"os/signal"
 	"pkg.redcarbon.ai/cmd/profile"
 	"pkg.redcarbon.ai/internal/cli"
 	"pkg.redcarbon.ai/internal/config"
 	"pkg.redcarbon.ai/internal/routines"
-	"syscall"
-	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -27,6 +28,7 @@ const (
 	configRoutineInterval = "10m"
 	updateRoutineInterval = "1d"
 	debugRoutineInterval  = "2s"
+	proxyRoutineInterval  = "200ms"
 
 	updateErrorCode = 3
 )
@@ -101,6 +103,7 @@ func run(cmd *cobra.Command, args []string) {
 			s.Every(updateRoutineInterval).StartImmediately().SingletonMode().Do(r.UpdateRoutine, ctx)
 			s.Every(hzRoutineInterval).StartImmediately().Do(r.HZRoutine, ctx)
 			s.Every(configRoutine).StartImmediately().SingletonMode().Do(r.ConfigRoutine, ctx)
+			s.Every(proxyRoutineInterval).StartImmediately().SingletonMode().Do(r.ProxyRoutine, ctx)
 
 			return nil
 		})
