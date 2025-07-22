@@ -3,6 +3,7 @@ package routines
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -77,6 +78,7 @@ func (r RoutineConfig) processRequest(ctx context.Context, req *agents_publicv1.
 		httpReq, err := r.createHTTPProxyRequest(ctx, req)
 		if err != nil {
 			l.WithError(err).Error("Error while creating the HTTP request")
+			r.sendErrorToServer(ctx, req, "error while creating the HTTP request")
 			return
 		}
 
@@ -85,6 +87,7 @@ func (r RoutineConfig) processRequest(ctx context.Context, req *agents_publicv1.
 		httpRes, err := httpCli.Do(httpReq)
 		if err != nil {
 			l.WithError(err).Error("Error while executing the HTTP request")
+			r.sendErrorToServer(ctx, req, "error while executing the HTTP request")
 			return
 		}
 		defer httpRes.Body.Close()
@@ -94,6 +97,7 @@ func (r RoutineConfig) processRequest(ctx context.Context, req *agents_publicv1.
 		err = r.sendResponseToServer(ctx, req, httpRes)
 		if err != nil {
 			l.WithError(err).Error("Error while sending the response to the server")
+			r.sendErrorToServer(ctx, req, "error while sending the response to the server")
 			return
 		}
 
@@ -113,6 +117,31 @@ func (r RoutineConfig) createHTTPProxyRequest(ctx context.Context, req *agents_p
 	}
 
 	return httpReq, nil
+}
+
+func (r RoutineConfig) sendErrorToServer(ctx context.Context, req *agents_publicv1.AgentRequest, reason string) {
+	body, err := json.Marshal(map[string]string{
+		"error": reason,
+	})
+	if err != nil {
+		logrus.WithError(err).Error("Error while marshalling the error to the server")
+		return
+	}
+
+	response := connect.NewRequest(&agents_publicv1.SubmitAgentResponseRequest{
+		RequestId: req.RequestId,
+		Response: &agents_publicv1.AgentResponse{
+			Status:  int32(http.StatusInternalServerError),
+			Body:    body,
+			Headers: make(map[string]string),
+		},
+	})
+	response.Header().Set("authorization", fmt.Sprintf("ApiToken %s", r.profile.Profile.Token))
+
+	_, err = r.agentsCli.SubmitAgentResponse(ctx, response)
+	if err != nil {
+		logrus.WithError(err).Error("Error while sending the error to the server")
+	}
 }
 
 func (r RoutineConfig) sendResponseToServer(ctx context.Context, req *agents_publicv1.AgentRequest, httpRes *http.Response) error {
