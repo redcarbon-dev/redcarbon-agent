@@ -17,6 +17,10 @@ import (
 	agents_publicv1 "pkg.redcarbon.ai/proto/redcarbon/agents_public/v1"
 )
 
+var httpCli = http.Client{
+	Timeout: 10 * time.Second,
+}
+
 func (r RoutineConfig) ProxyRoutine(ctx context.Context) {
 	logrus.Info("Starting the proxy routine...")
 
@@ -77,7 +81,8 @@ func (r RoutineConfig) processRequest(ctx context.Context, req *agents_publicv1.
 		}
 
 		l.Infof("Executing HTTP request: %s %s", req.Method, req.Url)
-		httpRes, err := http.DefaultClient.Do(httpReq)
+
+		httpRes, err := httpCli.Do(httpReq)
 		if err != nil {
 			l.WithError(err).Error("Error while executing the HTTP request")
 			return
@@ -97,6 +102,7 @@ func (r RoutineConfig) processRequest(ctx context.Context, req *agents_publicv1.
 }
 
 func (r RoutineConfig) createHTTPProxyRequest(ctx context.Context, req *agents_publicv1.AgentRequest) (*http.Request, error) {
+	// Url is already validated by the server
 	httpReq, err := http.NewRequestWithContext(ctx, req.Method, req.Url, bytes.NewReader(req.Body))
 	if err != nil {
 		return nil, err
