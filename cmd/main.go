@@ -81,9 +81,8 @@ func run(cmd *cobra.Command, args []string) {
 		logrus.Fatal("No profiles found, please add one by running `redcarbon profile add`")
 	}
 
-	ctx, cancelFn := signal.NotifyContext(context.Background(), syscall.SIGINT)
-
-	defer cancelFn()
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT)
+	defer cancel()
 
 	g, ctx := errgroup.WithContext(ctx)
 
@@ -103,7 +102,7 @@ func run(cmd *cobra.Command, args []string) {
 			s.Every(updateRoutineInterval).StartImmediately().SingletonMode().Do(r.UpdateRoutine, ctx)
 			s.Every(hzRoutineInterval).StartImmediately().Do(r.HZRoutine, ctx)
 			s.Every(configRoutine).StartImmediately().SingletonMode().Do(r.ConfigRoutine, ctx)
-			s.Every(proxyRoutineInterval).StartImmediately().SingletonMode().Do(r.ProxyRoutine, ctx)
+			s.Every(proxyRoutineInterval).StartImmediately().Do(r.ProxyRoutine, ctx)
 
 			return nil
 		})
