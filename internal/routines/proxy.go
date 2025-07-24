@@ -3,6 +3,7 @@ package routines
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -20,6 +21,9 @@ var defaultTimeout = 1 * time.Minute
 
 var httpCli = http.Client{
 	Timeout: defaultTimeout,
+	Transport: &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	},
 }
 
 func (r RoutineConfig) ProxyRoutine(ctx context.Context) {
