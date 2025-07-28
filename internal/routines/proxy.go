@@ -96,7 +96,7 @@ func (r RoutineConfig) processRequest(ctx context.Context, req *agents_publicv1.
 
 func (r RoutineConfig) createHTTPProxyRequest(ctx context.Context, req *agents_publicv1.AgentRequest) (*http.Request, error) {
 	// Url is already validated by the server
-	httpReq, err := http.NewRequestWithContext(ctx, req.Method, req.Url, bytes.NewReader(req.Body))
+	httpReq, err := http.NewRequestWithContext(ctx, req.Method, req.Url, bytes.NewBuffer(req.Body))
 	if err != nil {
 		return nil, err
 	}
