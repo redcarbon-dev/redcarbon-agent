@@ -28,7 +28,7 @@ const (
 	configRoutineInterval = "10m"
 	updateRoutineInterval = "1d"
 	debugRoutineInterval  = "2s"
-	proxyRoutineInterval  = "200ms"
+	proxyRoutineInterval  = "2s"
 
 	updateErrorCode = 3
 )
@@ -102,7 +102,7 @@ func run(cmd *cobra.Command, args []string) {
 			s.Every(updateRoutineInterval).StartImmediately().SingletonMode().Do(r.UpdateRoutine, ctx)
 			s.Every(hzRoutineInterval).StartImmediately().Do(r.HZRoutine, ctx)
 			s.Every(configRoutine).StartImmediately().SingletonMode().Do(r.ConfigRoutine, ctx)
-			s.Every(proxyRoutineInterval).StartImmediately().Do(r.ProxyRoutine, ctx)
+			s.Every(proxyRoutineInterval).StartImmediately().SingletonMode().Do(r.ProxyRoutine, ctx)
 
 			return nil
 		})
