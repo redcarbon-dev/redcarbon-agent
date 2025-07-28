@@ -139,6 +139,16 @@ func (r RoutineConfig) sendResponseToServer(ctx context.Context, req *agents_pub
 		return err
 	}
 
+	// Only log body as string for text-based content types
+	contentType := httpRes.Header.Get("Content-Type")
+	if strings.HasPrefix(contentType, "text/") ||
+		strings.Contains(contentType, "json") ||
+		strings.Contains(contentType, "xml") {
+		logrus.Infof("Response body: %s", string(body))
+	} else {
+		logrus.Infof("Response body: [binary data, %d bytes, Content-Type: %s]", len(body), contentType)
+	}
+
 	headers := make(map[string]string)
 	for key, values := range httpRes.Header {
 		headers[key] = strings.Join(values, ",")
