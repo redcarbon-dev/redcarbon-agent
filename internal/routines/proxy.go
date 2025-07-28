@@ -14,6 +14,8 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/net/html/charset"
+	"golang.org/x/text/transform"
 	agents_publicv1 "pkg.redcarbon.ai/proto/redcarbon/agents_public/v1"
 )
 
@@ -139,15 +141,14 @@ func (r RoutineConfig) sendResponseToServer(ctx context.Context, req *agents_pub
 		return err
 	}
 
-	// Only log body as string for text-based content types
-	contentType := httpRes.Header.Get("Content-Type")
-	if strings.HasPrefix(contentType, "text/") ||
-		strings.Contains(contentType, "json") ||
-		strings.Contains(contentType, "xml") {
-		logrus.Infof("Response body: %s", string(body))
-	} else {
-		logrus.Infof("Response body: [binary data, %d bytes, Content-Type: %s]", len(body), contentType)
+	// Handle charset conversion
+	convertedBody, err := r.convertCharset(body, httpRes.Header.Get("Content-Type"))
+	if err != nil {
+		logrus.WithError(err).Warn("Failed to convert charset, using original body")
+		convertedBody = body
 	}
+
+	logrus.Infof("Response body: %s", string(convertedBody))
 
 	headers := make(map[string]string)
 	for key, values := range httpRes.Header {
@@ -158,7 +159,7 @@ func (r RoutineConfig) sendResponseToServer(ctx context.Context, req *agents_pub
 		RequestId: req.RequestId,
 		Response: &agents_publicv1.AgentResponse{
 			Status:  int32(httpRes.StatusCode),
-			Body:    body,
+			Body:    convertedBody,
 			Headers: headers,
 		},
 	})
@@ -170,4 +171,35 @@ func (r RoutineConfig) sendResponseToServer(ctx context.Context, req *agents_pub
 	}
 
 	return nil
+}
+
+// convertCharset converts the response body to UTF-8 based on the Content-Type charset
+func (r RoutineConfig) convertCharset(body []byte, contentType string) ([]byte, error) {
+	if len(body) == 0 {
+		return body, nil
+	}
+
+	// Extract charset from Content-Type header
+	_, name, _ := charset.DetermineEncoding(body, contentType)
+
+	// If no charset is detected or it's already UTF-8, return as-is
+	if name == "utf-8" || name == "" {
+		return body, nil
+	}
+
+	// Get the encoding for the detected charset
+	e, _ := charset.Lookup(name)
+	if e == nil {
+		// If we can't find the encoding, return the original body
+		return body, nil
+	}
+
+	// Convert to UTF-8
+	reader := transform.NewReader(bytes.NewReader(body), e.NewDecoder())
+	converted, err := io.ReadAll(reader)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert charset %s to UTF-8: %w", name, err)
+	}
+
+	return converted, nil
 }
