@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
-	"strings"
 	"sync"
 	"time"
 
@@ -20,7 +18,7 @@ import (
 
 var defaultTimeout = 1 * time.Minute
 
-var httpCli = http.Client{
+var httpCli = &http.Client{
 	Timeout: defaultTimeout,
 	Transport: &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -75,7 +73,7 @@ func (r RoutineConfig) processRequest(ctx context.Context, req *agents_publicv1.
 		return
 	}
 
-	l.Infof("Executing HTTP request: %s %s", req.Method, req.Url)
+	logrus.WithField("headers", httpReq.Header).Infof("Executing HTTP request: %s %s", req.Method, req.Url)
 
 	httpRes, err := httpCli.Do(httpReq)
 	if err != nil {
@@ -103,7 +101,9 @@ func (r RoutineConfig) createHTTPProxyRequest(ctx context.Context, req *agents_p
 	}
 
 	for key, value := range req.Headers {
-		httpReq.Header.Set(key, value)
+		for _, v := range value.Values {
+			httpReq.Header.Add(key, v)
+		}
 	}
 
 	return httpReq, nil
@@ -123,7 +123,7 @@ func (r RoutineConfig) sendErrorToServer(ctx context.Context, req *agents_public
 		Response: &agents_publicv1.AgentResponse{
 			Status:  int32(http.StatusInternalServerError),
 			Body:    body,
-			Headers: make(map[string]string),
+			Headers: map[string]*agents_publicv1.ValueHeader{},
 		},
 	})
 	response.Header().Set("authorization", fmt.Sprintf("ApiToken %s", r.profile.Profile.Token))
@@ -140,20 +140,11 @@ func (r RoutineConfig) sendResponseToServer(ctx context.Context, req *agents_pub
 		return err
 	}
 
-	tempFile, err := os.CreateTemp(".", "response-*.json")
-	if err != nil {
-		return err
-	}
-	defer tempFile.Close()
-
-	_, err = tempFile.Write(body)
-	if err != nil {
-		return err
-	}
-
-	headers := make(map[string]string)
+	headers := make(map[string]*agents_publicv1.ValueHeader)
 	for key, values := range httpRes.Header {
-		headers[key] = strings.Join(values, ",")
+		headers[key] = &agents_publicv1.ValueHeader{
+			Values: values,
+		}
 	}
 
 	response := connect.NewRequest(&agents_publicv1.SubmitAgentResponseRequest{

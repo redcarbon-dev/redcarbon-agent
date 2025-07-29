@@ -269,20 +269,64 @@ func (x *FortiSIEMJobConfiguration) GetVerifySsl() bool {
 	return false
 }
 
-type AgentRequest struct {
+type ValueHeader struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	RequestId     string                 `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
-	Method        string                 `protobuf:"bytes,2,opt,name=method,proto3" json:"method,omitempty"`
-	Url           string                 `protobuf:"bytes,3,opt,name=url,proto3" json:"url,omitempty"`
-	Headers       map[string]string      `protobuf:"bytes,4,rep,name=headers,proto3" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	Body          []byte                 `protobuf:"bytes,5,opt,name=body,proto3" json:"body,omitempty"`
+	Values        []string               `protobuf:"bytes,1,rep,name=values,proto3" json:"values,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ValueHeader) Reset() {
+	*x = ValueHeader{}
+	mi := &file_redcarbon_agents_public_v1_types_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ValueHeader) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ValueHeader) ProtoMessage() {}
+
+func (x *ValueHeader) ProtoReflect() protoreflect.Message {
+	mi := &file_redcarbon_agents_public_v1_types_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ValueHeader.ProtoReflect.Descriptor instead.
+func (*ValueHeader) Descriptor() ([]byte, []int) {
+	return file_redcarbon_agents_public_v1_types_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ValueHeader) GetValues() []string {
+	if x != nil {
+		return x.Values
+	}
+	return nil
+}
+
+type AgentRequest struct {
+	state         protoimpl.MessageState  `protogen:"open.v1"`
+	RequestId     string                  `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	Method        string                  `protobuf:"bytes,2,opt,name=method,proto3" json:"method,omitempty"`
+	Url           string                  `protobuf:"bytes,3,opt,name=url,proto3" json:"url,omitempty"`
+	Headers       map[string]*ValueHeader `protobuf:"bytes,4,rep,name=headers,proto3" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Body          []byte                  `protobuf:"bytes,5,opt,name=body,proto3" json:"body,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *AgentRequest) Reset() {
 	*x = AgentRequest{}
-	mi := &file_redcarbon_agents_public_v1_types_proto_msgTypes[4]
+	mi := &file_redcarbon_agents_public_v1_types_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -294,7 +338,7 @@ func (x *AgentRequest) String() string {
 func (*AgentRequest) ProtoMessage() {}
 
 func (x *AgentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_redcarbon_agents_public_v1_types_proto_msgTypes[4]
+	mi := &file_redcarbon_agents_public_v1_types_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -307,7 +351,7 @@ func (x *AgentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentRequest.ProtoReflect.Descriptor instead.
 func (*AgentRequest) Descriptor() ([]byte, []int) {
-	return file_redcarbon_agents_public_v1_types_proto_rawDescGZIP(), []int{4}
+	return file_redcarbon_agents_public_v1_types_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *AgentRequest) GetRequestId() string {
@@ -331,7 +375,7 @@ func (x *AgentRequest) GetUrl() string {
 	return ""
 }
 
-func (x *AgentRequest) GetHeaders() map[string]string {
+func (x *AgentRequest) GetHeaders() map[string]*ValueHeader {
 	if x != nil {
 		return x.Headers
 	}
@@ -346,17 +390,17 @@ func (x *AgentRequest) GetBody() []byte {
 }
 
 type AgentResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Status        int32                  `protobuf:"varint,1,opt,name=status,proto3" json:"status,omitempty"`
-	Headers       map[string]string      `protobuf:"bytes,2,rep,name=headers,proto3" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	Body          []byte                 `protobuf:"bytes,3,opt,name=body,proto3" json:"body,omitempty"`
+	state         protoimpl.MessageState  `protogen:"open.v1"`
+	Status        int32                   `protobuf:"varint,1,opt,name=status,proto3" json:"status,omitempty"`
+	Headers       map[string]*ValueHeader `protobuf:"bytes,2,rep,name=headers,proto3" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Body          []byte                  `protobuf:"bytes,3,opt,name=body,proto3" json:"body,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *AgentResponse) Reset() {
 	*x = AgentResponse{}
-	mi := &file_redcarbon_agents_public_v1_types_proto_msgTypes[5]
+	mi := &file_redcarbon_agents_public_v1_types_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -368,7 +412,7 @@ func (x *AgentResponse) String() string {
 func (*AgentResponse) ProtoMessage() {}
 
 func (x *AgentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_redcarbon_agents_public_v1_types_proto_msgTypes[5]
+	mi := &file_redcarbon_agents_public_v1_types_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -381,7 +425,7 @@ func (x *AgentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentResponse.ProtoReflect.Descriptor instead.
 func (*AgentResponse) Descriptor() ([]byte, []int) {
-	return file_redcarbon_agents_public_v1_types_proto_rawDescGZIP(), []int{5}
+	return file_redcarbon_agents_public_v1_types_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *AgentResponse) GetStatus() int32 {
@@ -391,7 +435,7 @@ func (x *AgentResponse) GetStatus() int32 {
 	return 0
 }
 
-func (x *AgentResponse) GetHeaders() map[string]string {
+func (x *AgentResponse) GetHeaders() map[string]*ValueHeader {
 	if x != nil {
 		return x.Headers
 	}
@@ -432,24 +476,26 @@ const file_redcarbon_agents_public_v1_types_proto_rawDesc = "" +
 	"\busername\x18\x02 \x01(\tR\busername\x12\x1a\n" +
 	"\bpassword\x18\x03 \x01(\tR\bpassword\x12\x1d\n" +
 	"\n" +
-	"verify_ssl\x18\x04 \x01(\bR\tverifySsl\"\xf8\x01\n" +
+	"verify_ssl\x18\x04 \x01(\bR\tverifySsl\"%\n" +
+	"\vValueHeader\x12\x16\n" +
+	"\x06values\x18\x01 \x03(\tR\x06values\"\xa1\x02\n" +
 	"\fAgentRequest\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12\x16\n" +
 	"\x06method\x18\x02 \x01(\tR\x06method\x12\x10\n" +
 	"\x03url\x18\x03 \x01(\tR\x03url\x12O\n" +
 	"\aheaders\x18\x04 \x03(\v25.redcarbon.agents_public.v1.AgentRequest.HeadersEntryR\aheaders\x12\x12\n" +
-	"\x04body\x18\x05 \x01(\fR\x04body\x1a:\n" +
+	"\x04body\x18\x05 \x01(\fR\x04body\x1ac\n" +
 	"\fHeadersEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xc9\x01\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12=\n" +
+	"\x05value\x18\x02 \x01(\v2'.redcarbon.agents_public.v1.ValueHeaderR\x05value:\x028\x01\"\xf2\x01\n" +
 	"\rAgentResponse\x12\x16\n" +
 	"\x06status\x18\x01 \x01(\x05R\x06status\x12P\n" +
 	"\aheaders\x18\x02 \x03(\v26.redcarbon.agents_public.v1.AgentResponse.HeadersEntryR\aheaders\x12\x12\n" +
-	"\x04body\x18\x03 \x01(\fR\x04body\x1a:\n" +
+	"\x04body\x18\x03 \x01(\fR\x04body\x1ac\n" +
 	"\fHeadersEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\xf5\x01\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12=\n" +
+	"\x05value\x18\x02 \x01(\v2'.redcarbon.agents_public.v1.ValueHeaderR\x05value:\x028\x01B\xf5\x01\n" +
 	"\x1ecom.redcarbon.agents_public.v1B\n" +
 	"TypesProtoP\x01ZApkg.redcarbon.ai/proto/redcarbon/agents_public/v1;agents_publicv1\xa2\x02\x03RAX\xaa\x02\x19Redcarbon.AgentsPublic.V1\xca\x02\x19Redcarbon\\AgentsPublic\\V1\xe2\x02%Redcarbon\\AgentsPublic\\V1\\GPBMetadata\xea\x02\x1bRedcarbon::AgentsPublic::V1b\x06proto3"
 
@@ -465,28 +511,31 @@ func file_redcarbon_agents_public_v1_types_proto_rawDescGZIP() []byte {
 	return file_redcarbon_agents_public_v1_types_proto_rawDescData
 }
 
-var file_redcarbon_agents_public_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_redcarbon_agents_public_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_redcarbon_agents_public_v1_types_proto_goTypes = []any{
 	(*AgentConfiguration)(nil),          // 0: redcarbon.agents_public.v1.AgentConfiguration
 	(*QRadarJobConfiguration)(nil),      // 1: redcarbon.agents_public.v1.QRadarJobConfiguration
 	(*SentinelOneJobConfiguration)(nil), // 2: redcarbon.agents_public.v1.SentinelOneJobConfiguration
 	(*FortiSIEMJobConfiguration)(nil),   // 3: redcarbon.agents_public.v1.FortiSIEMJobConfiguration
-	(*AgentRequest)(nil),                // 4: redcarbon.agents_public.v1.AgentRequest
-	(*AgentResponse)(nil),               // 5: redcarbon.agents_public.v1.AgentResponse
-	nil,                                 // 6: redcarbon.agents_public.v1.AgentRequest.HeadersEntry
-	nil,                                 // 7: redcarbon.agents_public.v1.AgentResponse.HeadersEntry
+	(*ValueHeader)(nil),                 // 4: redcarbon.agents_public.v1.ValueHeader
+	(*AgentRequest)(nil),                // 5: redcarbon.agents_public.v1.AgentRequest
+	(*AgentResponse)(nil),               // 6: redcarbon.agents_public.v1.AgentResponse
+	nil,                                 // 7: redcarbon.agents_public.v1.AgentRequest.HeadersEntry
+	nil,                                 // 8: redcarbon.agents_public.v1.AgentResponse.HeadersEntry
 }
 var file_redcarbon_agents_public_v1_types_proto_depIdxs = []int32{
 	1, // 0: redcarbon.agents_public.v1.AgentConfiguration.qradar_job_configuration:type_name -> redcarbon.agents_public.v1.QRadarJobConfiguration
 	2, // 1: redcarbon.agents_public.v1.AgentConfiguration.sentinelone_job_configuration:type_name -> redcarbon.agents_public.v1.SentinelOneJobConfiguration
 	3, // 2: redcarbon.agents_public.v1.AgentConfiguration.fortisiem_job_configuration:type_name -> redcarbon.agents_public.v1.FortiSIEMJobConfiguration
-	6, // 3: redcarbon.agents_public.v1.AgentRequest.headers:type_name -> redcarbon.agents_public.v1.AgentRequest.HeadersEntry
-	7, // 4: redcarbon.agents_public.v1.AgentResponse.headers:type_name -> redcarbon.agents_public.v1.AgentResponse.HeadersEntry
-	5, // [5:5] is the sub-list for method output_type
-	5, // [5:5] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	7, // 3: redcarbon.agents_public.v1.AgentRequest.headers:type_name -> redcarbon.agents_public.v1.AgentRequest.HeadersEntry
+	8, // 4: redcarbon.agents_public.v1.AgentResponse.headers:type_name -> redcarbon.agents_public.v1.AgentResponse.HeadersEntry
+	4, // 5: redcarbon.agents_public.v1.AgentRequest.HeadersEntry.value:type_name -> redcarbon.agents_public.v1.ValueHeader
+	4, // 6: redcarbon.agents_public.v1.AgentResponse.HeadersEntry.value:type_name -> redcarbon.agents_public.v1.ValueHeader
+	7, // [7:7] is the sub-list for method output_type
+	7, // [7:7] is the sub-list for method input_type
+	7, // [7:7] is the sub-list for extension type_name
+	7, // [7:7] is the sub-list for extension extendee
+	0, // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_redcarbon_agents_public_v1_types_proto_init() }
@@ -501,7 +550,7 @@ func file_redcarbon_agents_public_v1_types_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_redcarbon_agents_public_v1_types_proto_rawDesc), len(file_redcarbon_agents_public_v1_types_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
