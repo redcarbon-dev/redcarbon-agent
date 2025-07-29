@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -101,6 +102,10 @@ func (r RoutineConfig) createHTTPProxyRequest(ctx context.Context, req *agents_p
 	}
 
 	for key, value := range req.Headers {
+		if strings.ToLower(key) == "accept-encoding" {
+			continue
+		}
+
 		for _, v := range value.Values {
 			httpReq.Header.Add(key, v)
 		}
