@@ -9,6 +9,7 @@ package agents_publicv1
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	durationpb "google.golang.org/protobuf/types/known/durationpb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -320,6 +321,7 @@ type AgentRequest struct {
 	Url           string                  `protobuf:"bytes,3,opt,name=url,proto3" json:"url,omitempty"`
 	Headers       map[string]*ValueHeader `protobuf:"bytes,4,rep,name=headers,proto3" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	Body          []byte                  `protobuf:"bytes,5,opt,name=body,proto3" json:"body,omitempty"`
+	Timeout       *durationpb.Duration    `protobuf:"bytes,6,opt,name=timeout,proto3" json:"timeout,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -389,6 +391,13 @@ func (x *AgentRequest) GetBody() []byte {
 	return nil
 }
 
+func (x *AgentRequest) GetTimeout() *durationpb.Duration {
+	if x != nil {
+		return x.Timeout
+	}
+	return nil
+}
+
 type AgentResponse struct {
 	state         protoimpl.MessageState  `protogen:"open.v1"`
 	Status        int32                   `protobuf:"varint,1,opt,name=status,proto3" json:"status,omitempty"`
@@ -453,7 +462,7 @@ var File_redcarbon_agents_public_v1_types_proto protoreflect.FileDescriptor
 
 const file_redcarbon_agents_public_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"&redcarbon/agents_public/v1/types.proto\x12\x1aredcarbon.agents_public.v1\"\xe5\x03\n" +
+	"&redcarbon/agents_public/v1/types.proto\x12\x1aredcarbon.agents_public.v1\x1a\x1egoogle/protobuf/duration.proto\"\xe5\x03\n" +
 	"\x12AgentConfiguration\x12q\n" +
 	"\x18qradar_job_configuration\x18\x01 \x01(\v22.redcarbon.agents_public.v1.QRadarJobConfigurationH\x00R\x16qradarJobConfiguration\x88\x01\x01\x12\x80\x01\n" +
 	"\x1dsentinelone_job_configuration\x18\x02 \x01(\v27.redcarbon.agents_public.v1.SentinelOneJobConfigurationH\x01R\x1bsentineloneJobConfiguration\x88\x01\x01\x12z\n" +
@@ -478,14 +487,15 @@ const file_redcarbon_agents_public_v1_types_proto_rawDesc = "" +
 	"\n" +
 	"verify_ssl\x18\x04 \x01(\bR\tverifySsl\"%\n" +
 	"\vValueHeader\x12\x16\n" +
-	"\x06values\x18\x01 \x03(\tR\x06values\"\xa1\x02\n" +
+	"\x06values\x18\x01 \x03(\tR\x06values\"\xd6\x02\n" +
 	"\fAgentRequest\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12\x16\n" +
 	"\x06method\x18\x02 \x01(\tR\x06method\x12\x10\n" +
 	"\x03url\x18\x03 \x01(\tR\x03url\x12O\n" +
 	"\aheaders\x18\x04 \x03(\v25.redcarbon.agents_public.v1.AgentRequest.HeadersEntryR\aheaders\x12\x12\n" +
-	"\x04body\x18\x05 \x01(\fR\x04body\x1ac\n" +
+	"\x04body\x18\x05 \x01(\fR\x04body\x123\n" +
+	"\atimeout\x18\x06 \x01(\v2\x19.google.protobuf.DurationR\atimeout\x1ac\n" +
 	"\fHeadersEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12=\n" +
 	"\x05value\x18\x02 \x01(\v2'.redcarbon.agents_public.v1.ValueHeaderR\x05value:\x028\x01\"\xf2\x01\n" +
@@ -522,20 +532,22 @@ var file_redcarbon_agents_public_v1_types_proto_goTypes = []any{
 	(*AgentResponse)(nil),               // 6: redcarbon.agents_public.v1.AgentResponse
 	nil,                                 // 7: redcarbon.agents_public.v1.AgentRequest.HeadersEntry
 	nil,                                 // 8: redcarbon.agents_public.v1.AgentResponse.HeadersEntry
+	(*durationpb.Duration)(nil),         // 9: google.protobuf.Duration
 }
 var file_redcarbon_agents_public_v1_types_proto_depIdxs = []int32{
 	1, // 0: redcarbon.agents_public.v1.AgentConfiguration.qradar_job_configuration:type_name -> redcarbon.agents_public.v1.QRadarJobConfiguration
 	2, // 1: redcarbon.agents_public.v1.AgentConfiguration.sentinelone_job_configuration:type_name -> redcarbon.agents_public.v1.SentinelOneJobConfiguration
 	3, // 2: redcarbon.agents_public.v1.AgentConfiguration.fortisiem_job_configuration:type_name -> redcarbon.agents_public.v1.FortiSIEMJobConfiguration
 	7, // 3: redcarbon.agents_public.v1.AgentRequest.headers:type_name -> redcarbon.agents_public.v1.AgentRequest.HeadersEntry
-	8, // 4: redcarbon.agents_public.v1.AgentResponse.headers:type_name -> redcarbon.agents_public.v1.AgentResponse.HeadersEntry
-	4, // 5: redcarbon.agents_public.v1.AgentRequest.HeadersEntry.value:type_name -> redcarbon.agents_public.v1.ValueHeader
-	4, // 6: redcarbon.agents_public.v1.AgentResponse.HeadersEntry.value:type_name -> redcarbon.agents_public.v1.ValueHeader
-	7, // [7:7] is the sub-list for method output_type
-	7, // [7:7] is the sub-list for method input_type
-	7, // [7:7] is the sub-list for extension type_name
-	7, // [7:7] is the sub-list for extension extendee
-	0, // [0:7] is the sub-list for field type_name
+	9, // 4: redcarbon.agents_public.v1.AgentRequest.timeout:type_name -> google.protobuf.Duration
+	8, // 5: redcarbon.agents_public.v1.AgentResponse.headers:type_name -> redcarbon.agents_public.v1.AgentResponse.HeadersEntry
+	4, // 6: redcarbon.agents_public.v1.AgentRequest.HeadersEntry.value:type_name -> redcarbon.agents_public.v1.ValueHeader
+	4, // 7: redcarbon.agents_public.v1.AgentResponse.HeadersEntry.value:type_name -> redcarbon.agents_public.v1.ValueHeader
+	8, // [8:8] is the sub-list for method output_type
+	8, // [8:8] is the sub-list for method input_type
+	8, // [8:8] is the sub-list for extension type_name
+	8, // [8:8] is the sub-list for extension extendee
+	0, // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_redcarbon_agents_public_v1_types_proto_init() }

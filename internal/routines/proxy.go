@@ -14,6 +14,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/protobuf/types/known/durationpb"
 	agents_publicv1 "pkg.redcarbon.ai/proto/redcarbon/agents_public/v1"
 )
 
@@ -27,7 +28,7 @@ var httpCli = &http.Client{
 }
 
 func (r RoutineConfig) ProxyRoutine(ctx context.Context) {
-	logrus.Info("Starting the proxy routine...")
+	logrus.Debug("Starting the proxy routine...")
 
 	// Prepare the request to fetch agent requests
 	req := connect.NewRequest(&agents_publicv1.FetchAgentRequestsRequest{})
@@ -36,14 +37,14 @@ func (r RoutineConfig) ProxyRoutine(ctx context.Context) {
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
-	logrus.Info("Fetching the agent requests...")
+	logrus.Debug("Fetching the agent requests...")
 	res, err := r.agentsCli.FetchAgentRequests(ctx, req)
 	if err != nil {
 		logrus.WithError(err).Error("Error while fetching the agent requests")
 		return
 	}
 
-	logrus.Infof("Running %d agent requests...", len(res.Msg.Requests))
+	logrus.Debugf("Running %d agent requests...", len(res.Msg.Requests))
 
 	var wg sync.WaitGroup
 
@@ -57,15 +58,18 @@ func (r RoutineConfig) ProxyRoutine(ctx context.Context) {
 
 	wg.Wait()
 
-	logrus.Info("Proxy routine completed")
+	logrus.Debug("Proxy routine completed")
 }
 
 func (r RoutineConfig) processRequest(ctx context.Context, req *agents_publicv1.AgentRequest) {
 	l := logrus.WithFields(logrus.Fields{
-		"requestId": req.RequestId,
+		"id": req.RequestId,
 	})
 
-	l.Info("Handling request...")
+	l.Debug("Handling request...")
+
+	ctx, cancel := extractTimeout(ctx, req.Timeout)
+	defer cancel()
 
 	httpReq, err := r.createHTTPProxyRequest(ctx, req)
 	if err != nil {
@@ -92,6 +96,15 @@ func (r RoutineConfig) processRequest(ctx context.Context, req *agents_publicv1.
 		r.sendErrorToServer(ctx, req, "error while sending the response to the server")
 		return
 	}
+}
+
+func extractTimeout(ctx context.Context, requestTimeout *durationpb.Duration) (context.Context, context.CancelFunc) {
+	timeout := 10 * time.Second
+	if requestTimeout != nil && requestTimeout.AsDuration() > 0 {
+		timeout = requestTimeout.AsDuration()
+	}
+
+	return context.WithTimeout(ctx, timeout)
 }
 
 func (r RoutineConfig) createHTTPProxyRequest(ctx context.Context, req *agents_publicv1.AgentRequest) (*http.Request, error) {
