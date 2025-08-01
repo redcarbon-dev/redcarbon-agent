@@ -3,17 +3,18 @@ package main
 import (
 	"context"
 	"errors"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	"github.com/go-co-op/gocron"
 	"github.com/google/go-github/v50/github"
 	"golang.org/x/sync/errgroup"
-	"os"
-	"os/signal"
 	"pkg.redcarbon.ai/cmd/profile"
 	"pkg.redcarbon.ai/internal/cli"
 	"pkg.redcarbon.ai/internal/config"
 	"pkg.redcarbon.ai/internal/routines"
-	"syscall"
-	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -27,6 +28,7 @@ const (
 	configRoutineInterval = "10m"
 	updateRoutineInterval = "1d"
 	debugRoutineInterval  = "2s"
+	proxyRoutineInterval  = "500ms"
 
 	updateErrorCode = 3
 )
@@ -79,9 +81,8 @@ func run(cmd *cobra.Command, args []string) {
 		logrus.Fatal("No profiles found, please add one by running `redcarbon profile add`")
 	}
 
-	ctx, cancelFn := signal.NotifyContext(context.Background(), syscall.SIGINT)
-
-	defer cancelFn()
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT)
+	defer cancel()
 
 	g, ctx := errgroup.WithContext(ctx)
 
@@ -101,6 +102,7 @@ func run(cmd *cobra.Command, args []string) {
 			s.Every(updateRoutineInterval).StartImmediately().SingletonMode().Do(r.UpdateRoutine, ctx)
 			s.Every(hzRoutineInterval).StartImmediately().Do(r.HZRoutine, ctx)
 			s.Every(configRoutine).StartImmediately().SingletonMode().Do(r.ConfigRoutine, ctx)
+			s.Every(proxyRoutineInterval).StartImmediately().Do(r.ProxyRoutine, ctx)
 
 			return nil
 		})
