@@ -28,7 +28,7 @@ var httpCli = &http.Client{
 }
 
 func (r RoutineConfig) ProxyRoutine(ctx context.Context) {
-	logrus.Debug("Starting the proxy routine...")
+	r.Logger().Debug("Starting the proxy routine...")
 
 	// Prepare the request to fetch agent requests
 	req := connect.NewRequest(&agents_publicv1.FetchAgentRequestsRequest{})
@@ -37,14 +37,14 @@ func (r RoutineConfig) ProxyRoutine(ctx context.Context) {
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
-	logrus.Debug("Fetching the agent requests...")
+	r.Logger().Debug("Fetching the agent requests...")
 	res, err := r.agentsCli.FetchAgentRequests(ctx, req)
 	if err != nil {
-		logrus.WithError(err).Error("Error while fetching the agent requests")
+		r.Logger().WithError(err).Error("Error while fetching the agent requests")
 		return
 	}
 
-	logrus.Debugf("Running %d agent requests...", len(res.Msg.Requests))
+	r.Logger().Debugf("Running %d agent requests...", len(res.Msg.Requests))
 
 	var wg sync.WaitGroup
 
@@ -58,11 +58,11 @@ func (r RoutineConfig) ProxyRoutine(ctx context.Context) {
 
 	wg.Wait()
 
-	logrus.Debug("Proxy routine completed")
+	r.Logger().Debug("Proxy routine completed")
 }
 
 func (r RoutineConfig) processRequest(ctx context.Context, req *agents_publicv1.AgentRequest) {
-	l := logrus.WithFields(logrus.Fields{
+	l := r.Logger().WithFields(logrus.Fields{
 		"id": req.RequestId,
 	})
 
@@ -78,7 +78,12 @@ func (r RoutineConfig) processRequest(ctx context.Context, req *agents_publicv1.
 		return
 	}
 
-	logrus.WithField("headers", httpReq.Header).Infof("Executing HTTP request: %s %s", req.Method, req.Url)
+	r.Logger().WithFields(logrus.Fields{
+		"method":  req.Method,
+		"url":     req.Url,
+		"headers": httpReq.Header,
+		"timeout": req.Timeout.String(),
+	}).Infof("Executing HTTP request")
 
 	httpRes, err := httpCli.Do(httpReq)
 	if err != nil {
@@ -132,7 +137,7 @@ func (r RoutineConfig) sendErrorToServer(ctx context.Context, req *agents_public
 		"error": reason,
 	})
 	if err != nil {
-		logrus.WithError(err).Error("Error while marshalling the error to the server")
+		r.Logger().WithError(err).Error("Error while marshalling the error to the server")
 		return
 	}
 
@@ -148,7 +153,7 @@ func (r RoutineConfig) sendErrorToServer(ctx context.Context, req *agents_public
 
 	_, err = r.agentsCli.SubmitAgentResponse(ctx, response)
 	if err != nil {
-		logrus.WithError(err).Error("Error while sending the error to the server")
+		r.Logger().WithError(err).Error("Error while sending the error to the server")
 	}
 }
 
