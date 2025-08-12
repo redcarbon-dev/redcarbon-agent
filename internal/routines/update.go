@@ -14,7 +14,7 @@ import (
 
 	"github.com/google/go-github/v50/github"
 	"github.com/inconshreveable/go-update"
-	"github.com/sirupsen/logrus"
+
 	"golang.org/x/mod/semver"
 
 	"pkg.redcarbon.ai/internal/build"
@@ -22,18 +22,21 @@ import (
 )
 
 func (r RoutineConfig) UpdateRoutine(ctx context.Context) {
+	r.Logger().Info("Starting update routine")
+
 	rel, _, err := r.gh.Repositories.GetLatestRelease(ctx, "redcarbon-dev", "redcarbon-agent")
 	if err != nil {
+		r.Logger().Errorf("Error while retrieving the latest release: %v", err)
 		return
 	}
 
 	if build.Version == "DEV" || strings.Contains(build.Version, "SNAPSHOT") {
-		logrus.Info("Skipping update as the agent is running in development mode")
+		r.Logger().Info("Skipping update as the agent is running in development mode")
 		return
 	}
 
 	if semver.Compare(fmt.Sprintf("v%s", build.Version), *rel.TagName) >= 0 {
-		logrus.Info("Skipping update as the agent is already at the last version")
+		r.Logger().Info("Skipping update as the agent is already at the last version")
 		return
 	}
 
@@ -45,17 +48,17 @@ func (r RoutineConfig) UpdateRoutine(ctx context.Context) {
 		if strings.Contains(*asset.Name, fmt.Sprintf("%s.tar.gz", build.Architecture)) {
 			checksum, err := r.retrieveChecksumForAsset(*asset.Name, rel.Assets)
 			if err != nil {
-				logrus.Errorf("Error while retrieving the checksum for the latest version for error %v", err)
+				r.Logger().Errorf("Error while retrieving the checksum for the latest version for error %v", err)
 				return
 			}
 
 			err = r.doUpdate(*asset.BrowserDownloadURL, *asset.Name, checksum)
 			if err != nil {
-				logrus.Errorf("Unexpected error while updating the binary %v", err)
+				r.Logger().Errorf("Unexpected error while updating the binary %v", err)
 				return
 			}
 
-			logrus.Info("Update executed successfully! Shutting down the agent...")
+			r.Logger().Info("Update executed successfully! Shutting down the agent...")
 
 			r.done <- true
 
@@ -70,17 +73,17 @@ func (r RoutineConfig) doUpdate(url string, name string, hexChecksum string) err
 		return err
 	}
 
-	logrus.Info("Performing update...")
+	r.Logger().Info("Performing update...")
 
 	err = update.Apply(executable, update.Options{})
 	if err != nil {
-		logrus.Errorf("Rollbacking for error found during update %v", err)
+		r.Logger().Errorf("Rollbacking for error found during update %v", err)
 
 		if rErr := update.RollbackError(err); rErr != nil {
-			logrus.Fatalf("Failed to rollback from bad update: %v", rErr)
+			r.Logger().Fatalf("Failed to rollback from bad update: %v", rErr)
 		}
 
-		logrus.Errorf("Rollback executed successfully")
+		r.Logger().Errorf("Rollback executed successfully")
 	}
 
 	return nil
@@ -126,7 +129,7 @@ func (r RoutineConfig) retrieveChecksumsList(asset *github.ReleaseAsset) ([]stri
 }
 
 func (r RoutineConfig) downloadAsset(url string, name string, hexChecksum string) (io.Reader, error) {
-	logrus.Info("Downloading new version...")
+	r.Logger().Info("Downloading new version...")
 
 	resp, err := http.Get(url)
 	if err != nil {
@@ -145,7 +148,7 @@ func (r RoutineConfig) downloadAsset(url string, name string, hexChecksum string
 		return nil, err
 	}
 
-	logrus.Info("Extracting the binary...")
+	r.Logger().Info("Extracting the binary...")
 
 	outDir, err := os.MkdirTemp("", "*_redcarbon_agent")
 	if err != nil {
