@@ -11,7 +11,12 @@ permissions:
 
 jobs:
   goreleaser:
-    runs-on: ubuntu-latest
+    # `arc-default`: .goreleaser.yml has no `dockers:`/`docker_manifests:`/`ko:`
+    # section — it only cross-compiles static binaries (CGO_ENABLED=0) for
+    # linux/darwin amd64+arm64 and uploads tarballs to the GitHub release. No
+    # image is built or pushed, so the privileged class is not needed.
+    # goreleaser/goreleaser-action is `using: node24`.
+    runs-on: arc-default
     steps:
       - name: Checkout
         uses: actions/checkout@v7.0.0

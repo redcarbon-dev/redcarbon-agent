@@ -8,7 +8,11 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # `arc-default` (non-privileged, no docker socket): `go build`/`go test` only.
+    # No ory/dockertest and no testcontainers anywhere in the module, so no
+    # docker daemon is required. The runner image ships gcc/libc6-dev, so cgo
+    # would work too.
+    runs-on: arc-default
     permissions:
       contents: read
       packages: write
@@ -24,7 +28,11 @@ jobs:
       - name: Test
         run: go test -v ./...
   protolint:
-    runs-on: ubuntu-latest
+    # `arc-default`: all three buf actions are `using: node20` JavaScript
+    # actions, not Docker container actions. buf-setup downloads the buf binary
+    # and buf-breaking clones the `against` git input over HTTPS; runner egress
+    # is unrestricted, so both work off the privileged class.
+    runs-on: arc-default
     steps:
       - uses: actions/checkout@v7.0.0
       - uses: bufbuild/buf-setup-action@v1.50.0
