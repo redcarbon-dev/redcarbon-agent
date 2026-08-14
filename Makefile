@@ -5,7 +5,7 @@ mocks:
 	mockery --with-expecter --all
 
 run:
-	go run cmd/main.go start
+	go run cmd/main.go
 
 test:
 	go test ./...
