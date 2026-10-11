@@ -4,7 +4,6 @@ go 1.27
 
 require (
 	connectrpc.com/connect v1.21.0
-	github.com/inconshreveable/go-update v0.0.0-20160112193335-8152e7eb6ccf
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.12.1
 	go.yaml.in/yaml/v3 v3.0.5
