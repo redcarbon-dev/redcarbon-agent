@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/google/go-github/v50/github"
+	"github.com/google/go-github/v92/github"
 	"github.com/inconshreveable/go-update"
 
 	"golang.org/x/mod/semver"
@@ -35,7 +35,7 @@ func (r RoutineConfig) UpdateRoutine(ctx context.Context) {
 		return
 	}
 
-	if semver.Compare(fmt.Sprintf("v%s", build.Version), *rel.TagName) >= 0 {
+	if semver.Compare(fmt.Sprintf("v%s", build.Version), rel.TagName) >= 0 {
 		r.Logger().Info("Skipping update as the agent is already at the last version")
 		return
 	}
