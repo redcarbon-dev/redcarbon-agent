@@ -1,0 +1,29 @@
+{
+  "file": "29_hand_null_and_empty.yaml",
+  "config": {
+    "Version": "1.0",
+    "Profiles": [
+      {
+        "Name": "default",
+        "Profile": {
+          "Host": "h",
+          "Token": "t"
+        },
+        "SentinelONE": {
+          "LastExecution": "0001-01-01T00:00:00Z"
+        },
+        "FortiSIEM": {
+          "LastExecution": "0001-01-01T00:00:00Z"
+        },
+        "QRadar": {
+          "LastExecution": "0001-01-01T00:00:00Z"
+        },
+        "Debug": {
+          "Active": false,
+          "LastExecution": "0001-01-01T00:00:00Z"
+        }
+      }
+    ]
+  },
+  "file_after": "version: \"1.0\"\nprofiles:\n  - name: default\n    profile:\n      host: h\n      token: t\n    qradar:\n    debug: {}\n"
+}

@@ -1,0 +1,5 @@
+{
+  "file": "23_hand_quoted_time.yaml",
+  "panic": "logrus exit 1",
+  "file_after": "version: \"1.0\"\nprofiles:\n  - name: default\n    profile:\n      host: https://api.redcarbon.ai\n      token: tok\n    qradar:\n      lastExecution: \"2026-10-11T09:41:12Z\"\n"
+}

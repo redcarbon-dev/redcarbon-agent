@@ -1,0 +1,10 @@
+# managed by ansible
+version: "1.0"
+zzz_custom: keep-me
+profiles:
+  - name: default
+    extra: 1
+    profile:
+      host: https://api.redcarbon.ai
+      token: tok
+      proxy: http://proxy:3128

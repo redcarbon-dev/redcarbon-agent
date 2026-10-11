@@ -1,0 +1,6 @@
+profiles:
+    - name: default
+      profile:
+        host: https://api.redcarbon.ai
+        token: tok-default
+version: "1.0"

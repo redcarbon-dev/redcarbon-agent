@@ -1,0 +1,29 @@
+{
+  "file": "03_profile_add.yaml",
+  "config": {
+    "Version": "1.0",
+    "Profiles": [
+      {
+        "Name": "default",
+        "Profile": {
+          "Host": "https://api.redcarbon.ai",
+          "Token": "tok-default"
+        },
+        "SentinelONE": {
+          "LastExecution": "0001-01-01T00:00:00Z"
+        },
+        "FortiSIEM": {
+          "LastExecution": "0001-01-01T00:00:00Z"
+        },
+        "QRadar": {
+          "LastExecution": "0001-01-01T00:00:00Z"
+        },
+        "Debug": {
+          "Active": false,
+          "LastExecution": "0001-01-01T00:00:00Z"
+        }
+      }
+    ]
+  },
+  "file_after": "profiles:\n    - name: default\n      profile:\n        host: https://api.redcarbon.ai\n        token: tok-default\nversion: \"1.0\"\n"
+}

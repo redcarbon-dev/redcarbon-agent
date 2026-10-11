@@ -1,0 +1,10 @@
+auth:
+    access_token: tok-legacy
+fortisiem:
+    last_execution: 2026-10-10T23:59:59.999Z
+qradar:
+    last_execution: 2026-10-11T09:41:12.123456789+02:00
+sentinel_one:
+    last_execution: 2026-10-11T07:00:00Z
+server:
+    host: https://api.redcarbon.ai

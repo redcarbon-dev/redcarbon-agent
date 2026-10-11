@@ -1,0 +1,4 @@
+auth:
+    access_token: tok-legacy
+server:
+    host: https://api.redcarbon.ai

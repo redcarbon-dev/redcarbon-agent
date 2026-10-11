@@ -1,0 +1,10 @@
+version: "1.0"
+profiles:
+  - name: default
+    profile:
+      host: h
+      token: t
+    fortisiem:
+      lastExecution: 2026-10-11 09:41:12
+    sentinelone:
+      lastExecution: 2026-10-11

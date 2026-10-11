@@ -1,0 +1,8 @@
+version: "1.0"
+profiles:
+  - name: default
+    profile:
+      host: h
+      token: t
+    qradar:
+    debug: {}

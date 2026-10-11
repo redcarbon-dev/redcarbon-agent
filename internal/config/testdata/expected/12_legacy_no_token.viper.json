@@ -1,0 +1,5 @@
+{
+  "file": "12_legacy_no_token.yaml",
+  "panic": "runtime error: index out of range [0] with length 0",
+  "file_after": "qradar:\n    last_execution: 2026-10-11T09:41:12.123456789+02:00\n"
+}

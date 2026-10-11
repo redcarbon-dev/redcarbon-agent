@@ -1,0 +1,10 @@
+Version: "1.0"
+Profiles:
+  - Name: default
+    Profile:
+      Host: https://api.redcarbon.ai
+      TOKEN: tok
+    SentinelONE:
+      LastExecution: 2026-10-11T07:00:00Z
+    qradar:
+      lastexecution: 2026-10-11T09:41:12.123456789+02:00

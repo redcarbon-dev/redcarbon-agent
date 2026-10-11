@@ -1,0 +1,9 @@
+auth:
+  access_token: tok-legacy
+qradar:
+  last_execution: 2026-10-11T09:41:12Z
+profiles:
+  - name: first
+    profile:
+      host: https://api.redcarbon.ai
+      token: tok-first
