@@ -4,6 +4,7 @@ project_name: redcarbon
 
 release:
   prerelease: auto
+  mode: keep-existing
   name_template: "RedCarbon Agent {{.Version}}"
 
 before:

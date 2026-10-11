@@ -1,21 +1,60 @@
-name: Releaser
+name: Release
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to build and publish with GoReleaser (e.g. v0.3.0-rc.1)
+        required: true
+        type: string
 
-permissions:
-  contents: write
-  repository-projects: write
+permissions: {}
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
-  goreleaser:
+  release-please:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
+      - id: release
+        uses: googleapis/release-please-action@v5.0.0
+
+  goreleaser:
+    needs: release-please
+    if: >-
+      !cancelled() && (
+        (github.event_name == 'push' && needs.release-please.outputs.release_created == 'true') ||
+        github.event_name == 'workflow_dispatch'
+      )
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || needs.release-please.outputs.tag_name }}
+    steps:
+      - name: Validate tag
+        run: |
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::'$TAG' is not a v<semver> tag"
+            exit 1
+          fi
       - name: Checkout
         uses: actions/checkout@v7.0.1
         with:
+          ref: refs/tags/${{ env.TAG }}
           fetch-depth: 0
       - name: Set up Go
         uses: actions/setup-go@v7.0.0
@@ -28,4 +67,5 @@ jobs:
           args: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GORELEASER_CURRENT_TAG: ${{ env.TAG }}
           API_HOST: ${{ secrets.API_HOST }}
