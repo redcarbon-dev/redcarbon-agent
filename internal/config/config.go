@@ -1,9 +1,11 @@
 package config
 
 import (
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
+	"log/slog"
+	"os"
 	"time"
+
+	"github.com/spf13/viper"
 )
 
 type Configuration struct {
@@ -46,7 +48,8 @@ func LoadConfiguration() Configuration {
 	c := Configuration{}
 	err := viper.Unmarshal(&c)
 	if err != nil {
-		logrus.Fatal("Error while loading the configuration")
+		slog.Error("Error while loading the configuration", "error", err)
+		os.Exit(1)
 	}
 
 	if c.Version != "1.0" {
@@ -65,7 +68,8 @@ func LoadProfile(name string) Profile {
 		}
 	}
 
-	logrus.Fatalf("Profile %s not found", name)
+	slog.Error("Profile not found", "profile", name)
+	os.Exit(1)
 
 	return Profile{}
 }
@@ -111,7 +115,8 @@ func (c *Configuration) updateConfig() {
 func (c *Configuration) MustSave() {
 	err := c.save()
 	if err != nil {
-		logrus.Fatal("Error while saving the configuration")
+		slog.Error("Error while saving the configuration", "error", err)
+		os.Exit(1)
 	}
 }
 
@@ -122,7 +127,7 @@ func (c *Configuration) save() error {
 	return viper.WriteConfig()
 }
 
-func OverwriteProfileInConfig(l *logrus.Entry, profile Profile) {
+func OverwriteProfileInConfig(l *slog.Logger, profile Profile) {
 	c := LoadConfiguration()
 
 	for i, p := range c.Profiles {
@@ -133,6 +138,6 @@ func OverwriteProfileInConfig(l *logrus.Entry, profile Profile) {
 
 	err := c.save()
 	if err != nil {
-		l.WithError(err).Error("failed to save profile")
+		l.Error("failed to save profile", "error", err)
 	}
 }

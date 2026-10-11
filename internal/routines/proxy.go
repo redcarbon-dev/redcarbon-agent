@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
-	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/types/known/durationpb"
 	agents_publicv1 "pkg.redcarbon.ai/proto/redcarbon/agents_public/v1"
 )
@@ -42,11 +41,11 @@ func (r RoutineConfig) ProxyRoutine(ctx context.Context) {
 	r.Logger().Debug("Fetching the agent requests...")
 	res, err := r.agentsCli.FetchAgentRequests(ctx, req)
 	if err != nil {
-		r.Logger().WithError(err).Error("Error while fetching the agent requests")
+		r.Logger().Error("Error while fetching the agent requests", "error", err)
 		return
 	}
 
-	r.Logger().Debugf("Running %d agent requests...", len(res.Msg.Requests))
+	r.Logger().Debug("Running agent requests...", "count", len(res.Msg.Requests))
 
 	var wg sync.WaitGroup
 
@@ -64,9 +63,7 @@ func (r RoutineConfig) ProxyRoutine(ctx context.Context) {
 }
 
 func (r RoutineConfig) processRequest(ctx context.Context, req *agents_publicv1.AgentRequest) {
-	l := r.Logger().WithFields(logrus.Fields{
-		"id": req.RequestId,
-	})
+	l := r.Logger().With("id", req.RequestId)
 
 	l.Debug("Handling request...")
 
@@ -75,31 +72,31 @@ func (r RoutineConfig) processRequest(ctx context.Context, req *agents_publicv1.
 
 	httpReq, err := r.createHTTPProxyRequest(ctx, req)
 	if err != nil {
-		l.WithError(err).Error("Error while creating the HTTP request")
+		l.Error("Error while creating the HTTP request", "error", err)
 		r.sendErrorToServer(ctx, req, "error while creating the HTTP request")
 		return
 	}
 
-	r.Logger().WithFields(logrus.Fields{
-		"method":  req.Method,
-		"url":     redactedURL(req.Url),
-		"headers": headerNames(httpReq.Header),
-		"timeout": req.Timeout.String(),
-	}).Infof("Executing HTTP request")
+	l.Info("Executing HTTP request",
+		"method", req.Method,
+		"url", redactedURL(req.Url),
+		"headers", headerNames(httpReq.Header),
+		"timeout", req.Timeout.String(),
+	)
 
 	httpRes, err := httpCli.Do(httpReq)
 	if err != nil {
-		l.WithError(err).Error("Error while executing the HTTP request")
+		l.Error("Error while executing the HTTP request", "error", err)
 		r.sendErrorToServer(ctx, req, "error while executing the HTTP request")
 		return
 	}
 	defer httpRes.Body.Close()
 
-	l.Infof("Request completed with status code %d, sending the response to the server", httpRes.StatusCode)
+	l.Info("Request completed, sending the response to the server", "status", httpRes.StatusCode)
 
 	err = r.sendResponseToServer(ctx, req, httpRes)
 	if err != nil {
-		l.WithError(err).Error("Error while sending the response to the server")
+		l.Error("Error while sending the response to the server", "error", err)
 		r.sendErrorToServer(ctx, req, "error while sending the response to the server")
 		return
 	}
@@ -165,7 +162,7 @@ func (r RoutineConfig) sendErrorToServer(ctx context.Context, req *agents_public
 		"error": reason,
 	})
 	if err != nil {
-		r.Logger().WithError(err).Error("Error while marshalling the error to the server")
+		r.Logger().Error("Error while marshalling the error to the server", "error", err)
 		return
 	}
 
@@ -181,7 +178,7 @@ func (r RoutineConfig) sendErrorToServer(ctx context.Context, req *agents_public
 
 	_, err = r.agentsCli.SubmitAgentResponse(ctx, response)
 	if err != nil {
-		r.Logger().WithError(err).Error("Error while sending the error to the server")
+		r.Logger().Error("Error while sending the error to the server", "error", err)
 	}
 }
 

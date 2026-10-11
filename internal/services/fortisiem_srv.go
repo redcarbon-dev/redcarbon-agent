@@ -4,10 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"uuid"
 
 	"connectrpc.com/connect"
-	"github.com/sirupsen/logrus"
 	"pkg.redcarbon.ai/internal/config"
 	"pkg.redcarbon.ai/internal/services/fortisiem"
 	agents_publicv1 "pkg.redcarbon.ai/proto/redcarbon/agents_public/v1"
@@ -29,11 +27,7 @@ func newFortiSIEMService(conf *agents_publicv1.FortiSIEMJobConfiguration, agents
 }
 
 func (s srvFortiSIEM) RunService(ctx context.Context) {
-	l := logrus.WithFields(logrus.Fields{
-		"service": "fortisiem",
-		"trace":   uuid.New().String(),
-		"profile": s.profile.Name,
-	})
+	l := serviceLogger("fortisiem", s.profile)
 
 	l.Info("Starting FortiSIEM service")
 	s.profile = config.LoadProfile(s.profile.Name)
@@ -42,16 +36,16 @@ func (s srvFortiSIEM) RunService(ctx context.Context) {
 
 	alerts, err := s.cli.FetchAlerts(ctx, start, end)
 	if err != nil {
-		l.WithError(err).Error("Error while fetching the alerts")
+		l.Error("Error while fetching the alerts", "error", err)
 		return
 	}
 
-	l.Infof("Found %d alerts", len(alerts))
+	l.Info("Found alerts", "count", len(alerts))
 
 	for _, alert := range alerts {
 		incident, err := s.buildIncidentToIngest(alert)
 		if err != nil {
-			l.WithError(err).Warn("Error while building the incident to ingest for alert")
+			l.Warn("Error while building the incident to ingest for alert", "error", err)
 		}
 
 		req := connect.NewRequest(incident)
@@ -59,7 +53,7 @@ func (s srvFortiSIEM) RunService(ctx context.Context) {
 
 		_, err = s.agentsCli.IngestIncident(ctx, req)
 		if err != nil {
-			l.WithError(err).Error("failed to ingest incident")
+			l.Error("failed to ingest incident", "error", err)
 			continue
 		}
 	}

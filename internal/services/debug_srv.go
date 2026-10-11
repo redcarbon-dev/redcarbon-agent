@@ -2,9 +2,7 @@ package services
 
 import (
 	"context"
-	"uuid"
 
-	"github.com/sirupsen/logrus"
 	"pkg.redcarbon.ai/internal/config"
 )
 
@@ -19,18 +17,14 @@ func newDebugService(p config.Profile) Service {
 }
 
 func (s srvDebug) RunService(ctx context.Context) {
-	l := logrus.WithFields(logrus.Fields{
-		"service": "debug",
-		"trace":   uuid.New().String(),
-		"profile": s.profile.Name,
-	})
+	l := serviceLogger("debug", s.profile)
 
 	s.profile = config.LoadProfile(s.profile.Name)
 
 	l.Info("Starting Debug service")
 	start, end := retrieveStartAndEndTime(s.profile.Debug.LastExecution)
 
-	l.Infof("Debug from %s to %s", start, end)
+	l.Info("Debug window", "start", start, "end", end)
 
 	s.profile.Debug.LastExecution = end
 

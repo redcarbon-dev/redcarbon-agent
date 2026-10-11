@@ -26,7 +26,7 @@ func (r RoutineConfig) UpdateRoutine(ctx context.Context) {
 
 	rel, err := r.gh.LatestRelease(ctx, "redcarbon-dev", "redcarbon-agent")
 	if err != nil {
-		r.Logger().Errorf("Error while retrieving the latest release: %v", err)
+		r.Logger().Error("Error while retrieving the latest release", "error", err)
 		return
 	}
 
@@ -44,13 +44,13 @@ func (r RoutineConfig) UpdateRoutine(ctx context.Context) {
 		if strings.Contains(asset.Name, fmt.Sprintf("%s.tar.gz", build.Architecture)) {
 			checksum, err := r.retrieveChecksumForAsset(asset.Name, rel.Assets)
 			if err != nil {
-				r.Logger().Errorf("Error while retrieving the checksum for the latest version for error %v", err)
+				r.Logger().Error("Error while retrieving the checksum for the latest version", "error", err)
 				return
 			}
 
 			err = r.doUpdate(asset.BrowserDownloadURL, asset.Name, checksum)
 			if err != nil {
-				r.Logger().Errorf("Unexpected error while updating the binary %v", err)
+				r.Logger().Error("Unexpected error while updating the binary", "error", err)
 				return
 			}
 
@@ -73,13 +73,14 @@ func (r RoutineConfig) doUpdate(url string, name string, hexChecksum string) err
 
 	err = update.Apply(executable, update.Options{})
 	if err != nil {
-		r.Logger().Errorf("Rollbacking for error found during update %v", err)
+		r.Logger().Error("Rollbacking for error found during update", "error", err)
 
 		if rErr := update.RollbackError(err); rErr != nil {
-			r.Logger().Fatalf("Failed to rollback from bad update: %v", rErr)
+			r.Logger().Error("Failed to rollback from bad update", "error", rErr)
+			os.Exit(1)
 		}
 
-		r.Logger().Errorf("Rollback executed successfully")
+		r.Logger().Error("Rollback executed successfully")
 	}
 
 	return nil

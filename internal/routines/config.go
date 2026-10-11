@@ -9,13 +9,12 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
-	"github.com/sirupsen/logrus"
 	"pkg.redcarbon.ai/internal/services"
 	agents_publicv1 "pkg.redcarbon.ai/proto/redcarbon/agents_public/v1"
 )
 
 func (r RoutineConfig) ConfigRoutine(ctx context.Context) {
-	logrus.Infof("Start pulling the configurations from the server...")
+	r.Logger().Info("Start pulling the configurations from the server...")
 
 	ctxWithTimeout, cFn := context.WithTimeout(ctx, time.Hour)
 	defer cFn()
@@ -26,11 +25,11 @@ func (r RoutineConfig) ConfigRoutine(ctx context.Context) {
 
 	config, err := r.agentsCli.FetchAgentConfiguration(ctxWithTimeout, req)
 	if err != nil {
-		logrus.Errorf("Error while retrieving the configurations for error %v", err)
+		r.Logger().Error("Error while retrieving the configurations", "error", err)
 		return
 	}
 
-	logrus.Infof("Configurations successfully pulled! Starting the jobs...")
+	r.Logger().Info("Configurations successfully pulled! Starting the jobs...")
 
 	var wg sync.WaitGroup
 
@@ -50,7 +49,7 @@ func (r RoutineConfig) ConfigRoutine(ctx context.Context) {
 
 	wg.Wait()
 
-	logrus.Infof("Jobs completed!")
+	r.Logger().Info("Jobs completed!")
 }
 
 func (r RoutineConfig) runService(ctx context.Context, s services.Service, wg *sync.WaitGroup) {
