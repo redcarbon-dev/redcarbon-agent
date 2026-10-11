@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -80,8 +82,8 @@ func (r RoutineConfig) processRequest(ctx context.Context, req *agents_publicv1.
 
 	r.Logger().WithFields(logrus.Fields{
 		"method":  req.Method,
-		"url":     req.Url,
-		"headers": httpReq.Header,
+		"url":     redactedURL(req.Url),
+		"headers": headerNames(httpReq.Header),
 		"timeout": req.Timeout.String(),
 	}).Infof("Executing HTTP request")
 
@@ -130,6 +132,32 @@ func (r RoutineConfig) createHTTPProxyRequest(ctx context.Context, req *agents_p
 	}
 
 	return httpReq, nil
+}
+
+// headerNames returns the sorted header names only: values carry vendor credentials
+// (Authorization, API keys, cookies) and must never reach the agent log.
+func headerNames(h http.Header) []string {
+	names := make([]string, 0, len(h))
+	for name := range h {
+		names = append(names, name)
+	}
+	slices.Sort(names)
+	return names
+}
+
+// redactedURL masks the userinfo password and every query value, keeping the
+// parameter names: some vendors take API keys in the query string.
+func redactedURL(raw string) string {
+	u, err := url.Parse(raw)
+	if err != nil {
+		return "<unparseable URL>"
+	}
+	q := u.Query()
+	for name := range q {
+		q[name] = []string{"xxxxx"}
+	}
+	u.RawQuery = q.Encode()
+	return u.Redacted()
 }
 
 func (r RoutineConfig) sendErrorToServer(ctx context.Context, req *agents_publicv1.AgentRequest, reason string) {
