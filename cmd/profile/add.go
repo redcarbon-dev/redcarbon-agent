@@ -2,7 +2,9 @@ package profile
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
+	"log/slog"
+	"os"
+
 	"github.com/spf13/cobra"
 	"pkg.redcarbon.ai/internal/build"
 	"pkg.redcarbon.ai/internal/config"
@@ -45,7 +47,8 @@ func runAdd(cmd *cobra.Command, args []string, opts config.ProfileConfiguration)
 
 	for _, p := range conf.Profiles {
 		if p.Name == profileName {
-			logrus.Fatalf("Profile %s already exists", profileName)
+			slog.Error("Profile already exists", "profile", profileName)
+			os.Exit(1)
 		}
 	}
 
@@ -58,5 +61,5 @@ func runAdd(cmd *cobra.Command, args []string, opts config.ProfileConfiguration)
 
 	conf.MustSave()
 
-	logrus.Println("Profile successfully added!")
+	slog.Info("Profile successfully added!", "profile", profileName)
 }

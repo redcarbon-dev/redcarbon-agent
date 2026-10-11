@@ -5,10 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"uuid"
 
 	"connectrpc.com/connect"
-	"github.com/sirupsen/logrus"
 	"pkg.redcarbon.ai/internal/config"
 	"pkg.redcarbon.ai/internal/services/qradar"
 	agents_publicv1 "pkg.redcarbon.ai/proto/redcarbon/agents_public/v1"
@@ -52,11 +50,7 @@ func newQRadarService(conf *agents_publicv1.QRadarJobConfiguration, agentsCli ag
 }
 
 func (s srv) RunService(ctx context.Context) {
-	l := logrus.WithFields(logrus.Fields{
-		"service": "qradar",
-		"trace":   uuid.New().String(),
-		"profile": s.profile.Name,
-	})
+	l := serviceLogger("qradar", s.profile)
 
 	l.Info("Starting QRadar service")
 	s.profile = config.LoadProfile(s.profile.Name)
@@ -65,11 +59,11 @@ func (s srv) RunService(ctx context.Context) {
 
 	offenses, err := s.cli.FetchOffenses(ctx, start, end)
 	if err != nil {
-		l.WithError(err).Error("failed to fetch offenses")
+		l.Error("failed to fetch offenses", "error", err)
 		return
 	}
 
-	l.Infof("Found %d offenses", len(offenses))
+	l.Info("Found offenses", "count", len(offenses))
 
 	for _, offense := range offenses {
 		i, err := s.retrieveIncidentDataForOffense(ctx, offense)
@@ -82,7 +76,7 @@ func (s srv) RunService(ctx context.Context) {
 
 		_, err = s.agentsCli.IngestIncident(ctx, req)
 		if err != nil {
-			l.WithError(err).Error("failed to ingest incident")
+			l.Error("failed to ingest incident", "error", err)
 			continue
 		}
 	}

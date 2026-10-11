@@ -7,18 +7,19 @@ import (
 	"os"
 
 	"connectrpc.com/connect"
-	"github.com/sirupsen/logrus"
 	agents_publicv1 "pkg.redcarbon.ai/proto/redcarbon/agents_public/v1"
 )
 
 func (r RoutineConfig) HZRoutine(ctx context.Context) {
 	hostname, err := os.Hostname()
 	if err != nil {
-		r.Logger().Fatalf("Error while retrieving the Hostname %v", err)
+		r.Logger().Error("Error while retrieving the Hostname", "error", err)
+		os.Exit(1)
 	}
 
 	localAddr, err := getOutboundIP()
 	if err != nil {
+		r.Logger().Error("Error while retrieving the IP address", "error", err)
 		return
 	}
 
@@ -31,17 +32,16 @@ func (r RoutineConfig) HZRoutine(ctx context.Context) {
 
 	res, err := r.agentsCli.HZ(ctx, req)
 	if err != nil {
-		logrus.WithError(err).Error("Error while calling the HZ")
+		r.Logger().Error("Error while calling the HZ", "error", err)
 		return
 	}
 
-	r.Logger().Infof("HZ executed %s", res.Msg.ReceivedAt.String())
+	r.Logger().Info("HZ executed", "received_at", res.Msg.ReceivedAt.AsTime())
 }
 
 func getOutboundIP() (string, error) {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
-		logrus.WithError(err).Error("Error while retrieving the IP address")
 		return "", err
 	}
 

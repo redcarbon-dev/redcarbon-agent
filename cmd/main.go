@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -16,7 +17,6 @@ import (
 	"pkg.redcarbon.ai/internal/routines"
 	"pkg.redcarbon.ai/internal/scheduler"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -34,9 +34,12 @@ const (
 )
 
 func init() {
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, nil)))
+
 	confDir, err := os.Getwd()
 	if err != nil {
-		logrus.Fatalf("can't extract the user working directory for error %v", err)
+		slog.Error("can't extract the user working directory", "error", err)
+		os.Exit(1)
 	}
 
 	viper.SetConfigName(".config")
@@ -46,11 +49,13 @@ func init() {
 	if err = viper.ReadInConfig(); err != nil {
 		var e viper.ConfigFileNotFoundError
 		if !errors.As(err, &e) {
-			logrus.WithError(err).Fatal("error while reading the configuration")
+			slog.Error("error while reading the configuration", "error", err)
+			os.Exit(1)
 		}
 
 		if err = viper.SafeWriteConfig(); err != nil {
-			logrus.WithError(err).Fatal("error while writing the configuration")
+			slog.Error("error while writing the configuration", "error", err)
+			os.Exit(1)
 		}
 	}
 }
@@ -73,12 +78,13 @@ func main() {
 }
 
 func run(cmd *cobra.Command, args []string) {
-	logrus.Infof("Starting RedCarbon Agent v%s on %s", build.Version, build.Architecture)
+	slog.Info("Starting RedCarbon Agent", "version", build.Version, "arch", build.Architecture)
 
 	conf := config.LoadConfiguration()
 
 	if len(conf.Profiles) == 0 {
-		logrus.Fatal("No profiles found, please add one by running `redcarbon profile add`")
+		slog.Error("No profiles found, please add one by running `redcarbon profile add`")
+		os.Exit(1)
 	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT)
@@ -109,13 +115,14 @@ func run(cmd *cobra.Command, args []string) {
 
 	s, err := scheduler.Start(ctx, jobs...)
 	if err != nil {
-		logrus.WithError(err).Fatal("error while scheduling the routines")
+		slog.Error("error while scheduling the routines", "error", err)
+		os.Exit(1)
 	}
 
 	g.Go(func() error {
 		<-ctx.Done()
 		s.Stop()
-		logrus.Info("RedCarbon Agent stopped")
+		slog.Info("RedCarbon Agent stopped")
 		os.Exit(0)
 		return nil
 	})
@@ -123,12 +130,13 @@ func run(cmd *cobra.Command, args []string) {
 	g.Go(func() error {
 		<-done
 		s.Stop()
-		logrus.Info("RedCarbon Agent stopped due update")
+		slog.Info("RedCarbon Agent stopped due update")
 		os.Exit(updateErrorCode)
 		return nil
 	})
 
 	if err := g.Wait(); err != nil {
-		logrus.WithError(err).Fatal("error while running the agent")
+		slog.Error("error while running the agent", "error", err)
+		os.Exit(1)
 	}
 }

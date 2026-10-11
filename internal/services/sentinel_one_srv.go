@@ -4,10 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"uuid"
 
 	"connectrpc.com/connect"
-	"github.com/sirupsen/logrus"
 	"pkg.redcarbon.ai/internal/config"
 	"pkg.redcarbon.ai/internal/services/sentinel_one"
 	agents_publicv1 "pkg.redcarbon.ai/proto/redcarbon/agents_public/v1"
@@ -29,11 +27,7 @@ func newSentinelOneService(conf *agents_publicv1.SentinelOneJobConfiguration, ag
 }
 
 func (s srvSentinel) RunService(ctx context.Context) {
-	l := logrus.WithFields(logrus.Fields{
-		"service": "sentinel-one",
-		"trace":   uuid.New().String(),
-		"profile": s.profile.Name,
-	})
+	l := serviceLogger("sentinel-one", s.profile)
 
 	l.Info("Starting SentinelOne service")
 	s.profile = config.LoadProfile(s.profile.Name)
@@ -42,7 +36,7 @@ func (s srvSentinel) RunService(ctx context.Context) {
 
 	threats, err := s.cli.FetchThreats(ctx, start, end)
 	if err != nil {
-		l.WithError(err).Error("Error while fetching the threats")
+		l.Error("Error while fetching the threats", "error", err)
 		return
 	}
 
@@ -57,7 +51,7 @@ func (s srvSentinel) RunService(ctx context.Context) {
 
 		_, err = s.agentsCli.IngestIncident(ctx, req)
 		if err != nil {
-			l.WithError(err).Error("failed to ingest incident")
+			l.Error("failed to ingest incident", "error", err)
 			continue
 		}
 	}

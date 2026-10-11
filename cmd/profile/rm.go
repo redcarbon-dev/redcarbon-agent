@@ -2,7 +2,9 @@ package profile
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
+	"log/slog"
+	"os"
+
 	"github.com/spf13/cobra"
 	"pkg.redcarbon.ai/internal/config"
 )
@@ -42,12 +44,13 @@ func runRm(cmd *cobra.Command, args []string, opts config.ProfileConfiguration) 
 	}
 
 	if found == -1 {
-		logrus.Fatalf("Profile %s not found", profileName)
+		slog.Error("Profile not found", "profile", profileName)
+		os.Exit(1)
 	}
 
 	conf.Profiles = append(conf.Profiles[:found], conf.Profiles[found+1:]...)
 
 	conf.MustSave()
 
-	logrus.Println("Profile successfully removed!")
+	slog.Info("Profile successfully removed!", "profile", profileName)
 }

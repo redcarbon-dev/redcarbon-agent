@@ -1,7 +1,8 @@
 package routines
 
 import (
-	"github.com/sirupsen/logrus"
+	"log/slog"
+
 	"pkg.redcarbon.ai/internal/cli"
 	"pkg.redcarbon.ai/internal/config"
 	"pkg.redcarbon.ai/internal/github"
@@ -24,8 +25,6 @@ func NewRoutineJobs(profile config.Profile, clientFactory cli.ClientFactory, gh 
 	}
 }
 
-func (r RoutineConfig) Logger() *logrus.Entry {
-	return logrus.WithFields(logrus.Fields{
-		"profile": r.profile.Name,
-	})
+func (r RoutineConfig) Logger() *slog.Logger {
+	return slog.With("profile", r.profile.Name)
 }
