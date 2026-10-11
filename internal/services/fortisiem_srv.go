@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"uuid"
 
 	"connectrpc.com/connect"
-	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"pkg.redcarbon.ai/internal/config"
 	"pkg.redcarbon.ai/internal/services/fortisiem"
@@ -31,7 +31,7 @@ func newFortiSIEMService(conf *agents_publicv1.FortiSIEMJobConfiguration, agents
 func (s srvFortiSIEM) RunService(ctx context.Context) {
 	l := logrus.WithFields(logrus.Fields{
 		"service": "fortisiem",
-		"trace":   uuid.NewString(),
+		"trace":   uuid.New().String(),
 		"profile": s.profile.Name,
 	})
 
