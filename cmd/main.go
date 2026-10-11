@@ -8,11 +8,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/google/go-github/v92/github"
 	"golang.org/x/sync/errgroup"
 	"pkg.redcarbon.ai/cmd/profile"
 	"pkg.redcarbon.ai/internal/cli"
 	"pkg.redcarbon.ai/internal/config"
+	"pkg.redcarbon.ai/internal/github"
 	"pkg.redcarbon.ai/internal/routines"
 	"pkg.redcarbon.ai/internal/scheduler"
 
@@ -87,10 +87,7 @@ func run(cmd *cobra.Command, args []string) {
 	g, ctx := errgroup.WithContext(ctx)
 
 	clientFactory := cli.NewClientFactory()
-	gh, err := github.NewClient()
-	if err != nil {
-		logrus.WithError(err).Fatal("error while creating the GitHub client")
-	}
+	gh := github.NewClient(nil, github.DefaultBaseURL)
 	done := make(chan bool)
 
 	var jobs []scheduler.Job
