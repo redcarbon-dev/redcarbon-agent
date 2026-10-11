@@ -1,0 +1,8 @@
+version: "1.0"
+profiles:
+  - name: default
+    profile:
+      host: https://api.redcarbon.ai
+      token: tok
+    qradar:
+      lastExecution: "2026-10-11T09:41:12Z"

@@ -1,0 +1,10 @@
+auth:
+    access_token: tok-legacy
+profiles:
+    - name: default
+      profile:
+        host: https://api.redcarbon.ai
+        token: tok-legacy
+server:
+    host: https://api.redcarbon.ai
+version: "1.0"

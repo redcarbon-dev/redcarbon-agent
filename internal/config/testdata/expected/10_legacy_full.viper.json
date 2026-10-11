@@ -1,0 +1,29 @@
+{
+  "file": "10_legacy_full.yaml",
+  "config": {
+    "Version": "1.0",
+    "Profiles": [
+      {
+        "Name": "default",
+        "Profile": {
+          "Host": "https://api.redcarbon.ai",
+          "Token": "tok-legacy"
+        },
+        "SentinelONE": {
+          "LastExecution": "2026-10-11T07:00:00Z"
+        },
+        "FortiSIEM": {
+          "LastExecution": "2026-10-10T23:59:59.999Z"
+        },
+        "QRadar": {
+          "LastExecution": "2026-10-11T09:41:12.123456789+02:00"
+        },
+        "Debug": {
+          "Active": false,
+          "LastExecution": "0001-01-01T00:00:00Z"
+        }
+      }
+    ]
+  },
+  "file_after": "auth:\n    access_token: tok-legacy\nfortisiem:\n    last_execution: 2026-10-10T23:59:59.999Z\nprofiles:\n    - name: default\n      profile:\n        host: https://api.redcarbon.ai\n        token: tok-legacy\n      sentinelone:\n        lastExecution: 2026-10-11T07:00:00Z\n      fortisiem:\n        lastExecution: 2026-10-10T23:59:59.999Z\n      qradar:\n        lastExecution: 2026-10-11T09:41:12.123456789+02:00\nqradar:\n    last_execution: 2026-10-11T09:41:12.123456789+02:00\nsentinel_one:\n    last_execution: 2026-10-11T07:00:00Z\nserver:\n    host: https://api.redcarbon.ai\nversion: \"1.0\"\n"
+}

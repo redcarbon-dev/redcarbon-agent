@@ -1,0 +1,29 @@
+{
+  "file": "21_hand_unknown_keys.yaml",
+  "config": {
+    "Version": "1.0",
+    "Profiles": [
+      {
+        "Name": "default",
+        "Profile": {
+          "Host": "https://api.redcarbon.ai",
+          "Token": "tok"
+        },
+        "SentinelONE": {
+          "LastExecution": "0001-01-01T00:00:00Z"
+        },
+        "FortiSIEM": {
+          "LastExecution": "0001-01-01T00:00:00Z"
+        },
+        "QRadar": {
+          "LastExecution": "0001-01-01T00:00:00Z"
+        },
+        "Debug": {
+          "Active": false,
+          "LastExecution": "0001-01-01T00:00:00Z"
+        }
+      }
+    ]
+  },
+  "file_after": "# managed by ansible\nversion: \"1.0\"\nzzz_custom: keep-me\nprofiles:\n  - name: default\n    extra: 1\n    profile:\n      host: https://api.redcarbon.ai\n      token: tok\n      proxy: http://proxy:3128\n"
+}

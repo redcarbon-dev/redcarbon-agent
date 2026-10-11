@@ -1,0 +1,14 @@
+profiles:
+    - name: default
+      profile:
+        host: https://api.redcarbon.ai
+        token: tok-default
+    - name: Secondary
+      profile:
+        host: https://eu.redcarbon.ai:443
+        token: "0123456789"
+    - name: debugger
+      profile:
+        host: localhost:8080
+        token: 'tok: with colon'
+version: "1.0"

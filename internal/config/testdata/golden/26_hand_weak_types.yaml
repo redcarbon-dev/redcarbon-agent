@@ -1,0 +1,8 @@
+version: "1.0"
+profiles:
+  - name: default
+    profile:
+      host: https://api.redcarbon.ai
+      token: 0123
+    debug:
+      active: "true"

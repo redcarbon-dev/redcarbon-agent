@@ -1,0 +1,69 @@
+{
+  "file": "06_debug_updated.yaml",
+  "config": {
+    "Version": "1.0",
+    "Profiles": [
+      {
+        "Name": "default",
+        "Profile": {
+          "Host": "https://api.redcarbon.ai",
+          "Token": "tok-default"
+        },
+        "SentinelONE": {
+          "LastExecution": "0001-01-01T00:00:00Z"
+        },
+        "FortiSIEM": {
+          "LastExecution": "0001-01-01T00:00:00Z"
+        },
+        "QRadar": {
+          "LastExecution": "2026-10-11T09:41:12.123456789+02:00"
+        },
+        "Debug": {
+          "Active": false,
+          "LastExecution": "0001-01-01T00:00:00Z"
+        }
+      },
+      {
+        "Name": "Secondary",
+        "Profile": {
+          "Host": "https://eu.redcarbon.ai:443",
+          "Token": "0123456789"
+        },
+        "SentinelONE": {
+          "LastExecution": "2026-10-11T07:00:00Z"
+        },
+        "FortiSIEM": {
+          "LastExecution": "2026-10-10T23:59:59.999Z"
+        },
+        "QRadar": {
+          "LastExecution": "0001-01-01T00:00:00Z"
+        },
+        "Debug": {
+          "Active": false,
+          "LastExecution": "0001-01-01T00:00:00Z"
+        }
+      },
+      {
+        "Name": "debugger",
+        "Profile": {
+          "Host": "localhost:8080",
+          "Token": "tok: with colon"
+        },
+        "SentinelONE": {
+          "LastExecution": "0001-01-01T00:00:00Z"
+        },
+        "FortiSIEM": {
+          "LastExecution": "0001-01-01T00:00:00Z"
+        },
+        "QRadar": {
+          "LastExecution": "0001-01-01T00:00:00Z"
+        },
+        "Debug": {
+          "Active": true,
+          "LastExecution": "2026-01-15T12:30:00.0000005-05:00"
+        }
+      }
+    ]
+  },
+  "file_after": "profiles:\n    - name: default\n      profile:\n        host: https://api.redcarbon.ai\n        token: tok-default\n      qradar:\n        lastExecution: 2026-10-11T09:41:12.123456789+02:00\n    - name: Secondary\n      profile:\n        host: https://eu.redcarbon.ai:443\n        token: \"0123456789\"\n      sentinelone:\n        lastExecution: 2026-10-11T07:00:00Z\n      fortisiem:\n        lastExecution: 2026-10-10T23:59:59.999Z\n    - name: debugger\n      profile:\n        host: localhost:8080\n        token: 'tok: with colon'\n      debug:\n        active: true\n        lastExecution: 2026-01-15T12:30:00.0000005-05:00\nversion: \"1.0\"\n"
+}

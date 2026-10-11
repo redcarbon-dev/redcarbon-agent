@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -18,7 +17,6 @@ import (
 	"pkg.redcarbon.ai/internal/scheduler"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
 	"pkg.redcarbon.ai/internal/build"
 )
@@ -42,21 +40,9 @@ func init() {
 		os.Exit(1)
 	}
 
-	viper.SetConfigName(".config")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath(confDir)
-
-	if err = viper.ReadInConfig(); err != nil {
-		var e viper.ConfigFileNotFoundError
-		if !errors.As(err, &e) {
-			slog.Error("error while reading the configuration", "error", err)
-			os.Exit(1)
-		}
-
-		if err = viper.SafeWriteConfig(); err != nil {
-			slog.Error("error while writing the configuration", "error", err)
-			os.Exit(1)
-		}
+	if err = config.Init(confDir); err != nil {
+		slog.Error("error while initializing the configuration", "error", err)
+		os.Exit(1)
 	}
 }
 

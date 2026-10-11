@@ -1,0 +1,8 @@
+{
+  "file": "02_fresh_loaded.yaml",
+  "config": {
+    "Version": "1.0",
+    "Profiles": []
+  },
+  "file_after": "profiles: []\nversion: \"1.0\"\n"
+}

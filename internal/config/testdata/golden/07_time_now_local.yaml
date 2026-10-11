@@ -1,0 +1,23 @@
+profiles:
+    - name: default
+      profile:
+        host: https://api.redcarbon.ai
+        token: tok-default
+      qradar:
+        lastExecution: 2026-10-11T09:44:46.238764+02:00
+    - name: Secondary
+      profile:
+        host: https://eu.redcarbon.ai:443
+        token: "0123456789"
+      sentinelone:
+        lastExecution: 2026-10-11T07:00:00Z
+      fortisiem:
+        lastExecution: 2026-10-10T23:59:59.999Z
+    - name: debugger
+      profile:
+        host: localhost:8080
+        token: 'tok: with colon'
+      debug:
+        active: true
+        lastExecution: 2026-01-15T12:30:00.0000005-05:00
+version: "1.0"

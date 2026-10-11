@@ -1,0 +1,69 @@
+{
+  "file": "04_profile_add_three.yaml",
+  "config": {
+    "Version": "1.0",
+    "Profiles": [
+      {
+        "Name": "default",
+        "Profile": {
+          "Host": "https://api.redcarbon.ai",
+          "Token": "tok-default"
+        },
+        "SentinelONE": {
+          "LastExecution": "0001-01-01T00:00:00Z"
+        },
+        "FortiSIEM": {
+          "LastExecution": "0001-01-01T00:00:00Z"
+        },
+        "QRadar": {
+          "LastExecution": "0001-01-01T00:00:00Z"
+        },
+        "Debug": {
+          "Active": false,
+          "LastExecution": "0001-01-01T00:00:00Z"
+        }
+      },
+      {
+        "Name": "Secondary",
+        "Profile": {
+          "Host": "https://eu.redcarbon.ai:443",
+          "Token": "0123456789"
+        },
+        "SentinelONE": {
+          "LastExecution": "0001-01-01T00:00:00Z"
+        },
+        "FortiSIEM": {
+          "LastExecution": "0001-01-01T00:00:00Z"
+        },
+        "QRadar": {
+          "LastExecution": "0001-01-01T00:00:00Z"
+        },
+        "Debug": {
+          "Active": false,
+          "LastExecution": "0001-01-01T00:00:00Z"
+        }
+      },
+      {
+        "Name": "debugger",
+        "Profile": {
+          "Host": "localhost:8080",
+          "Token": "tok: with colon"
+        },
+        "SentinelONE": {
+          "LastExecution": "0001-01-01T00:00:00Z"
+        },
+        "FortiSIEM": {
+          "LastExecution": "0001-01-01T00:00:00Z"
+        },
+        "QRadar": {
+          "LastExecution": "0001-01-01T00:00:00Z"
+        },
+        "Debug": {
+          "Active": false,
+          "LastExecution": "0001-01-01T00:00:00Z"
+        }
+      }
+    ]
+  },
+  "file_after": "profiles:\n    - name: default\n      profile:\n        host: https://api.redcarbon.ai\n        token: tok-default\n    - name: Secondary\n      profile:\n        host: https://eu.redcarbon.ai:443\n        token: \"0123456789\"\n    - name: debugger\n      profile:\n        host: localhost:8080\n        token: 'tok: with colon'\nversion: \"1.0\"\n"
+}
