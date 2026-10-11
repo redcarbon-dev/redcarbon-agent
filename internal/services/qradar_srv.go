@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"uuid"
 
 	"connectrpc.com/connect"
-	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"pkg.redcarbon.ai/internal/config"
 	"pkg.redcarbon.ai/internal/services/qradar"
@@ -54,7 +54,7 @@ func newQRadarService(conf *agents_publicv1.QRadarJobConfiguration, agentsCli ag
 func (s srv) RunService(ctx context.Context) {
 	l := logrus.WithFields(logrus.Fields{
 		"service": "qradar",
-		"trace":   uuid.NewString(),
+		"trace":   uuid.New().String(),
 		"profile": s.profile.Name,
 	})
 

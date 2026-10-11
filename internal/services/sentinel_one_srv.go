@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"uuid"
 
 	"connectrpc.com/connect"
-	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"pkg.redcarbon.ai/internal/config"
 	"pkg.redcarbon.ai/internal/services/sentinel_one"
@@ -31,7 +31,7 @@ func newSentinelOneService(conf *agents_publicv1.SentinelOneJobConfiguration, ag
 func (s srvSentinel) RunService(ctx context.Context) {
 	l := logrus.WithFields(logrus.Fields{
 		"service": "sentinel-one",
-		"trace":   uuid.NewString(),
+		"trace":   uuid.New().String(),
 		"profile": s.profile.Name,
 	})
 
