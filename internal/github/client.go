@@ -14,7 +14,6 @@ import (
 )
 
 const (
-	DefaultBaseURL = "https://api.github.com"
 	apiVersion     = "2022-11-28"
 	defaultTimeout = 30 * time.Second
 )
