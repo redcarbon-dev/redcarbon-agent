@@ -12,19 +12,19 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/google/go-github/v92/github"
 	"github.com/inconshreveable/go-update"
 
 	"golang.org/x/mod/semver"
 
 	"pkg.redcarbon.ai/internal/build"
+	"pkg.redcarbon.ai/internal/github"
 	"pkg.redcarbon.ai/internal/utils"
 )
 
 func (r RoutineConfig) UpdateRoutine(ctx context.Context) {
 	r.Logger().Info("Starting update routine")
 
-	rel, _, err := r.gh.Repositories.GetLatestRelease(ctx, "redcarbon-dev", "redcarbon-agent")
+	rel, err := r.gh.LatestRelease(ctx, "redcarbon-dev", "redcarbon-agent")
 	if err != nil {
 		r.Logger().Errorf("Error while retrieving the latest release: %v", err)
 		return
@@ -41,18 +41,14 @@ func (r RoutineConfig) UpdateRoutine(ctx context.Context) {
 	}
 
 	for _, asset := range rel.Assets {
-		if asset.Name == nil {
-			continue
-		}
-
-		if strings.Contains(*asset.Name, fmt.Sprintf("%s.tar.gz", build.Architecture)) {
-			checksum, err := r.retrieveChecksumForAsset(*asset.Name, rel.Assets)
+		if strings.Contains(asset.Name, fmt.Sprintf("%s.tar.gz", build.Architecture)) {
+			checksum, err := r.retrieveChecksumForAsset(asset.Name, rel.Assets)
 			if err != nil {
 				r.Logger().Errorf("Error while retrieving the checksum for the latest version for error %v", err)
 				return
 			}
 
-			err = r.doUpdate(*asset.BrowserDownloadURL, *asset.Name, checksum)
+			err = r.doUpdate(asset.BrowserDownloadURL, asset.Name, checksum)
 			if err != nil {
 				r.Logger().Errorf("Unexpected error while updating the binary %v", err)
 				return
@@ -89,13 +85,9 @@ func (r RoutineConfig) doUpdate(url string, name string, hexChecksum string) err
 	return nil
 }
 
-func (r RoutineConfig) retrieveChecksumForAsset(assetName string, assets []*github.ReleaseAsset) (string, error) {
+func (r RoutineConfig) retrieveChecksumForAsset(assetName string, assets []github.Asset) (string, error) {
 	for _, asset := range assets {
-		if asset.Name == nil {
-			continue
-		}
-
-		if strings.Contains(*asset.Name, "checksums.txt") {
+		if strings.Contains(asset.Name, "checksums.txt") {
 			checksums, err := r.retrieveChecksumsList(asset)
 			if err != nil {
 				return "", err
@@ -112,8 +104,8 @@ func (r RoutineConfig) retrieveChecksumForAsset(assetName string, assets []*gith
 	return "", fmt.Errorf("checksum not found")
 }
 
-func (r RoutineConfig) retrieveChecksumsList(asset *github.ReleaseAsset) ([]string, error) {
-	resp, err := http.Get(*asset.BrowserDownloadURL)
+func (r RoutineConfig) retrieveChecksumsList(asset github.Asset) ([]string, error) {
+	resp, err := http.Get(asset.BrowserDownloadURL)
 	if err != nil {
 		return nil, err
 	}

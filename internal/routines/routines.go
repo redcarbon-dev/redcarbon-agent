@@ -1,10 +1,10 @@
 package routines
 
 import (
-	"github.com/google/go-github/v92/github"
 	"github.com/sirupsen/logrus"
 	"pkg.redcarbon.ai/internal/cli"
 	"pkg.redcarbon.ai/internal/config"
+	"pkg.redcarbon.ai/internal/github"
 	"pkg.redcarbon.ai/proto/redcarbon/agents_public/v1/agents_publicv1connect"
 )
 
