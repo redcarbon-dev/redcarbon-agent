@@ -27,8 +27,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: bufbuild/buf-setup-action@v1.50.0
-      - uses: bufbuild/buf-lint-action@v1.1.1
-      - uses: bufbuild/buf-breaking-action@v1.1.4
+      - uses: bufbuild/buf-action@v1.6.0
         with:
-          against: "https://github.com/${GITHUB_REPOSITORY}.git#branch=main"
+          version: 1.73.0
+          lint: true
+          breaking: true
+          breaking_against: "https://github.com/${{ github.repository }}.git#branch=main"
+          format: false
+          push: false
+          archive: false
+          pr_comment: false

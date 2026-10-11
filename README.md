@@ -39,7 +39,7 @@ This is the repository containing the source code of the RedCarbon Agent.
 
 To build the Agent you need:
 
-- [Go](https://go.dev/) 1.24 or later. You'll also need to set your `$GOPATH` and have `$GOPATH/bin` in your path.
+- [Go](https://go.dev/) 1.27 or later. You'll also need to set your `$GOPATH` and have `$GOPATH/bin` in your path.
 
 ## Installation
 

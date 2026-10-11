@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/go-co-op/gocron"
-	"github.com/google/go-github/v50/github"
+	"github.com/google/go-github/v92/github"
 	"golang.org/x/sync/errgroup"
 	"pkg.redcarbon.ai/cmd/profile"
 	"pkg.redcarbon.ai/internal/cli"
@@ -89,7 +89,10 @@ func run(cmd *cobra.Command, args []string) {
 	s := gocron.NewScheduler(time.UTC)
 
 	clientFactory := cli.NewClientFactory()
-	gh := github.NewClient(nil)
+	gh, err := github.NewClient()
+	if err != nil {
+		logrus.WithError(err).Fatal("error while creating the GitHub client")
+	}
 	done := make(chan bool)
 
 	// Jobs must be registered before starting the scheduler: registering them
