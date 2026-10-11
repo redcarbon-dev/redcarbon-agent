@@ -8,10 +8,12 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"maps"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"slices"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -93,7 +95,8 @@ func buildArchive(t *testing.T, files map[string]string) []byte {
 
 	require.NoError(t, tw.WriteHeader(&tar.Header{Name: "redcarbon_1.2.3_linux_amd64/", Typeflag: tar.TypeDir, Mode: 0o755}))
 
-	for name, content := range files {
+	for _, name := range slices.Sorted(maps.Keys(files)) {
+		content := files[name]
 		require.NoError(t, tw.WriteHeader(&tar.Header{Name: name, Typeflag: tar.TypeReg, Mode: 0o755, Size: int64(len(content))}))
 		_, err := tw.Write([]byte(content))
 		require.NoError(t, err)
