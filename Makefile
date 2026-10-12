@@ -12,7 +12,7 @@ test:
 
 e2e:
 	docker build -f test/e2e/Dockerfile -t redcarbon-agent-e2e .
-	docker run --rm redcarbon-agent-e2e
+	docker run --rm --network none redcarbon-agent-e2e
 
 GOBIN=${PWD}/.bin
 
