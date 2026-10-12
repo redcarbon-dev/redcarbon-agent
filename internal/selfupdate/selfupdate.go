@@ -7,9 +7,15 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
+	"time"
 )
 
 var rename = os.Rename
+
+// Temporary files untouched for this long are leftovers of an interrupted Replace (e.g. the
+// process was killed mid-copy). Fresher ones may belong to a Replace still in flight.
+const staleTempAge = time.Hour
 
 // Executable returns the path of the running binary with symlinks resolved, so the
 // replacement lands on the file that is actually executed rather than on a link to it.
@@ -41,9 +47,12 @@ func Replace(target string, src io.Reader) (err error) {
 	}
 
 	dir := filepath.Dir(target)
+	prefix := "." + filepath.Base(target) + ".new-"
+
+	removeStaleTemps(dir, prefix)
 
 	// The temporary file must live next to target: rename(2) is only atomic within a filesystem.
-	tmp, err := os.CreateTemp(dir, "."+filepath.Base(target)+".new-*")
+	tmp, err := os.CreateTemp(dir, prefix+"*")
 	if err != nil {
 		return err
 	}
@@ -85,6 +94,28 @@ func Replace(target string, src io.Reader) (err error) {
 	_ = syncDir(dir)
 
 	return nil
+}
+
+// removeStaleTemps deletes, best effort, the temporary files that interrupted replacements
+// left next to the binary: their names are random, so nothing else would ever reclaim them.
+func removeStaleTemps(dir, prefix string) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return
+	}
+
+	for _, e := range entries {
+		if !e.Type().IsRegular() || !strings.HasPrefix(e.Name(), prefix) {
+			continue
+		}
+
+		info, err := e.Info()
+		if err != nil || time.Since(info.ModTime()) < staleTempAge {
+			continue
+		}
+
+		_ = os.Remove(filepath.Join(dir, e.Name()))
+	}
 }
 
 func syncDir(dir string) error {

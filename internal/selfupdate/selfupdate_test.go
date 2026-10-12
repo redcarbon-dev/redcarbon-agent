@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"testing"
 	"testing/iotest"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -88,6 +89,30 @@ func TestReplaceKeepsOpenHandlesOnOldContent(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "old", string(got))
 	assertContent(t, target, "new")
+}
+
+func TestReplaceRemovesStaleTemps(t *testing.T) {
+	target := writeTarget(t, "old", 0o755)
+	dir := filepath.Dir(target)
+
+	stale := filepath.Join(dir, ".redcarbon.new-interrupted")
+	require.NoError(t, os.WriteFile(stale, []byte("partial"), 0o600))
+	old := time.Now().Add(-2 * staleTempAge)
+	require.NoError(t, os.Chtimes(stale, old, old))
+
+	fresh := filepath.Join(dir, ".redcarbon.new-inflight")
+	require.NoError(t, os.WriteFile(fresh, []byte("partial"), 0o600))
+
+	unrelated := filepath.Join(dir, "config.yaml")
+	require.NoError(t, os.WriteFile(unrelated, []byte("keep"), 0o600))
+	require.NoError(t, os.Chtimes(unrelated, old, old))
+
+	require.NoError(t, Replace(target, strings.NewReader("new")))
+
+	assertContent(t, target, "new")
+	assert.NoFileExists(t, stale)
+	assert.FileExists(t, fresh)
+	assert.FileExists(t, unrelated)
 }
 
 func TestReplaceConcurrent(t *testing.T) {
