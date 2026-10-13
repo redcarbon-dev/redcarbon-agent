@@ -1,27 +1,46 @@
 package routines
 
 import (
+	"archive/tar"
 	"bytes"
+	"compress/gzip"
 	"context"
-	"crypto"
+	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
-	"os"
-	"path/filepath"
+	"path"
 	"strings"
-
-	"github.com/inconshreveable/go-update"
+	"sync"
+	"time"
 
 	"golang.org/x/mod/semver"
 
 	"pkg.redcarbon.ai/internal/build"
 	"pkg.redcarbon.ai/internal/github"
-	"pkg.redcarbon.ai/internal/utils"
+	"pkg.redcarbon.ai/internal/selfupdate"
+)
+
+var (
+	downloadClient = &http.Client{Timeout: 10 * time.Minute}
+	executable     = selfupdate.Executable
+
+	// Release archives are a few tens of MiB and are buffered in memory to verify their checksum.
+	maxDownloadSize int64 = 256 << 20
+
+	// Every profile schedules its own update routine; only one may swap the binary at a time.
+	updateMu sync.Mutex
 )
 
 func (r RoutineConfig) UpdateRoutine(ctx context.Context) {
+	if !updateMu.TryLock() {
+		r.Logger().Info("Skipping update as another profile is already updating the agent")
+		return
+	}
+	defer updateMu.Unlock()
+
 	r.Logger().Info("Starting update routine")
 
 	rel, err := r.gh.LatestRelease(ctx, "redcarbon-dev", "redcarbon-agent")
@@ -41,145 +60,165 @@ func (r RoutineConfig) UpdateRoutine(ctx context.Context) {
 	}
 
 	for _, asset := range rel.Assets {
-		if strings.Contains(asset.Name, fmt.Sprintf("%s.tar.gz", build.Architecture)) {
-			checksum, err := r.retrieveChecksumForAsset(asset.Name, rel.Assets)
-			if err != nil {
-				r.Logger().Error("Error while retrieving the checksum for the latest version", "error", err)
-				return
-			}
+		if !strings.HasSuffix(asset.Name, fmt.Sprintf("_%s.tar.gz", build.Architecture)) {
+			continue
+		}
 
-			err = r.doUpdate(asset.BrowserDownloadURL, asset.Name, checksum)
-			if err != nil {
-				r.Logger().Error("Unexpected error while updating the binary", "error", err)
-				return
-			}
-
-			r.Logger().Info("Update executed successfully! Shutting down the agent...")
-
-			r.done <- true
-
+		checksum, err := retrieveChecksumForAsset(ctx, asset.Name, rel.Assets)
+		if err != nil {
+			r.Logger().Error("Error while retrieving the checksum for the latest version", "error", err)
 			return
 		}
-	}
-}
 
-func (r RoutineConfig) doUpdate(url string, name string, hexChecksum string) error {
-	executable, err := r.downloadAsset(url, name, hexChecksum)
-	if err != nil {
-		return err
-	}
-
-	r.Logger().Info("Performing update...")
-
-	err = update.Apply(executable, update.Options{})
-	if err != nil {
-		r.Logger().Error("Rollbacking for error found during update", "error", err)
-
-		if rErr := update.RollbackError(err); rErr != nil {
-			r.Logger().Error("Failed to rollback from bad update", "error", rErr)
-			os.Exit(1)
+		if err := r.doUpdate(ctx, asset, checksum); err != nil {
+			r.Logger().Error("Unexpected error while updating the binary", "error", err)
+			return
 		}
 
-		r.Logger().Error("Rollback executed successfully")
-	}
+		r.Logger().Info("Update executed successfully! Shutting down the agent...")
 
-	return nil
-}
-
-func (r RoutineConfig) retrieveChecksumForAsset(assetName string, assets []github.Asset) (string, error) {
-	for _, asset := range assets {
-		if strings.Contains(asset.Name, "checksums.txt") {
-			checksums, err := r.retrieveChecksumsList(asset)
-			if err != nil {
-				return "", err
-			}
-
-			for _, checksum := range checksums {
-				if strings.Contains(checksum, assetName) {
-					return strings.Split(checksum, " ")[0], nil
-				}
-			}
+		// Only one receiver ever reads done: once shutdown has started, ctx is cancelled instead.
+		select {
+		case r.done <- true:
+		case <-ctx.Done():
 		}
+
+		return
 	}
 
-	return "", fmt.Errorf("checksum not found")
+	r.Logger().Error("No asset found for the agent architecture", "arch", build.Architecture, "release", rel.TagName)
 }
 
-func (r RoutineConfig) retrieveChecksumsList(asset github.Asset) ([]string, error) {
-	resp, err := http.Get(asset.BrowserDownloadURL)
+func (r RoutineConfig) doUpdate(ctx context.Context, asset github.Asset, hexChecksum string) error {
+	target, err := executable()
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("locating the running executable: %w", err)
 	}
 
-	defer resp.Body.Close()
-
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return strings.Split(string(data), "\n"), nil
-}
-
-func (r RoutineConfig) downloadAsset(url string, name string, hexChecksum string) (io.Reader, error) {
 	r.Logger().Info("Downloading new version...")
 
-	resp, err := http.Get(url)
+	archive, err := download(ctx, asset.BrowserDownloadURL)
+	if err != nil {
+		return err
+	}
+
+	if err := verifyChecksum(archive, hexChecksum); err != nil {
+		return err
+	}
+
+	binary, err := openInArchive(archive, path.Join(strings.TrimSuffix(asset.Name, ".tar.gz"), "bin", "redcarbon"))
+	if err != nil {
+		return err
+	}
+	defer binary.Close()
+
+	r.Logger().Info("Replacing the executable...", "path", target)
+
+	return selfupdate.Replace(target, binary)
+}
+
+func retrieveChecksumForAsset(ctx context.Context, assetName string, assets []github.Asset) (string, error) {
+	for _, asset := range assets {
+		if !strings.HasSuffix(asset.Name, "checksums.txt") {
+			continue
+		}
+
+		checksums, err := download(ctx, asset.BrowserDownloadURL)
+		if err != nil {
+			return "", err
+		}
+
+		return findChecksum(checksums, assetName)
+	}
+
+	return "", errors.New("checksums file not found in the release")
+}
+
+func findChecksum(checksums []byte, assetName string) (string, error) {
+	for line := range strings.Lines(string(checksums)) {
+		fields := strings.Fields(line)
+		if len(fields) == 2 && fields[1] == assetName {
+			return fields[0], nil
+		}
+	}
+
+	return "", fmt.Errorf("checksum for %s not found", assetName)
+}
+
+func download(ctx context.Context, url string) ([]byte, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("User-Agent", build.UserAgent())
+
+	resp, err := downloadClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
 
 	defer resp.Body.Close()
 
-	archive, err := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("downloading %s: unexpected status %s", url, resp.Status)
+	}
+
+	b, err := io.ReadAll(io.LimitReader(resp.Body, maxDownloadSize+1))
 	if err != nil {
 		return nil, err
 	}
 
-	err = r.verifyChecksum(bytes.NewReader(archive), hexChecksum)
-	if err != nil {
-		return nil, err
+	if int64(len(b)) > maxDownloadSize {
+		return nil, fmt.Errorf("downloading %s: larger than %d bytes", url, maxDownloadSize)
 	}
 
-	r.Logger().Info("Extracting the binary...")
-
-	outDir, err := os.MkdirTemp("", "*_redcarbon_agent")
-	if err != nil {
-		return nil, err
-	}
-
-	if err := utils.Untar(bytes.NewReader(archive), outDir); err != nil {
-		return nil, err
-	}
-
-	target := filepath.Join(outDir, strings.Replace(name, ".tar.gz", "", -1), "bin", "redcarbon")
-
-	file, err := os.Open(target)
-	if err != nil {
-		return nil, err
-	}
-
-	return file, nil
+	return b, nil
 }
 
-func (r RoutineConfig) verifyChecksum(file io.Reader, hexChecksum string) error {
-	checksum, err := hex.DecodeString(hexChecksum)
+func verifyChecksum(content []byte, hexChecksum string) error {
+	expected, err := hex.DecodeString(hexChecksum)
 	if err != nil {
 		return err
 	}
 
-	content, err := io.ReadAll(file)
-	if err != nil {
-		return err
-	}
+	actual := sha256.Sum256(content)
 
-	h := crypto.SHA256.New()
-	h.Write(content)
-	fileChecksum := h.Sum([]byte{})
-
-	if !bytes.Equal(fileChecksum, checksum) {
-		return fmt.Errorf("updated file has wrong checksum. Expected: %x, got: %x", checksum, fileChecksum)
+	if !bytes.Equal(actual[:], expected) {
+		return fmt.Errorf("updated file has wrong checksum. Expected: %x, got: %x", expected, actual)
 	}
 
 	return nil
+}
+
+func openInArchive(archive []byte, name string) (_ io.ReadCloser, err error) {
+	gzr, err := gzip.NewReader(bytes.NewReader(archive))
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err != nil {
+			_ = gzr.Close()
+		}
+	}()
+
+	tr := tar.NewReader(gzr)
+
+	for {
+		header, err := tr.Next()
+		if errors.Is(err, io.EOF) {
+			return nil, fmt.Errorf("%s not found in the archive", name)
+		}
+
+		if err != nil {
+			return nil, err
+		}
+
+		if header.Typeflag == tar.TypeReg && path.Clean(header.Name) == name {
+			return struct {
+				io.Reader
+				io.Closer
+			}{tr, gzr}, nil
+		}
+	}
 }
