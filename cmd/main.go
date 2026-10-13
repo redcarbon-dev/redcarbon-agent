@@ -79,7 +79,7 @@ func run(cmd *cobra.Command, args []string) {
 	g, ctx := errgroup.WithContext(ctx)
 
 	clientFactory := cli.NewClientFactory()
-	gh := github.NewClient(nil, github.DefaultBaseURL)
+	gh := github.NewClient(nil, build.GitHubAPIURL)
 	done := make(chan bool)
 
 	var jobs []scheduler.Job
