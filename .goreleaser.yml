@@ -4,7 +4,12 @@ project_name: redcarbon
 
 release:
   prerelease: auto
-  name_template: "RedCarbon Agent {{.Version}}"
+  mode: keep-existing
+  # release-please creates the release as a draft named after the tag; GoReleaser
+  # uploads the assets into it and only then publishes it, so agents never see a
+  # release without assets.
+  use_existing_draft: true
+  name_template: "{{ .Tag }}"
 
 before:
   hooks:

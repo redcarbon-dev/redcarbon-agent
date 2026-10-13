@@ -6,5 +6,8 @@ updates:
       interval: "daily"
       time: "04:00"
       timezone: "Etc/UTC"
+    # Action bumps don't change the agent binary: keep them out of releases.
+    commit-message:
+      prefix: "ci"
     cooldown:
       default-days: 2
