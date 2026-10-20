@@ -1,4 +1,4 @@
-FROM golang:1.27
+FROM golang:1.27.3
 
 RUN useradd --create-home e2e
 USER e2e
