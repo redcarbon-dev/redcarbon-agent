@@ -1,6 +1,6 @@
 module pkg.redcarbon.ai
 
-go 1.27
+go 1.27.3
 
 require (
 	connectrpc.com/connect v1.21.0
