@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-	"time"
 
 	"go.yaml.in/yaml/v3"
 )
@@ -29,34 +28,13 @@ type Configuration struct {
 }
 
 type Profile struct {
-	Name        string               `yaml:"name"`
-	Profile     ProfileConfiguration `yaml:"profile"`
-	SentinelONE SentinelONE          `yaml:"sentinelone,omitempty"`
-	FortiSIEM   FortiSIEM            `yaml:"fortisiem,omitempty"`
-	QRadar      QRadar               `yaml:"qradar,omitempty"`
-	Debug       Debug                `yaml:"debug,omitempty"`
+	Name    string               `yaml:"name"`
+	Profile ProfileConfiguration `yaml:"profile"`
 }
 
 type ProfileConfiguration struct {
 	Host  string `yaml:"host"`
 	Token string `yaml:"token"`
-}
-
-type Debug struct {
-	Active        bool      `yaml:"active"`
-	LastExecution time.Time `yaml:"lastExecution"`
-}
-
-type SentinelONE struct {
-	LastExecution time.Time `yaml:"lastExecution"`
-}
-
-type FortiSIEM struct {
-	LastExecution time.Time `yaml:"lastExecution"`
-}
-
-type QRadar struct {
-	LastExecution time.Time `yaml:"lastExecution"`
 }
 
 // Init points the package at the configuration file in dir, creating an empty one if it does not exist.
@@ -175,7 +153,7 @@ func read() (map[string]any, *yaml.Node, error) {
 		return nil, nil, fmt.Errorf("parsing %s: %w", configPath, err)
 	}
 
-	renameKeys(&node, strings.ToLower)
+	lowercaseKeys(&node)
 
 	var doc map[string]any
 	if err := node.Decode(&doc); err != nil {
@@ -185,27 +163,18 @@ func read() (map[string]any, *yaml.Node, error) {
 		doc = map[string]any{}
 	}
 
-	// lastExecution is the only yaml tag that is not lowercase;
-	// TestEveryFieldSurvivesSaveAndLoad fails if another one is added.
-	renameKeys(&node, func(k string) string {
-		if k == "lastexecution" {
-			return "lastExecution"
-		}
-		return k
-	})
-
 	return doc, &node, nil
 }
 
-func renameKeys(n *yaml.Node, rename func(string) string) {
+func lowercaseKeys(n *yaml.Node) {
 	if n.Kind == yaml.MappingNode {
 		for i := 0; i < len(n.Content); i += 2 {
-			n.Content[i].Value = rename(n.Content[i].Value)
+			n.Content[i].Value = strings.ToLower(n.Content[i].Value)
 		}
 	}
 
 	for _, c := range n.Content {
-		renameKeys(c, rename)
+		lowercaseKeys(c)
 	}
 }
 
@@ -247,7 +216,7 @@ func writeFile(name string, data []byte) error {
 	tmp, err := os.CreateTemp(filepath.Dir(name), filepath.Base(name)+".tmp-*")
 	if errors.Is(err, fs.ErrPermission) {
 		// The directory may be read-only for the agent user while the file itself is
-		// writable: a non-atomic write beats failing to persist LastExecution at all.
+		// writable: a non-atomic write beats failing to persist the configuration at all.
 		return os.WriteFile(name, data, perm)
 	}
 	if err != nil {
@@ -276,13 +245,6 @@ type legacyConfiguration struct {
 	Server struct {
 		Host string
 	}
-	QRadar      legacyService
-	FortiSIEM   legacyService
-	SentinelOne legacyService `yaml:"sentinel_one"`
-}
-
-type legacyService struct {
-	LastExecution time.Time `yaml:"last_execution"`
 }
 
 // migrateLegacy converts the flat format written by agents before profiles were introduced.
@@ -298,10 +260,7 @@ func (c *Configuration) migrateLegacy(node *yaml.Node) {
 	}
 
 	c.Profiles = append(c.Profiles, Profile{
-		Name:        "default",
-		Profile:     ProfileConfiguration{Host: legacy.Server.Host, Token: legacy.Auth.AccessToken},
-		QRadar:      QRadar{LastExecution: legacy.QRadar.LastExecution},
-		FortiSIEM:   FortiSIEM{LastExecution: legacy.FortiSIEM.LastExecution},
-		SentinelONE: SentinelONE{LastExecution: legacy.SentinelOne.LastExecution},
+		Name:    "default",
+		Profile: ProfileConfiguration{Host: legacy.Server.Host, Token: legacy.Auth.AccessToken},
 	})
 }

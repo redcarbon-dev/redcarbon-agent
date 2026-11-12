@@ -411,13 +411,17 @@ func (gh *fakeGitHub) serveHTTP(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(content)
 }
 
+// fakeRedCarbonAPI serves the public Agent API; the Agent's proxy requests are queued with enqueueProxyRequest.
 type fakeRedCarbonAPI struct {
 	agents_publicv1connect.UnimplementedAgentsPublicAPIsV1SrvHandler
 
 	URL string
 
-	mu         sync.Mutex
-	heartbeats []heartbeat
+	mu             sync.Mutex
+	procedures     []string
+	heartbeats     []heartbeat
+	proxyRequests  []*agents_publicv1.AgentRequest
+	proxyResponses []*agents_publicv1.SubmitAgentResponseRequest
 }
 
 type heartbeat struct {
@@ -431,11 +435,25 @@ func newFakeRedCarbonAPI(t *testing.T) *fakeRedCarbonAPI {
 	mux := http.NewServeMux()
 	mux.Handle(agents_publicv1connect.NewAgentsPublicAPIsV1SrvHandler(api))
 
-	srv := httptest.NewServer(mux)
+	// Procedures are recorded at the HTTP level so that calls to RPCs this fake does not implement are seen too.
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		api.mu.Lock()
+		api.procedures = append(api.procedures, r.URL.Path)
+		api.mu.Unlock()
+
+		mux.ServeHTTP(w, r)
+	}))
 	t.Cleanup(srv.Close)
 	api.URL = srv.URL
 
 	return api
+}
+
+func (api *fakeRedCarbonAPI) calledProcedures() []string {
+	api.mu.Lock()
+	defer api.mu.Unlock()
+
+	return slices.Clone(api.procedures)
 }
 
 func (api *fakeRedCarbonAPI) receivedHeartbeats() []heartbeat {
@@ -443,6 +461,20 @@ func (api *fakeRedCarbonAPI) receivedHeartbeats() []heartbeat {
 	defer api.mu.Unlock()
 
 	return slices.Clone(api.heartbeats)
+}
+
+func (api *fakeRedCarbonAPI) enqueueProxyRequest(req *agents_publicv1.AgentRequest) {
+	api.mu.Lock()
+	defer api.mu.Unlock()
+
+	api.proxyRequests = append(api.proxyRequests, req)
+}
+
+func (api *fakeRedCarbonAPI) receivedProxyResponses() []*agents_publicv1.SubmitAgentResponseRequest {
+	api.mu.Lock()
+	defer api.mu.Unlock()
+
+	return slices.Clone(api.proxyResponses)
 }
 
 func (api *fakeRedCarbonAPI) HZ(_ context.Context, req *connect.Request[agents_publicv1.HZRequest]) (*connect.Response[agents_publicv1.HZResponse], error) {
@@ -453,10 +485,21 @@ func (api *fakeRedCarbonAPI) HZ(_ context.Context, req *connect.Request[agents_p
 	return connect.NewResponse(&agents_publicv1.HZResponse{ReceivedAt: timestamppb.Now()}), nil
 }
 
-func (*fakeRedCarbonAPI) FetchAgentConfiguration(context.Context, *connect.Request[agents_publicv1.FetchAgentConfigurationRequest]) (*connect.Response[agents_publicv1.FetchAgentConfigurationResponse], error) {
-	return connect.NewResponse(&agents_publicv1.FetchAgentConfigurationResponse{}), nil
+func (api *fakeRedCarbonAPI) FetchAgentRequests(context.Context, *connect.Request[agents_publicv1.FetchAgentRequestsRequest]) (*connect.Response[agents_publicv1.FetchAgentRequestsResponse], error) {
+	api.mu.Lock()
+	defer api.mu.Unlock()
+
+	requests := api.proxyRequests
+	api.proxyRequests = nil
+
+	return connect.NewResponse(&agents_publicv1.FetchAgentRequestsResponse{Requests: requests}), nil
 }
 
-func (*fakeRedCarbonAPI) FetchAgentRequests(context.Context, *connect.Request[agents_publicv1.FetchAgentRequestsRequest]) (*connect.Response[agents_publicv1.FetchAgentRequestsResponse], error) {
-	return connect.NewResponse(&agents_publicv1.FetchAgentRequestsResponse{}), nil
+func (api *fakeRedCarbonAPI) SubmitAgentResponse(_ context.Context, req *connect.Request[agents_publicv1.SubmitAgentResponseRequest]) (*connect.Response[agents_publicv1.SubmitAgentResponseResponse], error) {
+	api.mu.Lock()
+	defer api.mu.Unlock()
+
+	api.proxyResponses = append(api.proxyResponses, req.Msg)
+
+	return connect.NewResponse(&agents_publicv1.SubmitAgentResponseResponse{}), nil
 }

@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -9,7 +10,6 @@ import (
 	"strings"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -39,7 +39,8 @@ type viperResult struct {
 }
 
 // Expected outputs record what the viper-based implementation loaded from, and
-// wrote back to, each golden input. Panic is set where viper crashed or exited.
+// wrote back to, each golden input, restricted to the fields of the current
+// profile model. Panic is set where viper crashed or exited.
 // LoadConfiguration exits the process on error, so load is called directly.
 func TestLoadMatchesViper(t *testing.T) {
 	deviations := map[string]func(t *testing.T, c Configuration, err error, input, after string){
@@ -56,18 +57,19 @@ func TestLoadMatchesViper(t *testing.T) {
 		},
 		"23_hand_quoted_time.yaml": func(t *testing.T, c Configuration, err error, input, after string) {
 			require.NoError(t, err, "viper could not decode a quoted timestamp")
-			assert.True(t, c.Profiles[0].QRadar.LastExecution.Equal(time.Date(2026, 10, 11, 9, 41, 12, 0, time.UTC)))
+			assert.Equal(t, []Profile{{Name: "default", Profile: ProfileConfiguration{Host: "https://api.redcarbon.ai", Token: "tok"}}}, c.Profiles)
 			assert.Equal(t, input, after)
 		},
 		"24_hand_profiles_no_version_plus_legacy.yaml": func(t *testing.T, c Configuration, err error, _, _ string) {
 			require.NoError(t, err)
-			require.Len(t, c.Profiles, 2)
-			assert.True(t, c.Profiles[0].QRadar.LastExecution.IsZero(), "viper attached the legacy timestamp to Profiles[0]")
-			assert.Equal(t, "default", c.Profiles[1].Name)
-			assert.False(t, c.Profiles[1].QRadar.LastExecution.IsZero())
+			assert.Equal(t, []Profile{
+				{Name: "first", Profile: ProfileConfiguration{Host: "https://api.redcarbon.ai", Token: "tok-first"}},
+				{Name: "default", Profile: ProfileConfiguration{Token: "tok-legacy"}},
+			}, c.Profiles, "viper attached the legacy profile to Profiles[0]")
 		},
-		"26_hand_weak_types.yaml": func(t *testing.T, _ Configuration, err error, input, after string) {
-			assert.Error(t, err, "viper weakly decoded active: \"true\" and the octal token 0123 as \"83\"")
+		"26_hand_weak_types.yaml": func(t *testing.T, c Configuration, err error, input, after string) {
+			require.NoError(t, err)
+			assert.Equal(t, "0123", c.Profiles[0].Profile.Token, "viper weakly decoded the octal token 0123 as \"83\"")
 			assert.Equal(t, input, after)
 		},
 	}
@@ -102,14 +104,6 @@ func TestLoadMatchesViper(t *testing.T) {
 	}
 }
 
-var (
-	cest    = time.FixedZone("CEST", 2*60*60)
-	tQRadar = time.Date(2026, 10, 11, 9, 41, 12, 123456789, cest)
-	tS1     = time.Date(2026, 10, 11, 7, 0, 0, 0, time.UTC)
-	tForti  = time.Date(2026, 10, 10, 23, 59, 59, 999000000, time.UTC)
-	tDebug  = time.Date(2026, 1, 15, 12, 30, 0, 500, time.FixedZone("EST", -5*60*60))
-)
-
 // Golden files were written by the viper-based implementation running the same
 // steps: byte-identical output is what lets an older agent read files written by this one.
 func TestWriterMatchesViper(t *testing.T) {
@@ -118,7 +112,7 @@ func TestWriterMatchesViper(t *testing.T) {
 	require.NoError(t, Init(dir))
 	name := filepath.Join(dir, fileName)
 
-	golden := func(file string) {
+	golden := func(t *testing.T, file string) {
 		t.Helper()
 		assert.Equal(t, readString(t, filepath.Join("testdata/golden", file)), readString(t, name), file)
 	}
@@ -128,34 +122,22 @@ func TestWriterMatchesViper(t *testing.T) {
 		c.MustSave()
 	}
 
-	golden("01_fresh_init.yaml")
+	golden(t, "01_fresh_init.yaml")
 
 	LoadConfiguration()
-	golden("02_fresh_loaded.yaml")
+	golden(t, "02_fresh_loaded.yaml")
 
 	addProfile("default", ProfileConfiguration{Host: "https://api.redcarbon.ai", Token: "tok-default"})
-	golden("03_profile_add.yaml")
+	golden(t, "03_profile_add.yaml")
 
 	addProfile("Secondary", ProfileConfiguration{Host: "https://eu.redcarbon.ai:443", Token: "0123456789"})
 	addProfile("debugger", ProfileConfiguration{Host: "localhost:8080", Token: "tok: with colon"})
-	golden("04_profile_add_three.yaml")
+	golden(t, "04_profile_add_three.yaml")
 
-	p := LoadProfile("default")
-	p.QRadar.LastExecution = tQRadar
-	OverwriteProfileInConfig(l, p)
-	p = LoadProfile("Secondary")
-	p.SentinelONE.LastExecution = tS1
-	p.FortiSIEM.LastExecution = tForti
-	OverwriteProfileInConfig(l, p)
-	p = LoadProfile("debugger")
-	p.Debug.Active = true
-	OverwriteProfileInConfig(l, p)
-	golden("05_services_updated.yaml")
-
-	p = LoadProfile("debugger")
-	p.Debug.LastExecution = tDebug
-	OverwriteProfileInConfig(l, p)
-	golden("06_debug_updated.yaml")
+	t.Run("re-saving an unchanged profile is byte-stable", func(t *testing.T) {
+		OverwriteProfileInConfig(l, LoadProfile("Secondary"))
+		golden(t, "04_profile_add_three.yaml")
+	})
 }
 
 func TestConcurrentOverwrite(t *testing.T) {
@@ -168,7 +150,7 @@ func TestConcurrentOverwrite(t *testing.T) {
 		wg.Go(func() {
 			for i := range 20 {
 				p := LoadProfile(n)
-				p.QRadar.LastExecution = tS1.Add(time.Duration(i) * time.Second)
+				p.Profile.Token = fmt.Sprintf("tok-%d", i)
 				OverwriteProfileInConfig(slog.Default(), p)
 			}
 		})
@@ -179,7 +161,7 @@ func TestConcurrentOverwrite(t *testing.T) {
 	require.Len(t, c.Profiles, len(names))
 	for i, p := range c.Profiles {
 		assert.Equal(t, names[i], p.Name)
-		assert.True(t, p.QRadar.LastExecution.Equal(tS1.Add(19*time.Second)), p.Name)
+		assert.Equal(t, "tok-19", p.Profile.Token, p.Name)
 	}
 	matches, err := filepath.Glob(name + ".tmp-*")
 	require.NoError(t, err)
@@ -252,8 +234,7 @@ func TestSaveInReadOnlyDirectory(t *testing.T) {
 	assert.Contains(t, readString(t, name), "name: p")
 }
 
-// read lowercases every key and then restores the camelCase yaml tags it knows
-// about, so a new camelCase tag it does not know would silently stop loading.
+// read lowercases every key, so a camelCase yaml tag would silently stop loading.
 func TestEveryFieldSurvivesSaveAndLoad(t *testing.T) {
 	setupFile(t, []byte("{}\n"))
 
@@ -268,12 +249,8 @@ func TestEveryFieldSurvivesSaveAndLoad(t *testing.T) {
 func fillAllFields(t *testing.T, v reflect.Value) {
 	t.Helper()
 	switch {
-	case v.Type() == reflect.TypeFor[time.Time]():
-		v.Set(reflect.ValueOf(tS1))
 	case v.Kind() == reflect.String:
 		v.SetString("X")
-	case v.Kind() == reflect.Bool:
-		v.SetBool(true)
 	case v.Kind() == reflect.Slice:
 		v.Set(reflect.MakeSlice(v.Type(), 1, 1))
 		fillAllFields(t, v.Index(0))
@@ -291,12 +268,8 @@ func TestLoadMatchesKeysCaseInsensitively(t *testing.T) {
 	want := Configuration{
 		Version: currentVersion,
 		Profiles: []Profile{{
-			Name:        "P",
-			Profile:     ProfileConfiguration{Host: "H", Token: "T"},
-			SentinelONE: SentinelONE{LastExecution: tS1},
-			FortiSIEM:   FortiSIEM{LastExecution: tForti},
-			QRadar:      QRadar{LastExecution: tS1},
-			Debug:       Debug{Active: true, LastExecution: tForti},
+			Name:    "P",
+			Profile: ProfileConfiguration{Host: "H", Token: "T"},
 		}},
 	}
 	b, err := yaml.Marshal(want)
@@ -306,4 +279,28 @@ func TestLoadMatchesKeysCaseInsensitively(t *testing.T) {
 	got, err := load()
 	require.NoError(t, err)
 	assert.Equal(t, want, got)
+}
+
+// Files written before OPE-2693 still carry per-profile job checkpoints; they must load and be dropped on save.
+func TestCheckpointSectionsAreDroppedOnSave(t *testing.T) {
+	name := setupFile(t, []byte(readString(t, "testdata/golden/07_time_now_local.yaml")))
+
+	c := LoadConfiguration()
+	c.MustSave()
+
+	assert.Equal(t, `profiles:
+    - name: default
+      profile:
+        host: https://api.redcarbon.ai
+        token: tok-default
+    - name: Secondary
+      profile:
+        host: https://eu.redcarbon.ai:443
+        token: "0123456789"
+    - name: debugger
+      profile:
+        host: localhost:8080
+        token: 'tok: with colon'
+version: "1.0"
+`, readString(t, name))
 }

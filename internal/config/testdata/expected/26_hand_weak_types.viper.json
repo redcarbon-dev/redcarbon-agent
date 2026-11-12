@@ -8,19 +8,6 @@
         "Profile": {
           "Host": "https://api.redcarbon.ai",
           "Token": "83"
-        },
-        "SentinelONE": {
-          "LastExecution": "0001-01-01T00:00:00Z"
-        },
-        "FortiSIEM": {
-          "LastExecution": "0001-01-01T00:00:00Z"
-        },
-        "QRadar": {
-          "LastExecution": "0001-01-01T00:00:00Z"
-        },
-        "Debug": {
-          "Active": true,
-          "LastExecution": "0001-01-01T00:00:00Z"
         }
       }
     ]
