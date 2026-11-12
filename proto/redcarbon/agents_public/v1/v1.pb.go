@@ -26,6 +26,7 @@ type HZRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Hostname      string                 `protobuf:"bytes,1,opt,name=hostname,proto3" json:"hostname,omitempty"`
 	Ip            string                 `protobuf:"bytes,2,opt,name=ip,proto3" json:"ip,omitempty"`
+	Version       string                 `protobuf:"bytes,3,opt,name=version,proto3" json:"version,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -70,6 +71,13 @@ func (x *HZRequest) GetHostname() string {
 func (x *HZRequest) GetIp() string {
 	if x != nil {
 		return x.Ip
+	}
+	return ""
+}
+
+func (x *HZRequest) GetVersion() string {
+	if x != nil {
+		return x.Version
 	}
 	return ""
 }
@@ -498,10 +506,11 @@ var File_redcarbon_agents_public_v1_v1_proto protoreflect.FileDescriptor
 
 const file_redcarbon_agents_public_v1_v1_proto_rawDesc = "" +
 	"\n" +
-	"#redcarbon/agents_public/v1/v1.proto\x12\x1aredcarbon.agents_public.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a&redcarbon/agents_public/v1/types.proto\"7\n" +
+	"#redcarbon/agents_public/v1/v1.proto\x12\x1aredcarbon.agents_public.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a&redcarbon/agents_public/v1/types.proto\"Q\n" +
 	"\tHZRequest\x12\x1a\n" +
 	"\bhostname\x18\x01 \x01(\tR\bhostname\x12\x0e\n" +
-	"\x02ip\x18\x02 \x01(\tR\x02ip\"I\n" +
+	"\x02ip\x18\x02 \x01(\tR\x02ip\x12\x18\n" +
+	"\aversion\x18\x03 \x01(\tR\aversion\"I\n" +
 	"\n" +
 	"HZResponse\x12;\n" +
 	"\vreceived_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
