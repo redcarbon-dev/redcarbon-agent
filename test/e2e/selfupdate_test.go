@@ -45,7 +45,7 @@ const (
 
 func TestSelfUpdate(t *testing.T) {
 	gh := newFakeGitHub(t)
-	apiURL := newFakeRedCarbonAPI(t)
+	api := newFakeRedCarbonAPI(t)
 	platform := runtime.GOOS + "_" + runtime.GOARCH
 
 	buildDir := t.TempDir()
@@ -70,7 +70,7 @@ func TestSelfUpdate(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		gh.publish(releasedVersion, goodRelease())
-		dir := install(t, installed, apiURL)
+		dir := install(t, installed, api.URL)
 
 		a := startAgent(t, dir)
 		require.Equal(t, updateExitCode, a.waitExit(t), a.output())
@@ -100,7 +100,7 @@ func TestSelfUpdate(t *testing.T) {
 			archiveName(releasedVersion, platform): sha256Sum([]byte("tampered")),
 		})
 		gh.publish(releasedVersion, assets)
-		dir := install(t, installed, apiURL)
+		dir := install(t, installed, api.URL)
 
 		a := startAgent(t, dir)
 		a.waitFor(t, "checksum mismatch", func() bool {
@@ -117,7 +117,7 @@ func TestSelfUpdate(t *testing.T) {
 		}
 
 		gh.publish(releasedVersion, goodRelease())
-		dir := install(t, installed, apiURL)
+		dir := install(t, installed, api.URL)
 		binDir := filepath.Join(dir, "bin")
 		require.NoError(t, os.Chmod(binDir, 0o555))
 		t.Cleanup(func() { _ = os.Chmod(binDir, 0o755) })
@@ -135,7 +135,7 @@ func TestSelfUpdate(t *testing.T) {
 		assets := goodRelease()
 		assets[archiveName(releasedVersion, platform)] = nil
 		gh.publish(releasedVersion, assets)
-		dir := install(t, installed, apiURL)
+		dir := install(t, installed, api.URL)
 
 		a := startAgent(t, dir)
 		a.waitFor(t, "failed download", func() bool {
@@ -155,6 +155,8 @@ func buildAgent(t *testing.T, outDir, version, platform, githubURL string) []byt
 		"-X pkg.redcarbon.ai/internal/build.Version=" + version,
 		"-X pkg.redcarbon.ai/internal/build.Architecture=" + platform,
 		"-X pkg.redcarbon.ai/internal/build.GitHubAPIURL=" + githubURL,
+		// The e2e container has no default route, so the production probe address is unreachable.
+		"-X pkg.redcarbon.ai/internal/build.OutboundIPProbeAddr=127.0.0.1:80",
 	}, " ")
 
 	cmd := exec.Command("go", "build", "-ldflags", ldflags, "-o", out, "./cmd")
@@ -399,26 +401,50 @@ func (gh *fakeGitHub) serveHTTP(w http.ResponseWriter, r *http.Request) {
 
 type fakeRedCarbonAPI struct {
 	agents_publicv1connect.UnimplementedAgentsPublicAPIsV1SrvHandler
+
+	URL string
+
+	mu         sync.Mutex
+	heartbeats []heartbeat
 }
 
-func newFakeRedCarbonAPI(t *testing.T) string {
+type heartbeat struct {
+	userAgent string
+	msg       *agents_publicv1.HZRequest
+}
+
+func newFakeRedCarbonAPI(t *testing.T) *fakeRedCarbonAPI {
+	api := &fakeRedCarbonAPI{}
+
 	mux := http.NewServeMux()
-	mux.Handle(agents_publicv1connect.NewAgentsPublicAPIsV1SrvHandler(fakeRedCarbonAPI{}))
+	mux.Handle(agents_publicv1connect.NewAgentsPublicAPIsV1SrvHandler(api))
 
 	srv := httptest.NewServer(mux)
 	t.Cleanup(srv.Close)
+	api.URL = srv.URL
 
-	return srv.URL
+	return api
 }
 
-func (fakeRedCarbonAPI) HZ(context.Context, *connect.Request[agents_publicv1.HZRequest]) (*connect.Response[agents_publicv1.HZResponse], error) {
+func (api *fakeRedCarbonAPI) receivedHeartbeats() []heartbeat {
+	api.mu.Lock()
+	defer api.mu.Unlock()
+
+	return slices.Clone(api.heartbeats)
+}
+
+func (api *fakeRedCarbonAPI) HZ(_ context.Context, req *connect.Request[agents_publicv1.HZRequest]) (*connect.Response[agents_publicv1.HZResponse], error) {
+	api.mu.Lock()
+	api.heartbeats = append(api.heartbeats, heartbeat{userAgent: req.Header().Get("User-Agent"), msg: req.Msg})
+	api.mu.Unlock()
+
 	return connect.NewResponse(&agents_publicv1.HZResponse{ReceivedAt: timestamppb.Now()}), nil
 }
 
-func (fakeRedCarbonAPI) FetchAgentConfiguration(context.Context, *connect.Request[agents_publicv1.FetchAgentConfigurationRequest]) (*connect.Response[agents_publicv1.FetchAgentConfigurationResponse], error) {
+func (*fakeRedCarbonAPI) FetchAgentConfiguration(context.Context, *connect.Request[agents_publicv1.FetchAgentConfigurationRequest]) (*connect.Response[agents_publicv1.FetchAgentConfigurationResponse], error) {
 	return connect.NewResponse(&agents_publicv1.FetchAgentConfigurationResponse{}), nil
 }
 
-func (fakeRedCarbonAPI) FetchAgentRequests(context.Context, *connect.Request[agents_publicv1.FetchAgentRequestsRequest]) (*connect.Response[agents_publicv1.FetchAgentRequestsResponse], error) {
+func (*fakeRedCarbonAPI) FetchAgentRequests(context.Context, *connect.Request[agents_publicv1.FetchAgentRequestsRequest]) (*connect.Response[agents_publicv1.FetchAgentRequestsResponse], error) {
 	return connect.NewResponse(&agents_publicv1.FetchAgentRequestsResponse{}), nil
 }
