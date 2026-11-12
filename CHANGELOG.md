@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.4.0](https://github.com/redcarbon-dev/redcarbon-agent/compare/v0.3.0...v0.4.0) (2026-11-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* the agent no longer runs QRadar, SentinelOne or FortiSIEM jobs; data is ingested only through the agent proxy.
+
+### Features
+
+* remove agent jobs and their checkpoint config (OPE-2692, OPE-2693) ([#39](https://github.com/redcarbon-dev/redcarbon-agent/issues/39)) ([fde7572](https://github.com/redcarbon-dev/redcarbon-agent/commit/fde757227ba2a9940e9fbdc528ff8d9d3af8de76))
+
 ## [0.3.0](https://github.com/redcarbon-dev/redcarbon-agent/compare/v0.2.2...v0.3.0) (2026-11-12)
 
 
