@@ -7,6 +7,8 @@ import (
 	"os"
 
 	"connectrpc.com/connect"
+
+	"pkg.redcarbon.ai/internal/build"
 	agents_publicv1 "pkg.redcarbon.ai/proto/redcarbon/agents_public/v1"
 )
 
@@ -26,6 +28,7 @@ func (r RoutineConfig) HZRoutine(ctx context.Context) {
 	req := connect.NewRequest(&agents_publicv1.HZRequest{
 		Ip:       localAddr,
 		Hostname: hostname,
+		Version:  build.Version,
 	})
 
 	req.Header().Set("authorization", fmt.Sprintf("ApiToken %s", r.profile.Profile.Token))
@@ -40,7 +43,7 @@ func (r RoutineConfig) HZRoutine(ctx context.Context) {
 }
 
 func getOutboundIP() (string, error) {
-	conn, err := net.Dial("udp", "8.8.8.8:80")
+	conn, err := net.Dial("udp", build.OutboundIPProbeAddr)
 	if err != nil {
 		return "", err
 	}

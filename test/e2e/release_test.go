@@ -1,4 +1,4 @@
-// Package e2e exercises the agent binary end to end. The self-update scenarios need
+// Package e2e exercises the agent binary end to end. The agent scenarios need
 // the e2e build tag (see test/e2e/Dockerfile); the goreleaser drift guard always runs.
 package e2e
 
