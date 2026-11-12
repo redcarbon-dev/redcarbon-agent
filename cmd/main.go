@@ -23,9 +23,7 @@ import (
 
 const (
 	hzRoutineInterval     = 5 * time.Second
-	configRoutineInterval = 10 * time.Minute
 	updateRoutineInterval = 24 * time.Hour
-	debugRoutineInterval  = 2 * time.Second
 	proxyRoutineInterval  = 500 * time.Millisecond
 
 	updateErrorCode = 3
@@ -84,17 +82,11 @@ func run(cmd *cobra.Command, args []string) {
 
 	var jobs []scheduler.Job
 	for _, prof := range conf.Profiles {
-		configRoutine := configRoutineInterval
-		if prof.Debug.Active {
-			configRoutine = debugRoutineInterval
-		}
-
 		r := routines.NewRoutineJobs(prof, clientFactory, gh, done)
 
 		jobs = append(jobs,
 			scheduler.Job{Name: prof.Name + "/update", Interval: updateRoutineInterval, Singleton: true, Run: r.UpdateRoutine},
 			scheduler.Job{Name: prof.Name + "/hz", Interval: hzRoutineInterval, Run: r.HZRoutine},
-			scheduler.Job{Name: prof.Name + "/config", Interval: configRoutine, Singleton: true, Run: r.ConfigRoutine},
 			scheduler.Job{Name: prof.Name + "/proxy", Interval: proxyRoutineInterval, Run: r.ProxyRoutine},
 		)
 	}
