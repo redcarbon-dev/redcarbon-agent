@@ -192,6 +192,18 @@ func install(t *testing.T, binary []byte, apiURL string) string {
 	return dir
 }
 
+// installLatest installs an agent that is already at the latest release, so it never self-updates.
+func installLatest(t *testing.T) (*fakeRedCarbonAPI, string) {
+	t.Helper()
+
+	gh := newFakeGitHub(t)
+	api := newFakeRedCarbonAPI(t)
+	binary := buildAgent(t, t.TempDir(), installedVersion, runtime.GOOS+"_"+runtime.GOARCH, gh.URL)
+	gh.publish(installedVersion, nil)
+
+	return api, install(t, binary, api.URL)
+}
+
 func requireInstalled(t *testing.T, dir string, binary []byte) {
 	t.Helper()
 
