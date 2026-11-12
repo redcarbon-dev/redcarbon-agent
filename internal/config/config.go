@@ -153,7 +153,7 @@ func read() (map[string]any, *yaml.Node, error) {
 		return nil, nil, fmt.Errorf("parsing %s: %w", configPath, err)
 	}
 
-	renameKeys(&node, strings.ToLower)
+	lowercaseKeys(&node)
 
 	var doc map[string]any
 	if err := node.Decode(&doc); err != nil {
@@ -166,15 +166,15 @@ func read() (map[string]any, *yaml.Node, error) {
 	return doc, &node, nil
 }
 
-func renameKeys(n *yaml.Node, rename func(string) string) {
+func lowercaseKeys(n *yaml.Node) {
 	if n.Kind == yaml.MappingNode {
 		for i := 0; i < len(n.Content); i += 2 {
-			n.Content[i].Value = rename(n.Content[i].Value)
+			n.Content[i].Value = strings.ToLower(n.Content[i].Value)
 		}
 	}
 
 	for _, c := range n.Content {
-		renameKeys(c, rename)
+		lowercaseKeys(c)
 	}
 }
 

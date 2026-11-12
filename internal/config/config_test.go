@@ -39,8 +39,8 @@ type viperResult struct {
 }
 
 // Expected outputs record what the viper-based implementation loaded from, and
-// wrote back to, each golden input, minus the per-profile checkpoint sections the
-// profile model no longer has. Panic is set where viper crashed or exited.
+// wrote back to, each golden input, restricted to the fields of the current
+// profile model. Panic is set where viper crashed or exited.
 // LoadConfiguration exits the process on error, so load is called directly.
 func TestLoadMatchesViper(t *testing.T) {
 	deviations := map[string]func(t *testing.T, c Configuration, err error, input, after string){
@@ -112,7 +112,7 @@ func TestWriterMatchesViper(t *testing.T) {
 	require.NoError(t, Init(dir))
 	name := filepath.Join(dir, fileName)
 
-	golden := func(file string) {
+	golden := func(t *testing.T, file string) {
 		t.Helper()
 		assert.Equal(t, readString(t, filepath.Join("testdata/golden", file)), readString(t, name), file)
 	}
@@ -122,20 +122,22 @@ func TestWriterMatchesViper(t *testing.T) {
 		c.MustSave()
 	}
 
-	golden("01_fresh_init.yaml")
+	golden(t, "01_fresh_init.yaml")
 
 	LoadConfiguration()
-	golden("02_fresh_loaded.yaml")
+	golden(t, "02_fresh_loaded.yaml")
 
 	addProfile("default", ProfileConfiguration{Host: "https://api.redcarbon.ai", Token: "tok-default"})
-	golden("03_profile_add.yaml")
+	golden(t, "03_profile_add.yaml")
 
 	addProfile("Secondary", ProfileConfiguration{Host: "https://eu.redcarbon.ai:443", Token: "0123456789"})
 	addProfile("debugger", ProfileConfiguration{Host: "localhost:8080", Token: "tok: with colon"})
-	golden("04_profile_add_three.yaml")
+	golden(t, "04_profile_add_three.yaml")
 
-	OverwriteProfileInConfig(l, LoadProfile("Secondary"))
-	golden("04_profile_add_three.yaml")
+	t.Run("re-saving an unchanged profile is byte-stable", func(t *testing.T) {
+		OverwriteProfileInConfig(l, LoadProfile("Secondary"))
+		golden(t, "04_profile_add_three.yaml")
+	})
 }
 
 func TestConcurrentOverwrite(t *testing.T) {

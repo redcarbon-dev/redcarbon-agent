@@ -1,5 +1,5 @@
 {
-  "file": "05_services_updated.yaml",
+  "file": "05_checkpoints_services.yaml",
   "config": {
     "Version": "1.0",
     "Profiles": [
