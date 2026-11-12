@@ -8,19 +8,6 @@
         "Profile": {
           "Host": "h",
           "Token": "t"
-        },
-        "SentinelONE": {
-          "LastExecution": "2026-10-11T00:00:00Z"
-        },
-        "FortiSIEM": {
-          "LastExecution": "2026-10-11T09:41:12Z"
-        },
-        "QRadar": {
-          "LastExecution": "0001-01-01T00:00:00Z"
-        },
-        "Debug": {
-          "Active": false,
-          "LastExecution": "0001-01-01T00:00:00Z"
         }
       }
     ]
