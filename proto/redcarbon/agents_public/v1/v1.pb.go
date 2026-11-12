@@ -126,214 +126,6 @@ func (x *HZResponse) GetReceivedAt() *timestamppb.Timestamp {
 	return nil
 }
 
-type IngestIncidentRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
-	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	RawData       string                 `protobuf:"bytes,3,opt,name=raw_data,json=rawData,proto3" json:"raw_data,omitempty"`
-	Severity      uint32                 `protobuf:"varint,4,opt,name=severity,proto3" json:"severity,omitempty"`
-	Origin        string                 `protobuf:"bytes,5,opt,name=origin,proto3" json:"origin,omitempty"`
-	OriginalId    *string                `protobuf:"bytes,6,opt,name=original_id,json=originalId,proto3,oneof" json:"original_id,omitempty"`
-	OriginalUrl   *string                `protobuf:"bytes,7,opt,name=original_url,json=originalUrl,proto3,oneof" json:"original_url,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *IngestIncidentRequest) Reset() {
-	*x = IngestIncidentRequest{}
-	mi := &file_redcarbon_agents_public_v1_v1_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *IngestIncidentRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*IngestIncidentRequest) ProtoMessage() {}
-
-func (x *IngestIncidentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_redcarbon_agents_public_v1_v1_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use IngestIncidentRequest.ProtoReflect.Descriptor instead.
-func (*IngestIncidentRequest) Descriptor() ([]byte, []int) {
-	return file_redcarbon_agents_public_v1_v1_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *IngestIncidentRequest) GetTitle() string {
-	if x != nil {
-		return x.Title
-	}
-	return ""
-}
-
-func (x *IngestIncidentRequest) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
-func (x *IngestIncidentRequest) GetRawData() string {
-	if x != nil {
-		return x.RawData
-	}
-	return ""
-}
-
-func (x *IngestIncidentRequest) GetSeverity() uint32 {
-	if x != nil {
-		return x.Severity
-	}
-	return 0
-}
-
-func (x *IngestIncidentRequest) GetOrigin() string {
-	if x != nil {
-		return x.Origin
-	}
-	return ""
-}
-
-func (x *IngestIncidentRequest) GetOriginalId() string {
-	if x != nil && x.OriginalId != nil {
-		return *x.OriginalId
-	}
-	return ""
-}
-
-func (x *IngestIncidentRequest) GetOriginalUrl() string {
-	if x != nil && x.OriginalUrl != nil {
-		return *x.OriginalUrl
-	}
-	return ""
-}
-
-type IngestIncidentResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *IngestIncidentResponse) Reset() {
-	*x = IngestIncidentResponse{}
-	mi := &file_redcarbon_agents_public_v1_v1_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *IngestIncidentResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*IngestIncidentResponse) ProtoMessage() {}
-
-func (x *IngestIncidentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_redcarbon_agents_public_v1_v1_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use IngestIncidentResponse.ProtoReflect.Descriptor instead.
-func (*IngestIncidentResponse) Descriptor() ([]byte, []int) {
-	return file_redcarbon_agents_public_v1_v1_proto_rawDescGZIP(), []int{3}
-}
-
-type FetchAgentConfigurationRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *FetchAgentConfigurationRequest) Reset() {
-	*x = FetchAgentConfigurationRequest{}
-	mi := &file_redcarbon_agents_public_v1_v1_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *FetchAgentConfigurationRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*FetchAgentConfigurationRequest) ProtoMessage() {}
-
-func (x *FetchAgentConfigurationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_redcarbon_agents_public_v1_v1_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use FetchAgentConfigurationRequest.ProtoReflect.Descriptor instead.
-func (*FetchAgentConfigurationRequest) Descriptor() ([]byte, []int) {
-	return file_redcarbon_agents_public_v1_v1_proto_rawDescGZIP(), []int{4}
-}
-
-type FetchAgentConfigurationResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Configuration *AgentConfiguration    `protobuf:"bytes,1,opt,name=configuration,proto3" json:"configuration,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *FetchAgentConfigurationResponse) Reset() {
-	*x = FetchAgentConfigurationResponse{}
-	mi := &file_redcarbon_agents_public_v1_v1_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *FetchAgentConfigurationResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*FetchAgentConfigurationResponse) ProtoMessage() {}
-
-func (x *FetchAgentConfigurationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_redcarbon_agents_public_v1_v1_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use FetchAgentConfigurationResponse.ProtoReflect.Descriptor instead.
-func (*FetchAgentConfigurationResponse) Descriptor() ([]byte, []int) {
-	return file_redcarbon_agents_public_v1_v1_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *FetchAgentConfigurationResponse) GetConfiguration() *AgentConfiguration {
-	if x != nil {
-		return x.Configuration
-	}
-	return nil
-}
-
 type FetchAgentRequestsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -342,7 +134,7 @@ type FetchAgentRequestsRequest struct {
 
 func (x *FetchAgentRequestsRequest) Reset() {
 	*x = FetchAgentRequestsRequest{}
-	mi := &file_redcarbon_agents_public_v1_v1_proto_msgTypes[6]
+	mi := &file_redcarbon_agents_public_v1_v1_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -354,7 +146,7 @@ func (x *FetchAgentRequestsRequest) String() string {
 func (*FetchAgentRequestsRequest) ProtoMessage() {}
 
 func (x *FetchAgentRequestsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_redcarbon_agents_public_v1_v1_proto_msgTypes[6]
+	mi := &file_redcarbon_agents_public_v1_v1_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -367,7 +159,7 @@ func (x *FetchAgentRequestsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FetchAgentRequestsRequest.ProtoReflect.Descriptor instead.
 func (*FetchAgentRequestsRequest) Descriptor() ([]byte, []int) {
-	return file_redcarbon_agents_public_v1_v1_proto_rawDescGZIP(), []int{6}
+	return file_redcarbon_agents_public_v1_v1_proto_rawDescGZIP(), []int{2}
 }
 
 type FetchAgentRequestsResponse struct {
@@ -379,7 +171,7 @@ type FetchAgentRequestsResponse struct {
 
 func (x *FetchAgentRequestsResponse) Reset() {
 	*x = FetchAgentRequestsResponse{}
-	mi := &file_redcarbon_agents_public_v1_v1_proto_msgTypes[7]
+	mi := &file_redcarbon_agents_public_v1_v1_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -391,7 +183,7 @@ func (x *FetchAgentRequestsResponse) String() string {
 func (*FetchAgentRequestsResponse) ProtoMessage() {}
 
 func (x *FetchAgentRequestsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_redcarbon_agents_public_v1_v1_proto_msgTypes[7]
+	mi := &file_redcarbon_agents_public_v1_v1_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -404,7 +196,7 @@ func (x *FetchAgentRequestsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FetchAgentRequestsResponse.ProtoReflect.Descriptor instead.
 func (*FetchAgentRequestsResponse) Descriptor() ([]byte, []int) {
-	return file_redcarbon_agents_public_v1_v1_proto_rawDescGZIP(), []int{7}
+	return file_redcarbon_agents_public_v1_v1_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *FetchAgentRequestsResponse) GetRequests() []*AgentRequest {
@@ -424,7 +216,7 @@ type SubmitAgentResponseRequest struct {
 
 func (x *SubmitAgentResponseRequest) Reset() {
 	*x = SubmitAgentResponseRequest{}
-	mi := &file_redcarbon_agents_public_v1_v1_proto_msgTypes[8]
+	mi := &file_redcarbon_agents_public_v1_v1_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -436,7 +228,7 @@ func (x *SubmitAgentResponseRequest) String() string {
 func (*SubmitAgentResponseRequest) ProtoMessage() {}
 
 func (x *SubmitAgentResponseRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_redcarbon_agents_public_v1_v1_proto_msgTypes[8]
+	mi := &file_redcarbon_agents_public_v1_v1_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -449,7 +241,7 @@ func (x *SubmitAgentResponseRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubmitAgentResponseRequest.ProtoReflect.Descriptor instead.
 func (*SubmitAgentResponseRequest) Descriptor() ([]byte, []int) {
-	return file_redcarbon_agents_public_v1_v1_proto_rawDescGZIP(), []int{8}
+	return file_redcarbon_agents_public_v1_v1_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *SubmitAgentResponseRequest) GetRequestId() string {
@@ -474,7 +266,7 @@ type SubmitAgentResponseResponse struct {
 
 func (x *SubmitAgentResponseResponse) Reset() {
 	*x = SubmitAgentResponseResponse{}
-	mi := &file_redcarbon_agents_public_v1_v1_proto_msgTypes[9]
+	mi := &file_redcarbon_agents_public_v1_v1_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -486,7 +278,7 @@ func (x *SubmitAgentResponseResponse) String() string {
 func (*SubmitAgentResponseResponse) ProtoMessage() {}
 
 func (x *SubmitAgentResponseResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_redcarbon_agents_public_v1_v1_proto_msgTypes[9]
+	mi := &file_redcarbon_agents_public_v1_v1_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -499,7 +291,7 @@ func (x *SubmitAgentResponseResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubmitAgentResponseResponse.ProtoReflect.Descriptor instead.
 func (*SubmitAgentResponseResponse) Descriptor() ([]byte, []int) {
-	return file_redcarbon_agents_public_v1_v1_proto_rawDescGZIP(), []int{9}
+	return file_redcarbon_agents_public_v1_v1_proto_rawDescGZIP(), []int{5}
 }
 
 var File_redcarbon_agents_public_v1_v1_proto protoreflect.FileDescriptor
@@ -514,22 +306,7 @@ const file_redcarbon_agents_public_v1_v1_proto_rawDesc = "" +
 	"\n" +
 	"HZResponse\x12;\n" +
 	"\vreceived_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
-	"receivedAt\"\x8d\x02\n" +
-	"\x15IngestIncidentRequest\x12\x14\n" +
-	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x19\n" +
-	"\braw_data\x18\x03 \x01(\tR\arawData\x12\x1a\n" +
-	"\bseverity\x18\x04 \x01(\rR\bseverity\x12\x16\n" +
-	"\x06origin\x18\x05 \x01(\tR\x06origin\x12$\n" +
-	"\voriginal_id\x18\x06 \x01(\tH\x00R\n" +
-	"originalId\x88\x01\x01\x12&\n" +
-	"\foriginal_url\x18\a \x01(\tH\x01R\voriginalUrl\x88\x01\x01B\x0e\n" +
-	"\f_original_idB\x0f\n" +
-	"\r_original_url\"\x18\n" +
-	"\x16IngestIncidentResponse\" \n" +
-	"\x1eFetchAgentConfigurationRequest\"w\n" +
-	"\x1fFetchAgentConfigurationResponse\x12T\n" +
-	"\rconfiguration\x18\x01 \x01(\v2..redcarbon.agents_public.v1.AgentConfigurationR\rconfiguration\"\x1b\n" +
+	"receivedAt\"\x1b\n" +
 	"\x19FetchAgentRequestsRequest\"b\n" +
 	"\x1aFetchAgentRequestsResponse\x12D\n" +
 	"\brequests\x18\x01 \x03(\v2(.redcarbon.agents_public.v1.AgentRequestR\brequests\"\x82\x01\n" +
@@ -537,11 +314,9 @@ const file_redcarbon_agents_public_v1_v1_proto_rawDesc = "" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12E\n" +
 	"\bresponse\x18\x02 \x01(\v2).redcarbon.agents_public.v1.AgentResponseR\bresponse\"\x1d\n" +
-	"\x1bSubmitAgentResponseResponse2\x93\x05\n" +
+	"\x1bSubmitAgentResponseResponse2\x81\x03\n" +
 	"\x15AgentsPublicAPIsV1Srv\x12U\n" +
-	"\x02HZ\x12%.redcarbon.agents_public.v1.HZRequest\x1a&.redcarbon.agents_public.v1.HZResponse\"\x00\x12y\n" +
-	"\x0eIngestIncident\x121.redcarbon.agents_public.v1.IngestIncidentRequest\x1a2.redcarbon.agents_public.v1.IngestIncidentResponse\"\x00\x12\x94\x01\n" +
-	"\x17FetchAgentConfiguration\x12:.redcarbon.agents_public.v1.FetchAgentConfigurationRequest\x1a;.redcarbon.agents_public.v1.FetchAgentConfigurationResponse\"\x00\x12\x85\x01\n" +
+	"\x02HZ\x12%.redcarbon.agents_public.v1.HZRequest\x1a&.redcarbon.agents_public.v1.HZResponse\"\x00\x12\x85\x01\n" +
 	"\x12FetchAgentRequests\x125.redcarbon.agents_public.v1.FetchAgentRequestsRequest\x1a6.redcarbon.agents_public.v1.FetchAgentRequestsResponse\"\x00\x12\x88\x01\n" +
 	"\x13SubmitAgentResponse\x126.redcarbon.agents_public.v1.SubmitAgentResponseRequest\x1a7.redcarbon.agents_public.v1.SubmitAgentResponseResponse\"\x00B\xf2\x01\n" +
 	"\x1ecom.redcarbon.agents_public.v1B\aV1ProtoP\x01ZApkg.redcarbon.ai/proto/redcarbon/agents_public/v1;agents_publicv1\xa2\x02\x03RAX\xaa\x02\x19Redcarbon.AgentsPublic.V1\xca\x02\x19Redcarbon\\AgentsPublic\\V1\xe2\x02%Redcarbon\\AgentsPublic\\V1\\GPBMetadata\xea\x02\x1bRedcarbon::AgentsPublic::V1b\x06proto3"
@@ -558,43 +333,33 @@ func file_redcarbon_agents_public_v1_v1_proto_rawDescGZIP() []byte {
 	return file_redcarbon_agents_public_v1_v1_proto_rawDescData
 }
 
-var file_redcarbon_agents_public_v1_v1_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_redcarbon_agents_public_v1_v1_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_redcarbon_agents_public_v1_v1_proto_goTypes = []any{
-	(*HZRequest)(nil),                       // 0: redcarbon.agents_public.v1.HZRequest
-	(*HZResponse)(nil),                      // 1: redcarbon.agents_public.v1.HZResponse
-	(*IngestIncidentRequest)(nil),           // 2: redcarbon.agents_public.v1.IngestIncidentRequest
-	(*IngestIncidentResponse)(nil),          // 3: redcarbon.agents_public.v1.IngestIncidentResponse
-	(*FetchAgentConfigurationRequest)(nil),  // 4: redcarbon.agents_public.v1.FetchAgentConfigurationRequest
-	(*FetchAgentConfigurationResponse)(nil), // 5: redcarbon.agents_public.v1.FetchAgentConfigurationResponse
-	(*FetchAgentRequestsRequest)(nil),       // 6: redcarbon.agents_public.v1.FetchAgentRequestsRequest
-	(*FetchAgentRequestsResponse)(nil),      // 7: redcarbon.agents_public.v1.FetchAgentRequestsResponse
-	(*SubmitAgentResponseRequest)(nil),      // 8: redcarbon.agents_public.v1.SubmitAgentResponseRequest
-	(*SubmitAgentResponseResponse)(nil),     // 9: redcarbon.agents_public.v1.SubmitAgentResponseResponse
-	(*timestamppb.Timestamp)(nil),           // 10: google.protobuf.Timestamp
-	(*AgentConfiguration)(nil),              // 11: redcarbon.agents_public.v1.AgentConfiguration
-	(*AgentRequest)(nil),                    // 12: redcarbon.agents_public.v1.AgentRequest
-	(*AgentResponse)(nil),                   // 13: redcarbon.agents_public.v1.AgentResponse
+	(*HZRequest)(nil),                   // 0: redcarbon.agents_public.v1.HZRequest
+	(*HZResponse)(nil),                  // 1: redcarbon.agents_public.v1.HZResponse
+	(*FetchAgentRequestsRequest)(nil),   // 2: redcarbon.agents_public.v1.FetchAgentRequestsRequest
+	(*FetchAgentRequestsResponse)(nil),  // 3: redcarbon.agents_public.v1.FetchAgentRequestsResponse
+	(*SubmitAgentResponseRequest)(nil),  // 4: redcarbon.agents_public.v1.SubmitAgentResponseRequest
+	(*SubmitAgentResponseResponse)(nil), // 5: redcarbon.agents_public.v1.SubmitAgentResponseResponse
+	(*timestamppb.Timestamp)(nil),       // 6: google.protobuf.Timestamp
+	(*AgentRequest)(nil),                // 7: redcarbon.agents_public.v1.AgentRequest
+	(*AgentResponse)(nil),               // 8: redcarbon.agents_public.v1.AgentResponse
 }
 var file_redcarbon_agents_public_v1_v1_proto_depIdxs = []int32{
-	10, // 0: redcarbon.agents_public.v1.HZResponse.received_at:type_name -> google.protobuf.Timestamp
-	11, // 1: redcarbon.agents_public.v1.FetchAgentConfigurationResponse.configuration:type_name -> redcarbon.agents_public.v1.AgentConfiguration
-	12, // 2: redcarbon.agents_public.v1.FetchAgentRequestsResponse.requests:type_name -> redcarbon.agents_public.v1.AgentRequest
-	13, // 3: redcarbon.agents_public.v1.SubmitAgentResponseRequest.response:type_name -> redcarbon.agents_public.v1.AgentResponse
-	0,  // 4: redcarbon.agents_public.v1.AgentsPublicAPIsV1Srv.HZ:input_type -> redcarbon.agents_public.v1.HZRequest
-	2,  // 5: redcarbon.agents_public.v1.AgentsPublicAPIsV1Srv.IngestIncident:input_type -> redcarbon.agents_public.v1.IngestIncidentRequest
-	4,  // 6: redcarbon.agents_public.v1.AgentsPublicAPIsV1Srv.FetchAgentConfiguration:input_type -> redcarbon.agents_public.v1.FetchAgentConfigurationRequest
-	6,  // 7: redcarbon.agents_public.v1.AgentsPublicAPIsV1Srv.FetchAgentRequests:input_type -> redcarbon.agents_public.v1.FetchAgentRequestsRequest
-	8,  // 8: redcarbon.agents_public.v1.AgentsPublicAPIsV1Srv.SubmitAgentResponse:input_type -> redcarbon.agents_public.v1.SubmitAgentResponseRequest
-	1,  // 9: redcarbon.agents_public.v1.AgentsPublicAPIsV1Srv.HZ:output_type -> redcarbon.agents_public.v1.HZResponse
-	3,  // 10: redcarbon.agents_public.v1.AgentsPublicAPIsV1Srv.IngestIncident:output_type -> redcarbon.agents_public.v1.IngestIncidentResponse
-	5,  // 11: redcarbon.agents_public.v1.AgentsPublicAPIsV1Srv.FetchAgentConfiguration:output_type -> redcarbon.agents_public.v1.FetchAgentConfigurationResponse
-	7,  // 12: redcarbon.agents_public.v1.AgentsPublicAPIsV1Srv.FetchAgentRequests:output_type -> redcarbon.agents_public.v1.FetchAgentRequestsResponse
-	9,  // 13: redcarbon.agents_public.v1.AgentsPublicAPIsV1Srv.SubmitAgentResponse:output_type -> redcarbon.agents_public.v1.SubmitAgentResponseResponse
-	9,  // [9:14] is the sub-list for method output_type
-	4,  // [4:9] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	6, // 0: redcarbon.agents_public.v1.HZResponse.received_at:type_name -> google.protobuf.Timestamp
+	7, // 1: redcarbon.agents_public.v1.FetchAgentRequestsResponse.requests:type_name -> redcarbon.agents_public.v1.AgentRequest
+	8, // 2: redcarbon.agents_public.v1.SubmitAgentResponseRequest.response:type_name -> redcarbon.agents_public.v1.AgentResponse
+	0, // 3: redcarbon.agents_public.v1.AgentsPublicAPIsV1Srv.HZ:input_type -> redcarbon.agents_public.v1.HZRequest
+	2, // 4: redcarbon.agents_public.v1.AgentsPublicAPIsV1Srv.FetchAgentRequests:input_type -> redcarbon.agents_public.v1.FetchAgentRequestsRequest
+	4, // 5: redcarbon.agents_public.v1.AgentsPublicAPIsV1Srv.SubmitAgentResponse:input_type -> redcarbon.agents_public.v1.SubmitAgentResponseRequest
+	1, // 6: redcarbon.agents_public.v1.AgentsPublicAPIsV1Srv.HZ:output_type -> redcarbon.agents_public.v1.HZResponse
+	3, // 7: redcarbon.agents_public.v1.AgentsPublicAPIsV1Srv.FetchAgentRequests:output_type -> redcarbon.agents_public.v1.FetchAgentRequestsResponse
+	5, // 8: redcarbon.agents_public.v1.AgentsPublicAPIsV1Srv.SubmitAgentResponse:output_type -> redcarbon.agents_public.v1.SubmitAgentResponseResponse
+	6, // [6:9] is the sub-list for method output_type
+	3, // [3:6] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_redcarbon_agents_public_v1_v1_proto_init() }
@@ -603,14 +368,13 @@ func file_redcarbon_agents_public_v1_v1_proto_init() {
 		return
 	}
 	file_redcarbon_agents_public_v1_types_proto_init()
-	file_redcarbon_agents_public_v1_v1_proto_msgTypes[2].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_redcarbon_agents_public_v1_v1_proto_rawDesc), len(file_redcarbon_agents_public_v1_v1_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
