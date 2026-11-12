@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,10 +16,6 @@ import (
 )
 
 func TestAgentAnswersProxyRequests(t *testing.T) {
-	gh := newFakeGitHub(t)
-	api := newFakeRedCarbonAPI(t)
-	platform := runtime.GOOS + "_" + runtime.GOARCH
-
 	type vendorCall struct {
 		method, auth, body string
 	}
@@ -34,9 +29,7 @@ func TestAgentAnswersProxyRequests(t *testing.T) {
 	}))
 	t.Cleanup(vendor.Close)
 
-	binary := buildAgent(t, t.TempDir(), installedVersion, platform, gh.URL)
-	gh.publish(installedVersion, nil)
-	dir := install(t, binary, api.URL)
+	api, dir := installLatest(t)
 
 	api.enqueueProxyRequest(&agents_publicv1.AgentRequest{
 		RequestId: "req-1",
